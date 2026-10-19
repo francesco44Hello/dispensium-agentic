@@ -1,0 +1,10 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.back {
+  color: var(--primary-color);
+  font-weight: 700;
+}

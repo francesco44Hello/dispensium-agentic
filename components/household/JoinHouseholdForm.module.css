@@ -1,0 +1,51 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(45, 60, 89, 0.15);
+}
+
+.heading {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.field input {
+  padding: 12px;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--muted);
+  border-radius: 10px;
+  color: var(--primary-color);
+}
+
+.error {
+  margin: 0;
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+.button {
+  padding: 12px;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: var(--secondary-color);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.button:disabled {
+  opacity: 0.6;
+}

@@ -1,0 +1,39 @@
+.form {
+  display: flex;
+  gap: 12px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  padding: 0 16px;
+  font-size: 1.1rem;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--primary-color);
+}
+
+.input::placeholder {
+  color: rgba(45, 60, 89, 0.45);
+}
+
+.input:focus {
+  outline: 3px solid var(--muted);
+  outline-offset: 1px;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  background: #6b7fe0;
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
+  font-size: 2rem;
+  cursor: pointer;
+}

@@ -1,0 +1,45 @@
+:root {
+  --primary-color: #2d3c59;
+  --primary-button: #a3dc9a;
+  --secondary-color: #fdb7ea;
+  --muted: #b7b1f2;
+  --error-color: #9b1c1c;
+  --surface: #ffffff;
+  --font-sans: var(--font-balsamiq), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --nav-height: 88px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--primary-color);
+}
+
+/* Form controls do not inherit fonts by default. */
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+body {
+  background: linear-gradient(to bottom, #b7b1f2, #fdb7ea);
+  background-attachment: fixed !important;
+  min-height: 100vh;
+}
+
+.viewport {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 16px;
+}

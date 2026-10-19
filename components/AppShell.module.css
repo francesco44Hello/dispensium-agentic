@@ -1,0 +1,16 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: calc(var(--nav-height) + 16px);
+}

@@ -1,0 +1,50 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 8px 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.status {
+  margin: 0;
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+.footer {
+  position: sticky;
+  bottom: calc(var(--nav-height) + 8px);
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.complete {
+  padding: 16px 56px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: #c4c4c4;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.complete:not(:disabled) {
+  background: var(--secondary-color);
+}
+
+.complete:disabled {
+  cursor: not-allowed;
+}

@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(hid) {
+      return exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
+    }
+
+    function validText(value) {
+      return value is string && value.size() > 0 && value.size() <= 100 && !value.matches('.*[<>{}"].*');
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Codes are document ids, so a joiner can only read a code they already know. Listing is denied.
+    match /inviteCodes/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && isMember(request.resource.data.householdId);
+      allow delete: if signedIn() && isMember(resource.data.householdId);
+    }
+
+    match /households/{hid} {
+      allow get: if signedIn() && isMember(hid);
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && validText(request.resource.data.name);
+      allow update, delete: if false;
+
+      match /members/{uid} {
+        // Self-read is needed so a joiner can check for an existing membership inside the join transaction.
+        allow read: if signedIn() && (request.auth.uid == uid || isMember(hid));
+        // Owner bootstrap: the household does not exist yet, so the owner doc is created in the same batch.
+        // Joiners: must present an unexpired invite for this household.
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && (
+            (request.resource.data.role == 'owner' && !exists(/databases/$(database)/documents/households/$(hid)))
+            || (
+              request.resource.data.role == 'member'
+              && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.inviteCode)).data.householdId == hid
+              && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.inviteCode)).data.expiresAt > request.time
+            )
+          );
+        allow update, delete: if false;
+      }
+
+      match /groceries/{id} {
+        allow read, delete: if signedIn() && isMember(hid);
+        allow create, update: if signedIn()
+          && isMember(hid)
+          && validText(request.resource.data.name)
+          && request.resource.data.completed is bool;
+      }
+
+      match /configuration/{doc} {
+        allow read: if signedIn() && isMember(hid);
+        allow create: if signedIn()
+          && doc == 'categoryMap'
+          && request.resource.data.keys().hasOnly(['map'])
+          // Owner bootstrap: the household and member doc are created in the same transaction,
+          // so membership cannot be checked yet. Only allowed while the household does not exist.
+          && !exists(/databases/$(database)/documents/households/$(hid));
+        allow update: if signedIn()
+          && isMember(hid)
+          && doc == 'categoryMap'
+          && request.resource.data.keys().hasOnly(['map']);
+        allow delete: if false;
+      }
+    }
+  }
+}

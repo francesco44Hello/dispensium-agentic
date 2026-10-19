@@ -1,0 +1,54 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(45, 60, 89, 0.15);
+}
+
+.title,
+.subtitle {
+  margin: 0;
+}
+
+.meta {
+  margin: 0;
+  word-break: break-all;
+}
+
+.actions,
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.actions button {
+  flex: 1 1 140px;
+  padding: 10px;
+  font-weight: 700;
+  color: var(--primary-color);
+  background: var(--primary-button);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav a {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.log {
+  margin: 0;
+  padding-left: 18px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+}
