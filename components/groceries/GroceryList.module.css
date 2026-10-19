@@ -7,7 +7,7 @@
 .title {
   margin: 8px 0 0;
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-title);
   color: var(--primary-color);
 }
 
@@ -22,29 +22,38 @@
   font-weight: 600;
 }
 
+/* Fixed 24px above the bottom bar. The wrapper ignores pointer events so only the button blocks taps. */
 .footer {
-  position: sticky;
-  bottom: calc(var(--nav-height) + 8px);
+  position: fixed;
+  bottom: calc(var(--nav-height) + 24px);
+  left: 50%;
+  z-index: 5;
   display: flex;
   justify-content: center;
-  padding: 8px 0;
+  width: 100%;
+  max-width: 480px;
+  padding: 0 16px;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .complete {
-  padding: 16px 56px;
-  font-size: 1.25rem;
-  font-weight: 700;
+  pointer-events: auto;
+  height: 56px;
+  padding: 0 32px;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: var(--primary-color);
-  background: #c4c4c4;
+  background-color: #bcbfc2;
   border: none;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.complete:not(:disabled) {
-  background: var(--secondary-color);
-}
-
-.complete:disabled {
+  border-radius: 30px;
+  box-shadow: none;
   cursor: not-allowed;
+}
+
+/* Legacy enabled button: header green with a soft green shadow. */
+.complete:not(:disabled) {
+  background-color: var(--primary-button);
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+  cursor: pointer;
 }
