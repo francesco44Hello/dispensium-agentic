@@ -35,6 +35,7 @@ You (the main session) turn the user's requests into tasks and delegate to subag
 1. After the plan (T1/T2): get approval before building.
 2. After the handoff: the user does the manual test. Never merge or deploy to production until they say "ship it" (then use `/release`).
 3. Always ask before: installing dependencies, pushing, opening or merging PRs, any `vercel` or `firebase deploy` command.
+4. **No AI attribution in git.** Never add a `Co-Authored-By` trailer (or any "Generated with Claude" footer) to commit messages or PR descriptions. Write plain messages. Only add an attribution line if the user explicitly asks for one.
 
 ## Environment safety
 - Local dev, unit tests, e2e and screenshots use the mock backend (`NEXT_PUBLIC_AUTH_MOCK=true`) or the emulator. Never create accounts, write data or run scripts against the real Firebase project from tests, screenshots or experiments. `.env.local` points at the real project: do not read or edit `.env*`.
