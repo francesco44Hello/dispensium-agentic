@@ -8,13 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
     "test:e2e": "playwright test --project=mobile",
     "test:visual": "playwright test --project=visual",
     "test:rules": "firebase emulators:exec --only firestore --project demo-dispensium \"vitest run -c vitest.rules.config.js\"",
     "audit": "npm audit --omit=dev --audit-level=critical",
-    "audit:full": "npm audit --audit-level=high"
+    "audit:full": "npm audit --audit-level=high",
+    "verify:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run verify"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
