@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "dispensium-agentic",
+    "default": "dispensium-agentic-staging",
+    "staging": "dispensium-agentic-staging",
     "production": "dispensium-agentic"
   }
 }
