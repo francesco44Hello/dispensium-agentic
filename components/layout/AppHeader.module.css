@@ -8,7 +8,7 @@
 .title {
   margin: 0;
   font-size: 2.5rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
   text-align: center;
   color: var(--primary-color);
 }
