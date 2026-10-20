@@ -44,11 +44,11 @@ describe('AppShell', () => {
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
-  it('marks Shopping as the current tab and shows the other tabs as unavailable', async () => {
+  it('marks the current tab and links every tab to its page', async () => {
     await renderShell();
     expect(screen.getByRole('link', { name: 'Shopping' }).getAttribute('aria-current')).toBe('page');
-    expect(screen.getByText('Recipes').closest('[aria-disabled="true"]')).toBeTruthy();
-    expect(screen.getByText('Menu', { selector: 'span' }).closest('[aria-disabled="true"]')).toBeTruthy();
-    expect(screen.getByText('Manage').closest('[aria-disabled="true"]')).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Recipes' }).getAttribute('href')).toBe('/recipes');
+    expect(screen.getByRole('link', { name: 'Menu' }).getAttribute('href')).toBe('/weekly-menu');
+    expect(screen.getByRole('link', { name: 'Manage' }).getAttribute('href')).toBe('/manage-categories');
   });
 });
