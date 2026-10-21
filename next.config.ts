@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    agentFeedback: true,
-  },
+  // Stop Next.js writing AGENTS.md (managed agent rules and feedback blocks).
+  agentRules: false,
   cacheComponents: true,
   partialPrefetching: true,
   async headers() {
