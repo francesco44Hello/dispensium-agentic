@@ -25,11 +25,14 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr merge:*)",
       "Bash(vercel:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(gh pr new:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
       "Bash(git push -f:*)",
+      "Bash(git update-ref:*)",
+      "Bash(git update-index:*)",
       "Bash(rm -rf:*)",
       "Read(./.env)",
       "Read(./.env.*)",
@@ -41,7 +44,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit",
         "hooks": [
           {
             "type": "command",
