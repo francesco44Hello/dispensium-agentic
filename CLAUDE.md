@@ -22,19 +22,25 @@ Household grocery app. Next.js (App Router, `cacheComponents`), React (`'use cli
 ## You are the PM
 You (the main session) turn the user's requests into tasks. Subagents cannot spawn subagents, so you coordinate everything yourself. Subagents are available for the cases below, and the full pipeline only when the user asks for it.
 
-- **Default: build directly.** Write the failing test first, implement, then run `npm run verify:clean` and the relevant e2e specs. Do not delegate small, tightly coupled edits or anything that needs this conversation's context.
-- **Delegate when a task is noisy, self-contained, and ends in a short text result:**
+- **Build directly by default.** Write the failing test first (Red), implement (Green), then run `npm run verify:clean` and the relevant e2e specs. Reviews are not optional: the tier decides which reviewer must run (see Tiers).
+- **Delegate noisy, self-contained tasks that end in a short text result:**
   1. Visual comparison against `screenshots/` -> `e2e-tester` (keeps image reads out of the main context).
   2. Broad code or legacy-repo searches -> `Explore`.
-  3. Security review -> `security-reviewer`. Required for T2 and for auth, rules or data-model changes; optional otherwise.
-  4. Code review at the end of a larger feature -> `code-reviewer`.
+  3. Security review -> `security-reviewer` (required for T2, see Tiers).
+  4. Code review -> `code-reviewer` (required for T1 and T2, see Tiers).
   5. Diagnosing a long failing log -> a delegated debugging task.
 - Ask every delegated agent for a report of at most 15 lines, as text only.
 - **The full `/ship` pipeline runs only when the user asks for it** (for example "/ship" or "use the pipeline").
-- Tiers. **T0** trivial (copy, CSS tweak, typo): edit directly, run `npm run verify`. **T1** standard feature or fix: build directly, optional `code-reviewer`. **T2** risky (auth, rules, data model, dependencies, deploy): build directly plus required `security-reviewer`, and `db-architect` for data or rules.
+- **Tiers and required reviews.** Run the reviews on the whole diff against `origin/main`. Report each reviewer's verdict in the chat. The PR review and required CI are the merge check.
+  - **T0** trivial (CSS tweak, copy, typo, docs). No reviewer. Run `npm run verify`.
+  - **T1** any TypeScript or JavaScript change. Required: `code-reviewer` (`APPROVE`).
+  - **T2** auth, data access, rules, deploy, CI, or any dependency change (`package.json`, lockfile). Required: `security-reviewer` (`PASS`) and `code-reviewer` (`APPROVE`). Any change to `firestore.rules` must come with a change under `tests/rules/`. Use `db-architect` to design rules and tests; it is advisory, not a gate.
+  - When unsure between two tiers, take the higher one. Tell the user which tier you chose.
+- If a reviewer returns FAIL or REQUEST_CHANGES, fix with `tdd-engineer` (failing test first), then re-run that reviewer. Any edit after a review makes it stale.
 - Agents start cold and see none of this conversation. Every delegation must state: goal, acceptance criteria, files they may and may not touch, files to read first, constraints, and the report format (template is in `/ship`).
 - Never trust a report. After an agent says "done", run the gate command yourself and read the result.
 - Reviewers (`security-reviewer`, `code-reviewer`) are read-only. Fixes go to `tdd-engineer` with a failing test first.
+- Before finishing any turn with changes: the reviews required by the tier must be green. Do not present work as done without them.
 - Parallelize only tasks with disjoint files. Otherwise run sequentially.
 - Loop cap: at most 3 fix loops per task. If still failing, stop and tell the user what is stuck and what you ruled out.
 - Haiku is the model everywhere. Delegate only the cases listed above.
@@ -50,7 +56,7 @@ You (the main session) turn the user's requests into tasks. Subagents cannot spa
 - Staging and production are separate Firebase projects. Production is touched only through `/release` after approval.
 
 ## Definition of done
-`npm run verify` green, new behavior covered by unit tests (Red then Green shown), security `PASS`, code review `APPROVE`, e2e green for changed flows, visual QA done for UI changes, PR with passing CI, preview URL (when available). Report what was NOT verified (for example "rules tests not run: no Java") instead of implying it passed.
+`npm run verify` green, new behavior covered by unit tests (Red then Green shown), every review the tier requires green (`security-reviewer` PASS for T2, `code-reviewer` APPROVE for T1 and T2), e2e green for changed flows, visual QA done for UI changes, PR with passing CI, preview URL (when available). Report what was NOT verified (for example "rules tests not run: no Java") instead of implying it passed.
 
 ## Hooks you will meet (`.claude/settings.json`)
 - Edits to `.env*` and service-account files are blocked.
