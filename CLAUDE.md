@@ -20,16 +20,24 @@ Household grocery app. Next.js (App Router, `cacheComponents`), React (`'use cli
 6. Token discipline: edit only what the task needs; reuse existing code before adding new code.
 
 ## You are the PM
-You (the main session) turn the user's requests into tasks and delegate to subagents. Subagents cannot spawn subagents, so you coordinate everything yourself. You are explicitly authorized to spawn these agents without asking: `tdd-engineer`, `db-architect`, `security-reviewer`, `code-reviewer`, `e2e-tester` (plus built-in `Explore` and `Plan`).
+You (the main session) turn the user's requests into tasks. Subagents cannot spawn subagents, so you coordinate everything yourself. Subagents are available for the cases below, and the full pipeline only when the user asks for it.
 
-- Tiers. **T0** trivial (copy, CSS tweak, typo): edit directly, run `npm run verify`. **T1** standard feature or fix: full pipeline. **T2** risky (auth, rules, data model, dependencies, deploy): full pipeline plus `db-architect` and the `security-review` skill.
-- The pipeline for T1/T2 is the `/ship` skill. Follow it when the user asks for a feature, even if they do not type `/ship`.
+- **Default: build directly.** Write the failing test first, implement, then run `npm run verify:clean` and the relevant e2e specs. Do not delegate small, tightly coupled edits or anything that needs this conversation's context.
+- **Delegate when a task is noisy, self-contained, and ends in a short text result:**
+  1. Visual comparison against `screenshots/` -> `e2e-tester` (keeps image reads out of the main context).
+  2. Broad code or legacy-repo searches -> `Explore`.
+  3. Security review -> `security-reviewer`. Required for T2 and for auth, rules or data-model changes; optional otherwise.
+  4. Code review at the end of a larger feature -> `code-reviewer`.
+  5. Diagnosing a long failing log -> a delegated debugging task.
+- Ask every delegated agent for a report of at most 15 lines, as text only.
+- **The full `/ship` pipeline runs only when the user asks for it** (for example "/ship" or "use the pipeline").
+- Tiers. **T0** trivial (copy, CSS tweak, typo): edit directly, run `npm run verify`. **T1** standard feature or fix: build directly, optional `code-reviewer`. **T2** risky (auth, rules, data model, dependencies, deploy): build directly plus required `security-reviewer`, and `db-architect` for data or rules.
 - Agents start cold and see none of this conversation. Every delegation must state: goal, acceptance criteria, files they may and may not touch, files to read first, constraints, and the report format (template is in `/ship`).
 - Never trust a report. After an agent says "done", run the gate command yourself and read the result.
 - Reviewers (`security-reviewer`, `code-reviewer`) are read-only. Fixes go to `tdd-engineer` with a failing test first.
 - Parallelize only tasks with disjoint files. Otherwise run sequentially.
 - Loop cap: at most 3 fix loops per task. If still failing, stop and tell the user what is stuck and what you ruled out.
-- Keep it cheap: Haiku is the model everywhere. Prefer small, specific delegations; do not spawn an agent for something you can do in two tool calls.
+- Haiku is the model everywhere. Delegate only the cases listed above.
 
 ## Approval gates (stop and wait)
 1. After the plan (T1/T2): get approval before building.
