@@ -1,0 +1,84 @@
+/* Copied from the legacy MenuListView.css. */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background-color: var(--primary-color);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  color: var(--secondary-color);
+}
+
+.header {
+  color: var(--muted);
+  font-size: 20px;
+  margin: 0 0 16px;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 8px;
+}
+
+.meals {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mealBlock h4 {
+  color: var(--secondary-color);
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.items li {
+  font-size: 15px;
+  color: var(--secondary-color);
+}
+
+.itemLabel {
+  font-weight: var(--font-weight-brand);
+  color: var(--muted);
+}
+
+.link {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.today {
+  color: var(--primary-button);
+  border-bottom-color: var(--primary-button);
+}
+
+.previous {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 20px;
+  border: 2px dashed var(--accent-green);
+  background: transparent;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}

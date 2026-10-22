@@ -1,0 +1,67 @@
+/* Layout copied from the legacy weekly menu (WeeklyMenu.css). */
+/* The last day sits 32px above the bottom bar: the bar's height plus 32px. */
+.page {
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0 0;
+  padding-bottom: calc(var(--nav-height) + 32px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: var(--font-weight-title);
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.toggle {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 20px;
+  padding: 4px;
+}
+
+.toggleButton {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 16px;
+  color: var(--primary-color);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toggleActive {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.loading {
+  text-align: center;
+  color: #999;
+  padding: 40px 0;
+}
+
+.error {
+  margin: 0;
+  color: var(--error-color);
+}
