@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { MdCalendarMonth, MdChecklist, MdGridView, MdRestaurant } from 'react-icons/md';
+import { MdAdd, MdCalendarMonth, MdChecklist, MdGridView, MdRestaurant } from 'react-icons/md';
 import styles from './BottomNav.module.css';
 
 type Tab = { label: string; icon: IconType; href: string };
@@ -15,8 +15,14 @@ const TABS: Tab[] = [
   { label: 'Manage', icon: MdGridView, href: '/manage-categories' },
 ];
 
-export function BottomNav() {
+interface Props {
+  // Passed on the recipes page only: shows the floating add button.
+  onAdd?: () => void;
+}
+
+export function BottomNav({ onAdd }: Props) {
   const pathname = usePathname();
+  const showAdd = pathname === '/recipes' && onAdd;
 
   return (
     <nav className={styles.nav} aria-label="Main">
@@ -31,6 +37,11 @@ export function BottomNav() {
           </Link>
         );
       })}
+      {showAdd && (
+        <button type="button" className={styles.fab} aria-label="Add recipe" onClick={onAdd}>
+          <MdAdd aria-hidden="true" />
+        </button>
+      )}
     </nav>
   );
 }

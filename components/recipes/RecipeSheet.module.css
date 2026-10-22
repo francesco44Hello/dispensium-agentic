@@ -1,0 +1,54 @@
+/* Panel and header colours copied from the legacy add-recipe page. */
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  background-color: #fff;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.sheet[data-open='true'] {
+  transform: translateY(0);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background-color: var(--primary-color);
+  border-bottom-left-radius: 24px;
+  border-bottom-right-radius: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--secondary-color);
+  cursor: pointer;
+}
+
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: var(--font-weight-title);
+  color: var(--secondary-color);
+}
+
+.spacer {
+  width: 28px;
+}
+
+.body {
+  flex: 1;
+}

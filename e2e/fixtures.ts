@@ -1,6 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 
-const FIREBASE_TRAFFIC = /(identitytoolkit|securetoken|firestore)\.googleapis\.com|firebaseio\.com/;
+const FIREBASE_TRAFFIC = /(identitytoolkit|securetoken|firestore|storage)\.googleapis\.com|firebaseio\.com|firebasestorage\.googleapis\.com|firebasestorage\.app/;
 
 // Auto-fixture: every test fails if the page talks to a real Firebase backend.
 export const test = base.extend<{ noFirebaseTraffic: void }>({

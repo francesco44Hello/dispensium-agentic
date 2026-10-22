@@ -12,6 +12,6 @@
   flex: 1;
   flex-direction: column;
   gap: 16px;
-  /* Bottom bar + 24px gap + 56px action button + 24px breathing room, so the list can scroll clear of it. */
-  padding-bottom: calc(var(--nav-height) + 24px + 56px + 24px);
+  /* Keeps the end of the list clear of the bottom bar and its floating button. */
+  padding-bottom: var(--content-bottom);
 }
