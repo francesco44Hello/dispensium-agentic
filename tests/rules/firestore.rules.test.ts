@@ -6,7 +6,7 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
 
 // Runs against the Firestore emulator: `npm run test:rules` (needs Java).
 // FIRESTORE_EMULATOR_HOST is provided by `firebase emulators:exec`.
@@ -286,5 +286,92 @@ describe('invite codes and joining', () => {
 
   it('does not let members be edited or removed afterwards', async () => {
     await assertFails(updateDoc(doc(as('alice'), 'households', HID, 'members', 'alice'), { role: 'member' }));
+  });
+});
+
+describe('recipes', () => {
+  const validRecipe = (overrides: Record<string, unknown> = {}) => ({
+    title: 'Soup',
+    time: '20 min',
+    category: 'Dinner',
+    label: 'Quick & Easy ⚡',
+    ingredients: ['water'],
+    steps: ['Boil'],
+    image: '',
+    createdAt: new Date(),
+    createdBy: 'alice',
+    ...overrides,
+  });
+
+  beforeEach(async () => {
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'households', HID, 'recipes', 'r1'), { ...validRecipe(), title: 'Existing' });
+      await setDoc(doc(db, 'households', OTHER_HID, 'recipes', 'x1'), { ...validRecipe(), createdBy: 'dave' });
+    });
+  });
+
+  it('lets a member create a valid recipe for their household', async () => {
+    await assertSucceeds(addDoc(collection(as('alice'), 'households', HID, 'recipes'), validRecipe()));
+  });
+
+  it('lets a member read and delete their household recipes', async () => {
+    await assertSucceeds(getDoc(doc(as('alice'), 'households', HID, 'recipes', 'r1')));
+    await assertSucceeds(getDocs(collection(as('alice'), 'households', HID, 'recipes')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'households', HID, 'recipes', 'r1')));
+  });
+
+  it('blocks non-members from creating, reading and deleting recipes', async () => {
+    await assertFails(addDoc(collection(as('bob'), 'households', HID, 'recipes'), validRecipe({ createdBy: 'bob' })));
+    await assertFails(getDocs(collection(as('bob'), 'households', HID, 'recipes')));
+    await assertFails(deleteDoc(doc(as('bob'), 'households', HID, 'recipes', 'r1')));
+    await assertFails(getDoc(doc(as('alice'), 'households', OTHER_HID, 'recipes', 'x1')));
+  });
+
+  it('requires createdBy to be the signed-in user', async () => {
+    await assertFails(addDoc(collection(as('alice'), 'households', HID, 'recipes'), validRecipe({ createdBy: 'bob' })));
+  });
+
+  it('rejects an unknown category or label', async () => {
+    const recipes = collection(as('alice'), 'households', HID, 'recipes');
+    await assertFails(addDoc(recipes, validRecipe({ category: 'Brunch' })));
+    await assertFails(addDoc(recipes, validRecipe({ label: 'Spicy' })));
+  });
+
+  it('rejects markup in the time field', async () => {
+    await assertFails(addDoc(collection(as('alice'), 'households', HID, 'recipes'), validRecipe({ time: '<b>20</b>' })));
+  });
+
+  it('rejects an empty, too long or markup title', async () => {
+    const recipes = collection(as('alice'), 'households', HID, 'recipes');
+    await assertFails(addDoc(recipes, validRecipe({ title: '' })));
+    await assertFails(addDoc(recipes, validRecipe({ title: 'x'.repeat(101) })));
+    await assertFails(addDoc(recipes, validRecipe({ title: '<script>' })));
+  });
+
+  it('rejects too many ingredients or steps', async () => {
+    const recipes = collection(as('alice'), 'households', HID, 'recipes');
+    const many = Array.from({ length: 51 }, (_, i) => `item ${i}`);
+    await assertFails(addDoc(recipes, validRecipe({ ingredients: many })));
+    await assertFails(addDoc(recipes, validRecipe({ steps: many })));
+  });
+
+  it('accepts only empty images or photos stored in the member household', async () => {
+    const recipes = collection(as('alice'), 'households', HID, 'recipes');
+    await assertSucceeds(addDoc(recipes, validRecipe({ image: '' })));
+    await assertSucceeds(addDoc(recipes, validRecipe({ image: `households/${HID}/recipes/0f3a-photo.webp` })));
+    await assertFails(addDoc(recipes, validRecipe({ image: 'https://example.com/a.jpg' })));
+    await assertFails(addDoc(recipes, validRecipe({ image: `households/${OTHER_HID}/recipes/x.webp` })));
+    await assertFails(addDoc(recipes, validRecipe({ image: `households/${HID}/recipes/x.html` })));
+  });
+
+  it('rejects extra fields and a client-supplied non-timestamp createdAt', async () => {
+    const recipes = collection(as('alice'), 'households', HID, 'recipes');
+    await assertFails(addDoc(recipes, validRecipe({ isAdmin: true })));
+    await assertFails(addDoc(recipes, validRecipe({ createdAt: 'yesterday' })));
+  });
+
+  it('does not allow recipes to be edited', async () => {
+    await assertFails(updateDoc(doc(as('alice'), 'households', HID, 'recipes', 'r1'), { title: 'Changed' }));
   });
 });
