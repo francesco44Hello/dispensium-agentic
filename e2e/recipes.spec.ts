@@ -111,7 +111,10 @@ test('a photo chosen in the form is compressed, saved and shown on the recipe pa
   await sheet.getByRole('button', { name: 'Save recipe' }).click();
 
   await page.getByRole('link', { name: 'Photo cake' }).click();
-  const cover = page.getByAltText('Photo cake');
+  await expect(page).toHaveURL(/\/recipes\/[^/]+$/);
+  // Next keeps the previous pages mounted but hidden, so only visible images are checked here.
+  const cover = page.locator('img[alt="Photo cake"]:visible');
+  await expect(cover).toHaveCount(1);
   await expect(cover).toHaveAttribute('src', /^blob:/);
   expect(await cover.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
 });

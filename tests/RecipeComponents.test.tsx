@@ -238,7 +238,7 @@ describe('RecipeSheet photo import', () => {
       if (body.url === 'https://example.com/first.png') {
         return new Promise<Response>((resolve) => { finishFirst = resolve; });
       }
-      return Promise.resolve(new Response(new Blob(['second'], { type: 'image/webp' }), { status: 200 }));
+      return Promise.resolve(new Response(new Uint8Array([2, 2, 2]), { status: 200, headers: { 'content-type': 'image/webp' } }));
     });
     vi.stubGlobal('fetch', fetchMock);
     const importOnce = async (url: string, title: string) => {
@@ -256,7 +256,7 @@ describe('RecipeSheet photo import', () => {
     render(<RecipeSheet open onClose={vi.fn()} onSave={vi.fn()} />);
     await importOnce('https://example.com/first.png', 'First');
     await importOnce('https://example.com/second.png', 'Second');
-    finishFirst(new Response(new Blob(['first'], { type: 'image/webp' }), { status: 200 }));
+    finishFirst(new Response(new Uint8Array([1, 1, 1]), { status: 200, headers: { 'content-type': 'image/webp' } }));
     await new Promise((done) => setTimeout(done, 0));
     // Only the second import's photo was ever previewed, so the late first photo was ignored.
     expect(previews).toHaveBeenCalledTimes(1);
