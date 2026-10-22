@@ -7,6 +7,15 @@
   padding: 0 16px;
 }
 
+/* The recipe detail page runs full width, with no side gutter and no reserved space under the bar. */
+.shell.bleed {
+  padding: 0;
+}
+
+.content.bleed {
+  padding: 0;
+}
+
 .content {
   display: flex;
   flex: 1;
