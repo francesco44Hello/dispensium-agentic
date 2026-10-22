@@ -7,6 +7,10 @@
   --surface: #ffffff;
   --font-sans: var(--font-balsamiq), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --nav-height: 88px;
+  /* Space the bottom bar and its floating button need, reserved at the end of every page's content. */
+  --content-bottom: calc(var(--nav-height) + 24px + 56px + 24px);
+  /* Legacy accent for button shadows and the add-button icon. */
+  --accent-green: #06a77d;
   /* Balsamiq Sans only ships 400 and 700. Page titles use regular (400). Use this token, never a literal. */
   --font-weight-title: 400;
   /* The app name in the header is bold (700), a separate token from page titles. */

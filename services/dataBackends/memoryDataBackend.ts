@@ -1,5 +1,7 @@
 import { HouseholdError, type HouseholdBackend } from '../householdService';
 import { GroceryError, type GroceryBackend } from '../groceryService';
+import { RecipeError, type RecipeBackend } from '../recipeService';
+import type { Recipe } from '../../types/recipe';
 import type { DataBackend } from './dataBackend';
 import { addWord, removeWord } from '../../utils/categoryMap';
 import { defaultCategoryMap } from '../../constants/categories';
@@ -29,6 +31,8 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
   const invites = new Map<string, InviteCode>();
   const categoryMaps = new Map<string, CategoryMap>();
   const groceries = new Map<string, Map<string, GroceryItem>>();
+  const recipes = new Map<string, Map<string, Recipe>>();
+  const photos = new Map<string, Blob>();
   const subscriptions = new Set<Subscription>();
 
   const notifyAll = () => subscriptions.forEach((sub) => sub.run());
@@ -180,5 +184,44 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
     },
   };
 
-  return { households: householdBackend, groceries: groceryBackend };
+  const recipeBackend: RecipeBackend = {
+    // In mock mode photos stay in memory, and display URLs are object URLs, so nothing is sent anywhere.
+    async uploadPhoto(householdId, photo) {
+      const path = `households/${householdId}/recipes/${nextId('ph')}.webp`;
+      photos.set(path, photo);
+      return path;
+    },
+
+    async deletePhoto(path) {
+      photos.delete(path);
+    },
+
+    async photoUrl(path) {
+      const photo = photos.get(path);
+      if (!photo) throw new RecipeError('invalid-photo');
+      return URL.createObjectURL(photo);
+    },
+
+    async addRecipe(householdId, recipe) {
+      const id = nextId('rc');
+      let bucket = recipes.get(householdId);
+      if (!bucket) {
+        bucket = new Map();
+        recipes.set(householdId, bucket);
+      }
+      bucket.set(id, { id, ...recipe, createdAt: now() });
+      notifyAll();
+      return id;
+    },
+
+    subscribeToRecipes(householdId, listener) {
+      return subscribe(
+        // Insertion order is chronological, so reversing gives newest first even when timestamps tie.
+        () => [...(recipes.get(householdId)?.values() ?? [])].reverse(),
+        listener,
+      );
+    },
+  };
+
+  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend };
 }

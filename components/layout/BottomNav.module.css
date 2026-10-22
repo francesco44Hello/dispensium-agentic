@@ -50,3 +50,26 @@
 .label {
   white-space: nowrap;
 }
+
+/* Floating add button, copied from the legacy recipes page. */
+.fab {
+  position: absolute;
+  left: 50%;
+  top: -32px;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 3px solid var(--primary-color);
+  background-color: var(--primary-button);
+  color: var(--accent-green);
+  font-size: 32px;
+  cursor: pointer;
+}
+
+.fab:active {
+  transform: translateX(-50%) scale(0.95);
+}

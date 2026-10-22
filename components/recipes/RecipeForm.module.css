@@ -1,0 +1,167 @@
+/* Styles copied from the legacy add-recipe form. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  padding-bottom: 120px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sectionTitle {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+}
+
+.field {
+  display: block;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.input:focus-visible {
+  outline: 2px solid var(--secondary-color);
+  outline-offset: 2px;
+}
+
+.input {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  border-radius: 16px;
+  font-size: 16px;
+  color: #333;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.inputLarge {
+  font-size: 20px;
+  font-weight: var(--font-weight-brand);
+}
+
+.textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.pills {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.pill {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #999;
+  padding: 10px 20px;
+  border-radius: 20px;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.pillActive {
+  background-color: var(--secondary-color);
+  color: var(--primary-color);
+  border-color: var(--secondary-color);
+  box-shadow: 0 4px 12px rgba(255, 142, 113, 0.2);
+}
+
+.addRow {
+  background: none;
+  border: 2px dashed var(--primary-color);
+  color: var(--primary-color);
+  padding: 14px;
+  border-radius: 16px;
+  font-size: 16px;
+  font-weight: var(--font-weight-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.photoBox {
+  position: relative;
+  height: 150px;
+  border: 2px dashed rgba(0, 0, 0, 0.1);
+  border-radius: 24px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
+
+.photoPlaceholder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+}
+
+/* The real file input covers the box, so tapping anywhere on it opens the picker. */
+.fileInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.coverImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.submit {
+  width: 100%;
+  background-color: var(--primary-button);
+  color: var(--primary-color);
+  padding: 18px;
+  border: none;
+  border-radius: 20px;
+  font-size: 18px;
+  font-weight: var(--font-weight-brand);
+  box-shadow: 1px 1px 19px 5px var(--accent-green);
+  cursor: pointer;
+}
+
+.submit:disabled {
+  background-color: #bcbfc2;
+  box-shadow: none;
+  cursor: default;
+}
+
+.error {
+  margin: 0;
+  color: var(--error-color);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

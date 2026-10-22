@@ -1,13 +1,10 @@
-import { AppShell } from "../../components/AppShell";
-import { PlaceholderPage } from "../../components/PlaceholderPage";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
+import { RecipesScreen } from "../../components/recipes/RecipesScreen";
 
 export default function Page() {
   return (
     <ProtectedRoute>
-      <AppShell>
-        <PlaceholderPage title="Everyday Recipes" />
-      </AppShell>
+      <RecipesScreen />
     </ProtectedRoute>
   );
 }

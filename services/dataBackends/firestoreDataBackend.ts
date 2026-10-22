@@ -19,12 +19,15 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore';
 import { getFirebaseApp } from '../firebaseApp';
+import { deleteObject, getBytes, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { HouseholdError, type HouseholdBackend } from '../householdService';
 import { GroceryError, type GroceryBackend } from '../groceryService';
+import type { NewRecipe, RecipeBackend } from '../recipeService';
 import { addWord, removeWord } from '../../utils/categoryMap';
 import { defaultCategoryMap } from '../../constants/categories';
 import type { CategoryMap } from '../../types/category';
 import type { GroceryItem } from '../../types/grocery';
+import type { Recipe } from '../../types/recipe';
 import type { HouseholdMember, InviteCode } from '../../types/household';
 import type { Unsubscribe } from '../../types/subscription';
 import type { DataBackend } from './dataBackend';
@@ -44,6 +47,26 @@ function readCategoryMap(data: DocumentData | undefined): CategoryMap | null {
   const map: unknown = data?.map;
   if (typeof map !== 'object' || map === null) return null;
   return map as CategoryMap;
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === 'string') : [];
+}
+
+function toRecipe(snap: { id: string; data(): DocumentData | undefined }): Recipe {
+  const data = snap.data() ?? {};
+  return {
+    id: snap.id,
+    title: String(data.title ?? ''),
+    time: String(data.time ?? ''),
+    category: String(data.category ?? ''),
+    label: String(data.label ?? ''),
+    ingredients: stringList(data.ingredients),
+    steps: stringList(data.steps),
+    image: String(data.image ?? ''),
+    createdAt: toDate(data.createdAt),
+    createdBy: String(data.createdBy ?? ''),
+  };
 }
 
 function toGroceryItem(snap: QueryDocumentSnapshot<DocumentData> | { id: string; data(): DocumentData | undefined }): GroceryItem {
@@ -210,5 +233,40 @@ export function createFirestoreDataBackend(): DataBackend {
     });
   }
 
-  return { households: householdBackend, groceries: groceryBackend };
+  const recipeBackend: RecipeBackend = {
+    // Photos are read with getBytes, so every view is checked against storage.rules. No download-token links are created.
+    async uploadPhoto(householdId, photo) {
+      const path = `households/${householdId}/recipes/${crypto.randomUUID()}.webp`;
+      await uploadBytes(ref(getStorage(getFirebaseApp()), path), photo, { contentType: photo.type });
+      return path;
+    },
+
+    async deletePhoto(path) {
+      await deleteObject(ref(getStorage(getFirebaseApp()), path));
+    },
+
+    async photoUrl(path) {
+      const bytes = await getBytes(ref(getStorage(getFirebaseApp()), path));
+      return URL.createObjectURL(new Blob([bytes], { type: 'image/webp' }));
+    },
+
+    async addRecipe(householdId: string, recipe: NewRecipe): Promise<string> {
+      const docRef = await addDoc(collection(db(), 'households', householdId, 'recipes'), {
+        ...recipe,
+        createdAt: new Date(),
+      });
+      return docRef.id;
+    },
+
+    subscribeToRecipes(householdId, listener): Unsubscribe {
+      const q = query(collection(db(), 'households', householdId, 'recipes'), orderBy('createdAt', 'desc'));
+      return onSnapshot(
+        q,
+        (snap) => listener(snap.docs.map((d) => toRecipe(d))),
+        (error) => console.error('Could not load recipes:', error),
+      );
+    },
+  };
+
+  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend };
 }

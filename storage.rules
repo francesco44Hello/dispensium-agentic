@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Storage rules read membership from Firestore, the same check the database rules use.
+    function isMember(hid) {
+      return firestore.exists(/databases/(default)/documents/households/$(hid)/members/$(request.auth.uid));
+    }
+
+    // Recipe photos. Members read and delete their household's photos. Uploads are small compressed images.
+    // Clients always upload to a random new name, so overwriting an existing photo is not something the app does.
+    // The emulator cannot separate a create from an overwrite here, so that case is not enforced by these rules.
+    match /households/{hid}/recipes/{file} {
+      allow read, delete: if signedIn() && isMember(hid);
+      allow create: if signedIn()
+        && isMember(hid)
+        && request.resource.size < 1 * 1024 * 1024
+        && request.resource.contentType.matches('image/(webp|jpeg|png)');
+      allow update: if false;
+    }
+  }
+}

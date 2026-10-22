@@ -1,0 +1,59 @@
+.panel {
+  margin: 24px 24px 0;
+  padding: 16px;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(255, 142, 113, 0.1);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+}
+
+.subtitle {
+  margin: 4px 0 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 16px;
+  color: #333;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--primary-button);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.button:disabled {
+  background-color: #bcbfc2;
+  cursor: default;
+}
+
+.error {
+  margin: 8px 0 0;
+  color: var(--error-color);
+  font-size: 14px;
+}
