@@ -1,6 +1,8 @@
 import { HouseholdError, type HouseholdBackend } from '../householdService';
 import { GroceryError, type GroceryBackend } from '../groceryService';
 import { RecipeError, type RecipeBackend } from '../recipeService';
+import type { MenuBackend } from '../menuService';
+import type { DayMenu, MealEntry, MealType } from '../../types/menu';
 import type { Recipe } from '../../types/recipe';
 import type { DataBackend } from './dataBackend';
 import { addWord, removeWord } from '../../utils/categoryMap';
@@ -33,6 +35,7 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
   const groceries = new Map<string, Map<string, GroceryItem>>();
   const recipes = new Map<string, Map<string, Recipe>>();
   const photos = new Map<string, Blob>();
+  const menus = new Map<string, Map<string, Partial<DayMenu>>>();
   const subscriptions = new Set<Subscription>();
 
   const notifyAll = () => subscriptions.forEach((sub) => sub.run());
@@ -223,5 +226,29 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
     },
   };
 
-  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend };
+  const menuBackend: MenuBackend = {
+    async setMeal(householdId, date, meal: MealType, entry: MealEntry) {
+      let days = menus.get(householdId);
+      if (!days) {
+        days = new Map();
+        menus.set(householdId, days);
+      }
+      days.set(date, { ...days.get(date), [meal]: entry });
+      notifyAll();
+    },
+
+    subscribeToMenu(householdId, dates, listener) {
+      return subscribe(() => {
+        const days = menus.get(householdId);
+        const picked: Record<string, Partial<DayMenu>> = {};
+        for (const date of dates) {
+          const day = days?.get(date);
+          if (day) picked[date] = day;
+        }
+        return picked;
+      }, listener);
+    },
+  };
+
+  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend, menu: menuBackend };
 }

@@ -16,6 +16,11 @@
   padding: 0;
 }
 
+/* For pages that space their own bottom edge, so the shell reserves no extra room under the bar. */
+.content.flushBottom {
+  padding-bottom: 0;
+}
+
 .content {
   display: flex;
   flex: 1;

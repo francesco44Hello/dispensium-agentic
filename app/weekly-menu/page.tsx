@@ -1,13 +1,10 @@
-import { AppShell } from "../../components/AppShell";
-import { PlaceholderPage } from "../../components/PlaceholderPage";
 import { ProtectedRoute } from "../../components/auth/ProtectedRoute";
+import { MenuScreen } from "../../components/menu/MenuScreen";
 
 export default function Page() {
   return (
     <ProtectedRoute>
-      <AppShell>
-        <PlaceholderPage title="Plan the week" />
-      </AppShell>
+      <MenuScreen />
     </ProtectedRoute>
   );
 }

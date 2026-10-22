@@ -1,0 +1,35 @@
+/* Copied from the legacy MealTabs.css. */
+.tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.tab {
+  flex: 1;
+  padding: 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: white;
+  color: #999;
+  font-size: 16px;
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.icon {
+  height: 48px;
+  width: 48px;
+}
+
+.active {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+}
