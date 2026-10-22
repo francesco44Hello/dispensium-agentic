@@ -10,8 +10,6 @@ import styles from './GroceryList.module.css';
 
 const ERROR_MESSAGES: Record<GroceryErrorCode, string> = {
   'invalid-name': 'Please enter a valid item name (1–100 characters, without < > { } ").',
-  'invalid-word': 'Please enter a valid word.',
-  'unknown-category': 'That category does not exist.',
   'not-found': 'That item no longer exists.',
   unknown: 'Something went wrong. Please try again.',
 };

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { createKeyCache, KeysUnavailableError } from '../services/requestAuth';
+import { createKeyCache } from '../services/requestAuth';
+import { KeysUnavailableError } from '../utils/requestAuthErrors';
 import { extractRecipe } from '../utils/recipeJsonLd';
 
 describe('createKeyCache', () => {

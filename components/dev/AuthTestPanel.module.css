@@ -28,7 +28,7 @@
 .actions button {
   flex: 1 1 140px;
   padding: 10px;
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
   color: var(--primary-color);
   background: var(--primary-button);
   border: none;
@@ -43,7 +43,7 @@
 
 .nav a {
   color: var(--primary-color);
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
 }
 
 .log {

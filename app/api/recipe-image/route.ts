@@ -1,21 +1,12 @@
 import { NextResponse } from 'next/server';
-import { AuthError, authenticateRequest, KeysUnavailableError } from '../../../services/requestAuth';
-import { importImageFromUrl, RecipeImportError } from '../../../services/recipeImportService';
+import { authenticateRequest } from '../../../services/requestAuth';
+import { importImageFromUrl } from '../../../services/recipeImportService';
 import { sanitizeInput } from '../../../utils/sanitizeInput';
 import { readCapped } from '../../../utils/readCapped';
-import type { RecipeImportErrorCode } from '../../../utils/recipeImportError';
+import { RECIPE_IMPORT_STATUS, RecipeImportError } from '../../../utils/recipeImportError';
+import { importAuthFailure } from '../../../utils/importAuthError';
 
 const MAX_BODY_CHARS = 4096;
-
-const STATUS: Record<RecipeImportErrorCode, number> = {
-  'invalid-url': 400,
-  'blocked-address': 400,
-  'too-many-redirects': 502,
-  'fetch-failed': 502,
-  'no-recipe': 404,
-  'too-large': 413,
-  'not-an-image': 415,
-};
 
 // Returns the photo's bytes to the browser, which compresses them and uploads them to our own storage.
 export async function POST(request: Request) {
@@ -23,8 +14,8 @@ export async function POST(request: Request) {
   try {
     await authenticateRequest(request);
   } catch (error) {
-    if (error instanceof AuthError) return NextResponse.json({ error: 'Sign in to import recipes.' }, { status: 401 });
-    if (error instanceof KeysUnavailableError) return NextResponse.json({ error: 'Try again in a moment.' }, { status: 503 });
+    const failure = importAuthFailure(error);
+    if (failure) return failure;
     throw error;
   }
 
@@ -49,7 +40,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof RecipeImportError) {
-      return NextResponse.json({ error: 'Could not fetch that photo.' }, { status: STATUS[error.code] });
+      return NextResponse.json({ error: 'Could not fetch that photo.' }, { status: RECIPE_IMPORT_STATUS[error.code] });
     }
     console.error('Recipe photo import failed:', error);
     return NextResponse.json({ error: 'Could not fetch that photo.' }, { status: 500 });

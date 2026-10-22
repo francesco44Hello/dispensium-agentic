@@ -23,10 +23,12 @@ export default defineConfig({
     { name: 'visual', testMatch: /visual\.spec\.ts/ },
   ],
   webServer: {
-    command: `npm run build && npx next start -p ${PORT}`,
-    env: { NEXT_PUBLIC_AUTH_MOCK: 'true' },
+    // Dev server, not a production build: a production build with the mock flag is refused at startup (services/authClient.ts).
+    command: `npx next dev -p ${PORT}`,
+    env: { NEXT_PUBLIC_AUTH_MOCK: 'true', E2E: '1' },
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    // Never reuse a server already on this port: it might not be the mock build.
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 });

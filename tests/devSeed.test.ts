@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { withDevSeed, type SeedFile } from '../services/dataBackends/devSeed';
+import { withDevSeed } from '../services/dataBackends/devSeed';
+import type { SeedFile } from '../types/seed';
 import { createMemoryDataBackend } from '../services/dataBackends/memoryDataBackend';
 import type { Recipe } from '../types/recipe';
 

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { generateInviteCode, isValidInviteCode, normalizeInviteCode } from '../utils/inviteCode';
 
 describe('generateInviteCode', () => {
@@ -20,6 +20,27 @@ describe('generateInviteCode', () => {
     for (let i = 0; i < 200; i++) {
       expect(generateInviteCode()).not.toMatch(/[IO01]/);
     }
+  });
+
+  it('draws from crypto.getRandomValues and not Math.random', () => {
+    const cryptoSpy = vi.spyOn(crypto, 'getRandomValues');
+    const mathSpy = vi.spyOn(Math, 'random');
+    try {
+      generateInviteCode();
+      expect(cryptoSpy).toHaveBeenCalled();
+      expect(mathSpy).not.toHaveBeenCalled();
+    } finally {
+      cryptoSpy.mockRestore();
+      mathSpy.mockRestore();
+    }
+  });
+
+  it('keeps the 32-character alphabet: every character appears and nothing else does', () => {
+    const seen = new Set<string>();
+    for (let i = 0; i < 2000; i++) {
+      for (const char of generateInviteCode()) seen.add(char);
+    }
+    expect([...seen].sort().join('')).toBe('23456789ABCDEFGHJKLMNPQRSTUVWXYZ');
   });
 });
 

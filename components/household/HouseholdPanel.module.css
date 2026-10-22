@@ -20,7 +20,7 @@
 
 .button {
   padding: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
   color: var(--primary-color);
   background: var(--primary-button);
   border: none;
@@ -35,12 +35,12 @@
 
 .invite code {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
   letter-spacing: 0.1em;
 }
 
 .error {
   margin: 0;
   color: var(--error-color);
-  font-weight: 600;
+  font-weight: var(--font-weight-brand);
 }

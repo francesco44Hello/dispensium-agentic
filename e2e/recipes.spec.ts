@@ -151,7 +151,7 @@ test('the recipe page has no header, runs full width, and the cart adds an ingre
   await expect(page.getByRole('heading', { level: 1, name: 'Garlic bread' })).toBeVisible();
 
   // Next keeps the previous pages mounted but hidden, so only visible elements count here.
-  await expect(page.locator('button[aria-label="Open household menu"]:visible')).toHaveCount(0);
+  await expect(page.locator('button[aria-label="Open menu"]:visible')).toHaveCount(0);
 
   const article = page.locator('article:visible').first();
   const box = await article.boundingBox();

@@ -24,7 +24,11 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run test
+      # The production build fails without a Firebase API key (services/authClient.ts). The build makes no
+      # network calls, so a placeholder is enough here; deployed builds take the real key from Vercel.
       - run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ci-build-placeholder
       - run: npm run audit
 
   rules:

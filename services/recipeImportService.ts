@@ -8,8 +8,6 @@ import { extractRecipe } from '../utils/recipeJsonLd';
 import { isAllowedImageType } from '../utils/recipeImage';
 import type { ExtractedRecipe } from '../types/recipe';
 
-export { RecipeImportError } from '../utils/recipeImportError';
-
 const MAX_REDIRECTS = 3;
 const MAX_PAGE_BYTES = 2 * 1024 * 1024;
 // Source photos can be larger than what we store; the browser compresses them before upload.
@@ -29,12 +27,12 @@ export interface ImageResponse {
   bytes: Buffer;
 }
 
-export interface ImportDeps {
+interface ImportDeps {
   fetchPage: (url: URL) => Promise<PageResponse>;
   lookup: (host: string) => Promise<{ address: string }[]>;
 }
 
-export interface ImageImportDeps {
+interface ImageImportDeps {
   fetchImage: (url: URL) => Promise<ImageResponse>;
   lookup: (host: string) => Promise<{ address: string }[]>;
 }
@@ -127,8 +125,8 @@ const fetchPageOverNetwork = async (url: URL): Promise<PageResponse> => {
 
 const fetchImageOverNetwork = (url: URL): Promise<ImageResponse> => requestOverNetwork(url, MAX_IMAGE_BYTES);
 
-export const defaultImportDeps: ImportDeps = { fetchPage: fetchPageOverNetwork, lookup: resolveHost };
-export const defaultImageImportDeps: ImageImportDeps = { fetchImage: fetchImageOverNetwork, lookup: resolveHost };
+const defaultImportDeps: ImportDeps = { fetchPage: fetchPageOverNetwork, lookup: resolveHost };
+const defaultImageImportDeps: ImageImportDeps = { fetchImage: fetchImageOverNetwork, lookup: resolveHost };
 
 // Every hop is checked before it is requested. The pinned lookup repeats the check at connect time.
 async function assertPublicHost(url: URL, lookup: ImportDeps['lookup']): Promise<void> {
