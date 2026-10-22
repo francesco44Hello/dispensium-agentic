@@ -375,3 +375,59 @@ describe('recipes', () => {
     await assertFails(updateDoc(doc(as('alice'), 'households', HID, 'recipes', 'r1'), { title: 'Changed' }));
   });
 });
+
+describe('weekly menu', () => {
+  const entry = (overrides: Record<string, unknown> = {}) => ({
+    main: 'Pasta',
+    side: 'Salad',
+    mainRecipeId: 'r1',
+    sideRecipeId: '',
+    ...overrides,
+  });
+  const DAY = '2026-10-22';
+
+  it('lets a member write and read their household menu', async () => {
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry() }, { merge: true }));
+    await assertSucceeds(getDoc(doc(as('alice'), 'households', HID, 'menu', DAY)));
+  });
+
+  it('blocks non-members from reading or writing the menu', async () => {
+    await assertFails(setDoc(doc(as('bob'), 'households', HID, 'menu', DAY), { lunch: entry() }, { merge: true }));
+    await assertFails(getDoc(doc(as('bob'), 'households', HID, 'menu', DAY)));
+    await assertFails(getDoc(doc(as('alice'), 'households', OTHER_HID, 'menu', DAY)));
+  });
+
+  it('rejects days that do not exist in the calendar', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', '2026-02-31'), { lunch: entry() }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', '2026-04-31'), { lunch: entry() }, { merge: true }));
+  });
+
+  it('rejects day ids that are not real YYYY-MM-DD dates', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', '2026-13-45'), { lunch: entry() }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', '22-10-2026'), { lunch: entry() }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', 'tomorrow'), { lunch: entry() }, { merge: true }));
+  });
+
+  it('rejects fields other than lunch and dinner, and extra entry fields', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry() }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ extra: 'x' }) }, { merge: true }));
+  });
+
+  it('rejects markup and over-long text in a meal', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ main: '<b>x</b>' }) }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ side: 'x'.repeat(101) }) }, { merge: true }));
+  });
+
+  it('rejects a recipe id that is not a plain id', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ mainRecipeId: '../secrets' }) }, { merge: true }));
+  });
+
+  it('rejects a recipe link when the meal has no text', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ main: '', mainRecipeId: 'r1' }) }, { merge: true }));
+  });
+
+  it('does not allow a day to be deleted', async () => {
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry() }, { merge: true }));
+    await assertFails(deleteDoc(doc(as('alice'), 'households', HID, 'menu', DAY)));
+  });
+});

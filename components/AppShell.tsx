@@ -13,13 +13,15 @@ interface Props {
   hideHeader?: boolean;
   // Removes the side gutter so the page content can run edge to edge.
   bleed?: boolean;
+  // Skips the room the shell reserves under the bar, for pages that space their own bottom edge.
+  flushBottom?: boolean;
 }
 
-export function AppShell({ children, onAdd, hideHeader = false, bleed = false }: Props) {
+export function AppShell({ children, onAdd, hideHeader = false, bleed = false, flushBottom = false }: Props) {
   return (
     <div className={`${styles.shell} ${bleed ? styles.bleed : ''}`}>
       {!hideHeader && <AppHeader />}
-      <main className={`${styles.content} ${bleed ? styles.bleed : ''}`}>{children}</main>
+      <main className={`${styles.content} ${bleed ? styles.bleed : ''} ${flushBottom ? styles.flushBottom : ''}`}>{children}</main>
       <BottomNav onAdd={onAdd} />
     </div>
   );
