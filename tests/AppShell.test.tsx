@@ -8,6 +8,7 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }), usePathname:
 
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { AppShell } from '../components/AppShell';
+import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
 
@@ -20,11 +21,13 @@ async function renderShell() {
   const auth = createAuthService(createMockAuthBackend());
   await auth.signUp('alice@example.com', 'secret123');
   render(
-    <AuthProvider service={auth}>
-      <AppShell>
-        <p>list body</p>
-      </AppShell>
-    </AuthProvider>,
+    <LocaleProvider>
+      <AuthProvider service={auth}>
+        <AppShell>
+          <p>list body</p>
+        </AppShell>
+      </AuthProvider>
+    </LocaleProvider>,
   );
   return auth;
 }

@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { MdChevronRight, MdClose } from 'react-icons/md';
+import { LanguageSelect } from '../i18n/LanguageSelect';
 import styles from './SideMenu.module.css';
 
 // The side menu, copied from the legacy app: the app name, tagline, the Explore links and the footer.
@@ -43,6 +44,9 @@ export function SideMenu({ open, onClose }: Props) {
               </li>
             ))}
           </ul>
+          <div className={styles.language}>
+            <LanguageSelect />
+          </div>
           <footer className={styles.footer}>
             <p>© Francesco Longo</p>
             <p>2026</p>
