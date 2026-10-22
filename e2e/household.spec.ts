@@ -5,7 +5,7 @@ test('a housemate joins with an invite code and sees the shared list', async ({ 
   // Owner creates an invite and adds an item.
   await signUp(page, 'alice@example.com');
   await addItem(page, 'Parmigiano');
-  await page.getByRole('link', { name: 'Open household menu' }).click();
+  await page.getByRole('link', { name: 'Household', exact: true }).click();
   await expect(page.getByText('You · owner')).toBeVisible();
   await page.getByRole('button', { name: 'Create invite code' }).click();
   const code = (await page.locator('code').innerText()).trim();
@@ -15,7 +15,7 @@ test('a housemate joins with an invite code and sees the shared list', async ({ 
   // Second user signs up (client-side navigation keeps the in-memory backend) and joins.
   await goToSignUp(page);
   await fillSignUp(page, 'bob@example.com');
-  await page.getByRole('link', { name: 'Open household menu' }).click();
+  await page.getByRole('link', { name: 'Household', exact: true }).click();
   await visibleForm(page).getByLabel('Invite code').fill(code.toLowerCase());
   await page.getByRole('button', { name: 'Join household' }).click();
   await expect(page.getByText('You joined the household.')).toBeVisible();
@@ -28,7 +28,7 @@ test('a housemate joins with an invite code and sees the shared list', async ({ 
 
 test('an invalid invite code is rejected', async ({ page }) => {
   await signUp(page);
-  await page.getByRole('link', { name: 'Open household menu' }).click();
+  await page.getByRole('link', { name: 'Household', exact: true }).click();
   await visibleForm(page).getByLabel('Invite code').fill('ZZZZ2345');
   await page.getByRole('button', { name: 'Join household' }).click();
   await expect(alertOf(page)).toHaveText('That invite code is not valid.');

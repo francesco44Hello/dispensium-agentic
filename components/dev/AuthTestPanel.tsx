@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
 import { isMockAuth } from '../../services/authClient';
+import { hasCode } from '../../utils/hasCode';
 import styles from './AuthTestPanel.module.css';
 
 const DEMO_EMAIL = 'demo@example.com';
@@ -24,7 +25,8 @@ export function AuthTestPanel() {
       await action();
       record(`${label}: ok`);
     } catch (err) {
-      record(`${label}: ${(err as { code?: string }).code ?? (err as Error).message}`);
+      const reason = hasCode(err) ? err.code : err instanceof Error ? err.message : 'unknown';
+      record(`${label}: ${reason}`);
     } finally {
       setBusy(false);
     }

@@ -2,7 +2,7 @@
 const DAYS_FORWARD = 6;
 export const PREVIOUS_STEP_DAYS = 7;
 // Earlier days can be loaded up to two weeks back; after that the control hides them again.
-export const MAX_PREVIOUS_DAYS = 14;
+const MAX_PREVIOUS_DAYS = 14;
 
 export type PreviousAction = 'load' | 'hide';
 
@@ -37,7 +37,7 @@ export function listDays(today: Date, daysBack = 0): string[] {
 }
 
 // Day ids are local dates, so they are parsed as local dates too (new Date('2026-10-22') would be UTC).
-export function parseDateId(id: string): Date {
+function parseDateId(id: string): Date {
   const [year, month, day] = id.split('-').map(Number);
   return new Date(year, month - 1, day);
 }

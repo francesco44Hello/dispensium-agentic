@@ -6,14 +6,26 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from 'firebase/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  writeBatch,
+} from 'firebase/firestore';
 
 // Runs against the Firestore emulator: `npm run test:rules` (needs Java).
 // FIRESTORE_EMULATOR_HOST is provided by `firebase emulators:exec`.
 
 const HID = 'hh-1';
 const OTHER_HID = 'hh-2';
-const DAY_MS = 24 * 60 * 60 * 1000;
+const MIN_MS = 60 * 1000;
+const DAY_MS = 24 * 60 * MIN_MS;
 
 let env: RulesTestEnvironment;
 
@@ -181,6 +193,24 @@ describe('groceries', () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'groceries', 'g3'), newGrocery('a'.repeat(101))));
   });
 
+  it('refuses a forged createdBy on create', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'groceries', 'g5'), { ...newGrocery('Eggs'), createdBy: 'bob' }));
+  });
+
+  it('refuses keys other than name, category, completed, createdBy and createdAt, on create and update', async () => {
+    const db = as('alice');
+    await assertFails(setDoc(doc(db, 'households', HID, 'groceries', 'g5'), { ...newGrocery('Eggs'), priority: 1 }));
+    await assertFails(updateDoc(doc(db, 'households', HID, 'groceries', 'g1'), { completed: true, createdBy: 'bob' }));
+    await assertFails(updateDoc(doc(db, 'households', HID, 'groceries', 'g1'), { completed: true, note: 'x' }));
+  });
+
+  it('rejects a category with blocked characters or over 100 characters', async () => {
+    const db = as('alice');
+    await assertFails(setDoc(doc(db, 'households', HID, 'groceries', 'g5'), { ...newGrocery('Eggs'), category: '<b>' }));
+    await assertFails(setDoc(doc(db, 'households', HID, 'groceries', 'g5'), { ...newGrocery('Eggs'), category: 'c'.repeat(101) }));
+    await assertFails(updateDoc(doc(db, 'households', HID, 'groceries', 'g1'), { category: '' }));
+  });
+
   it('denies writes from a non-member', async () => {
     await assertFails(setDoc(doc(as('bob'), 'households', HID, 'groceries', 'g4'), newGrocery('Hack')));
     await assertFails(updateDoc(doc(as('bob'), 'households', HID, 'groceries', 'g1'), { completed: true }));
@@ -188,10 +218,21 @@ describe('groceries', () => {
 });
 
 describe('category map', () => {
-  it('lets a member update the map', async () => {
-    await assertSucceeds(
+  // The category map is written once, at household creation. There is no UI to edit it any more.
+  it('refuses a member update of the map', async () => {
+    await assertFails(
       setDoc(doc(as('alice'), 'households', HID, 'configuration', 'categoryMap'), { map: { fruits: ['apple', 'kiwi'] } }),
     );
+    await assertFails(
+      updateDoc(doc(as('alice'), 'households', HID, 'configuration', 'categoryMap'), { map: { fruits: ['apple', 'kiwi'] } }),
+    );
+  });
+
+  it('refuses an owner update of the map, and still lets members read it', async () => {
+    await assertFails(
+      updateDoc(doc(as('alice'), 'households', HID, 'configuration', 'categoryMap'), { map: { fruits: [] } }),
+    );
+    await assertSucceeds(getDoc(doc(as('alice'), 'households', HID, 'configuration', 'categoryMap')));
   });
 
   it('rejects extra fields and other document ids', async () => {
@@ -217,12 +258,107 @@ describe('invite codes and joining', () => {
     const invite = (householdId: string) => ({
       householdId,
       createdBy: 'alice',
-      createdAt: new Date(),
+      createdAt: serverTimestamp(),
       expiresAt: new Date(Date.now() + DAY_MS),
     });
-    await assertSucceeds(setDoc(doc(as('alice'), 'inviteCodes', 'NEWCODE2'), invite(HID)));
-    await assertFails(setDoc(doc(as('alice'), 'inviteCodes', 'NEWCODE3'), invite(OTHER_HID)));
-    await assertFails(setDoc(doc(as('bob'), 'inviteCodes', 'NEWCODE4'), { ...invite(HID), createdBy: 'bob' }));
+    await assertSucceeds(setDoc(doc(as('alice'), 'inviteCodes', 'FRESHCD2'), invite(HID)));
+    await assertFails(setDoc(doc(as('alice'), 'inviteCodes', 'FRESHCD3'), invite(OTHER_HID)));
+    await assertFails(setDoc(doc(as('bob'), 'inviteCodes', 'FRESHCD4'), { ...invite(HID), createdBy: 'bob' }));
+  });
+
+  it('refuses an invite with a field the client never writes', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'inviteCodes', 'EXTRA234'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + DAY_MS),
+        note: 'smuggled',
+      }),
+    );
+  });
+
+  it('refuses an invite whose code id is malformed', async () => {
+    const invite = () => ({
+      householdId: HID,
+      createdBy: 'alice',
+      createdAt: serverTimestamp(),
+      expiresAt: new Date(Date.now() + DAY_MS),
+    });
+    // Too short, too long, a zero (not in the alphabet), and lowercase.
+    for (const code of ['SHORT23', 'LONGCODE9', 'ZERO0000', 'lower234']) {
+      await assertFails(setDoc(doc(as('alice'), 'inviteCodes', code), invite()));
+    }
+  });
+
+  it('accepts a valid invite that expires within 7 days', async () => {
+    await assertSucceeds(
+      setDoc(doc(as('alice'), 'inviteCodes', 'WEEK2345'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 7 * DAY_MS),
+      }),
+    );
+  });
+
+  it('refuses an invite that expires in 30 days', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'inviteCodes', 'LONG2345'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 30 * DAY_MS),
+      }),
+    );
+  });
+
+  it('refuses a signed-out user an invite code, even one they know', async () => {
+    await assertFails(getDoc(doc(anon(), 'inviteCodes', 'VALID234')));
+  });
+
+  it('accepts an invite that expires exactly 7 days ahead', async () => {
+    await assertSucceeds(
+      setDoc(doc(as('alice'), 'inviteCodes', 'EXACT234'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 7 * DAY_MS),
+      }),
+    );
+  });
+
+  it('accepts an invite 7 days and 2 minutes ahead, so a device clock slightly ahead is tolerated', async () => {
+    await assertSucceeds(
+      setDoc(doc(as('alice'), 'inviteCodes', 'SKEW2345'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 7 * DAY_MS + 2 * MIN_MS),
+      }),
+    );
+  });
+
+  it('refuses an invite 7 days and 1 hour ahead, beyond the 5 minute skew allowance', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'inviteCodes', 'HOUR2345'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: serverTimestamp(),
+        expiresAt: new Date(Date.now() + 7 * DAY_MS + 60 * MIN_MS),
+      }),
+    );
+  });
+
+  it('refuses an invite with a backdated createdAt', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'inviteCodes', 'BACK2345'), {
+        householdId: HID,
+        createdBy: 'alice',
+        createdAt: new Date(Date.now() - 2 * DAY_MS),
+        expiresAt: new Date(Date.now() + DAY_MS),
+      }),
+    );
   });
 
   it('lets a user read their own (missing) membership before joining', async () => {

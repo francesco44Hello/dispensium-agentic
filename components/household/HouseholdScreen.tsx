@@ -17,6 +17,8 @@ export function HouseholdScreen() {
         ← Back to list
       </Link>
 
+      <h1 className={styles.title}>Household</h1>
+
       {status === 'error' && <p role="alert">We could not load your household. Please refresh the page.</p>}
       {status === 'ready' && householdId && user && (
         <>

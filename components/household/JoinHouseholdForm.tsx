@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from 'react';
 import { householdService as defaultService } from '../../services/dataClient';
-import { HouseholdError, type HouseholdErrorCode, type HouseholdService } from '../../services/householdService';
+import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
+import type { HouseholdService } from '../../types/household';
 import styles from './JoinHouseholdForm.module.css';
 
 const ERROR_MESSAGES: Record<HouseholdErrorCode, string> = {

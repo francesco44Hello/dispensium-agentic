@@ -1,4 +1,5 @@
 import { verifyIdToken } from '../utils/verifyIdToken';
+import { AuthError, KeysUnavailableError } from '../utils/requestAuthErrors';
 
 // Google publishes the certificates that sign Firebase ID tokens.
 const CERTIFICATES_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
@@ -7,11 +8,8 @@ const FETCH_TIMEOUT_MS = 5000;
 // A new key id can trigger one refetch, but not more than once a minute, so random ids cannot flood Google.
 const MIN_REFETCH_MS = 60_000;
 
-export class AuthError extends Error {}
-// Google's keys could not be loaded. Routes answer 503 rather than blaming the user's token.
-export class KeysUnavailableError extends Error {}
 
-export interface PublishedKeys {
+interface PublishedKeys {
   keys: Record<string, string>;
   maxAgeSeconds: number;
 }

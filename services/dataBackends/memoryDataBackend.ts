@@ -5,7 +5,6 @@ import type { MenuBackend } from '../menuService';
 import type { DayMenu, MealEntry, MealType } from '../../types/menu';
 import type { Recipe } from '../../types/recipe';
 import type { DataBackend } from './dataBackend';
-import { addWord, removeWord } from '../../utils/categoryMap';
 import { defaultCategoryMap } from '../../constants/categories';
 import type { CategoryMap } from '../../types/category';
 import type { Household, HouseholdMember, InviteCode } from '../../types/household';
@@ -166,20 +165,6 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
         () => [...bucketFor(householdId).values()].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
         listener,
       );
-    },
-
-    async addCategoryWord(householdId, category, word) {
-      const current = categoryMaps.get(householdId) ?? defaultCategoryMap;
-      if (!Object.hasOwn(current, category)) throw new GroceryError('unknown-category');
-      categoryMaps.set(householdId, addWord(current, category, word));
-      notifyAll();
-    },
-
-    async removeCategoryWord(householdId, category, word) {
-      const current = categoryMaps.get(householdId) ?? defaultCategoryMap;
-      if (!Object.hasOwn(current, category)) throw new GroceryError('unknown-category');
-      categoryMaps.set(householdId, removeWord(current, category, word));
-      notifyAll();
     },
 
     subscribeToCategoryMap(householdId, listener) {

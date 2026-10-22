@@ -3,20 +3,11 @@
 import { createContext, useEffect, useState, type ReactNode } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { householdService as defaultService } from '../../services/dataClient';
-import type { HouseholdService } from '../../services/householdService';
-
-export type HouseholdStatus = 'idle' | 'loading' | 'ready' | 'error';
-
-export type HouseholdContextValue = {
-  status: HouseholdStatus;
-  householdId: string | null;
-  error: string | null;
-  service: HouseholdService;
-};
+import { hasCode } from '../../utils/hasCode';
+import type { HouseholdContextValue, HouseholdService, HouseholdStatus } from '../../types/household';
 
 function errorCodeOf(err: unknown): string {
-  const code = (err as { code?: unknown } | null)?.code;
-  return typeof code === 'string' ? code : 'unknown';
+  return hasCode(err) ? err.code : 'unknown';
 }
 
 export const HouseholdContext = createContext<HouseholdContextValue | null>(null);

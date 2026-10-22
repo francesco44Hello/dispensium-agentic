@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
@@ -31,9 +32,9 @@ async function renderShell() {
 describe('AppShell', () => {
   it('shows the app title, the page content and a menu link to the household page', async () => {
     await renderShell();
-    expect(screen.getByRole('heading', { name: 'Dispensium' })).toBeTruthy();
-    expect(screen.getByText('list body')).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Open household menu' }).getAttribute('href')).toBe('/household');
+    expect(screen.getByRole('heading', { name: 'Dispensium' })).toBeInTheDocument();
+    expect(screen.getByText('list body')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
 
   it('signs out from the header icon and redirects to login', async () => {
@@ -49,6 +50,6 @@ describe('AppShell', () => {
     expect(screen.getByRole('link', { name: 'Shopping' }).getAttribute('aria-current')).toBe('page');
     expect(screen.getByRole('link', { name: 'Recipes' }).getAttribute('href')).toBe('/recipes');
     expect(screen.getByRole('link', { name: 'Menu' }).getAttribute('href')).toBe('/weekly-menu');
-    expect(screen.getByRole('link', { name: 'Manage' }).getAttribute('href')).toBe('/manage-categories');
+    expect(screen.getByRole('link', { name: 'Household' }).getAttribute('href')).toBe('/household');
   });
 });
