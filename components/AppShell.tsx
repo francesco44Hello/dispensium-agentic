@@ -6,11 +6,20 @@ import { BottomNav } from './layout/BottomNav';
 import styles from './AppShell.module.css';
 
 // Page chrome for the signed-in app: header on top, bottom tab bar fixed at the bottom.
-export function AppShell({ children, onAdd }: { children: ReactNode; onAdd?: () => void }) {
+interface Props {
+  children: ReactNode;
+  onAdd?: () => void;
+  // Hides the header, e.g. on the recipe page where the photo has its own back button.
+  hideHeader?: boolean;
+  // Removes the side gutter so the page content can run edge to edge.
+  bleed?: boolean;
+}
+
+export function AppShell({ children, onAdd, hideHeader = false, bleed = false }: Props) {
   return (
-    <div className={styles.shell}>
-      <AppHeader />
-      <main className={styles.content}>{children}</main>
+    <div className={`${styles.shell} ${bleed ? styles.bleed : ''}`}>
+      {!hideHeader && <AppHeader />}
+      <main className={`${styles.content} ${bleed ? styles.bleed : ''}`}>{children}</main>
       <BottomNav onAdd={onAdd} />
     </div>
   );
