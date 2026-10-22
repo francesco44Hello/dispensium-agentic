@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import type { AuthService, AuthStatus, AuthUser } from '../../services/authService';
+import type { AuthService, AuthUser } from '../../services/authService';
+import type { AuthStatus } from '../../types/auth';
 import { authService as clientService } from '../../services/authClient';
 
 export type AuthContextValue = {

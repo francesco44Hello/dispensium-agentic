@@ -1,4 +1,4 @@
-import type { AuthStatus } from '../services/authService';
+import type { AuthStatus } from '../types/auth';
 
 export type GuardDecision = 'loading' | 'redirect' | 'render';
 

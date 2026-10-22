@@ -14,7 +14,7 @@ test('capture list, household and login pages', async ({ page }) => {
   await page.getByText('Olio').click();
   await page.screenshot({ path: 'e2e-artifacts/visual/list.png' });
 
-  await page.getByRole('link', { name: 'Open household menu' }).click();
+  await page.getByRole('link', { name: 'Household', exact: true }).click();
   await page.getByRole('button', { name: 'Create invite code' }).click();
   await page.screenshot({ path: 'e2e-artifacts/visual/household.png' });
 });

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { MdAdd, MdCalendarMonth, MdChecklist, MdGridView, MdRestaurant } from 'react-icons/md';
+import { MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
 import styles from './BottomNav.module.css';
 
 type Tab = { label: string; icon: IconType; href: string };
@@ -12,7 +12,7 @@ const TABS: Tab[] = [
   { label: 'Shopping', icon: MdChecklist, href: '/' },
   { label: 'Recipes', icon: MdRestaurant, href: '/recipes' },
   { label: 'Menu', icon: MdCalendarMonth, href: '/weekly-menu' },
-  { label: 'Manage', icon: MdGridView, href: '/manage-categories' },
+  { label: 'Household', icon: MdGroups, href: '/household' },
 ];
 
 interface Props {

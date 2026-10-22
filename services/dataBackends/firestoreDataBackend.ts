@@ -11,6 +11,7 @@ import {
   orderBy,
   query,
   runTransaction,
+  serverTimestamp,
   setDoc,
   updateDoc,
   where,
@@ -24,8 +25,9 @@ import { deleteObject, getBytes, getStorage, ref, uploadBytes } from 'firebase/s
 import { HouseholdError, type HouseholdBackend } from '../householdService';
 import { GroceryError, type GroceryBackend } from '../groceryService';
 import type { NewRecipe, RecipeBackend } from '../recipeService';
-import { addWord, removeWord } from '../../utils/categoryMap';
 import { defaultCategoryMap } from '../../constants/categories';
+import { isCategoryMap, isPartialDayMenu } from '../../utils/dataGuards';
+import { hasCode } from '../../utils/hasCode';
 import type { CategoryMap } from '../../types/category';
 import type { GroceryItem } from '../../types/grocery';
 import type { Recipe } from '../../types/recipe';
@@ -48,8 +50,12 @@ function toDate(value: unknown): Date {
 
 function readCategoryMap(data: DocumentData | undefined): CategoryMap | null {
   const map: unknown = data?.map;
-  if (typeof map !== 'object' || map === null) return null;
-  return map as CategoryMap;
+  return isCategoryMap(map) ? map : null;
+}
+
+// A stored text field is used only when it is a string. Anything else gets the explicit fallback, never String(value).
+function textField(value: unknown, fallback: string): string {
+  return typeof value === 'string' ? value : fallback;
 }
 
 function stringList(value: unknown): string[] {
@@ -60,15 +66,15 @@ function toRecipe(snap: { id: string; data(): DocumentData | undefined }): Recip
   const data = snap.data() ?? {};
   return {
     id: snap.id,
-    title: String(data.title ?? ''),
-    time: String(data.time ?? ''),
-    category: String(data.category ?? ''),
-    label: String(data.label ?? ''),
+    title: textField(data.title, ''),
+    time: textField(data.time, ''),
+    category: textField(data.category, ''),
+    label: textField(data.label, ''),
     ingredients: stringList(data.ingredients),
     steps: stringList(data.steps),
-    image: String(data.image ?? ''),
+    image: textField(data.image, ''),
     createdAt: toDate(data.createdAt),
-    createdBy: String(data.createdBy ?? ''),
+    createdBy: textField(data.createdBy, ''),
   };
 }
 
@@ -76,11 +82,11 @@ function toGroceryItem(snap: QueryDocumentSnapshot<DocumentData> | { id: string;
   const data = snap.data() ?? {};
   return {
     id: snap.id,
-    name: String(data.name ?? ''),
-    category: String(data.category ?? 'other'),
+    name: textField(data.name, ''),
+    category: textField(data.category, 'other'),
     completed: data.completed === true,
     createdAt: toDate(data.createdAt),
-    createdBy: String(data.createdBy ?? ''),
+    createdBy: textField(data.createdBy, ''),
   };
 }
 
@@ -109,10 +115,11 @@ export function createFirestoreDataBackend(): DataBackend {
     async createInvite(householdId, createdBy, invite: InviteCode) {
       const memberSnap = await getDoc(doc(db(), 'households', householdId, 'members', createdBy));
       if (!memberSnap.exists()) throw new HouseholdError('not-a-member');
+      // createdAt is the server's clock: the rules accept an invite only when createdAt equals request.time.
       await setDoc(doc(db(), 'inviteCodes', invite.code), {
         householdId,
         createdBy,
-        createdAt: invite.createdAt,
+        createdAt: serverTimestamp(),
         expiresAt: invite.expiresAt,
       });
       return invite;
@@ -123,7 +130,9 @@ export function createFirestoreDataBackend(): DataBackend {
         const inviteSnap = await tx.get(doc(db(), 'inviteCodes', code));
         if (!inviteSnap.exists()) throw new HouseholdError('invalid-invite');
 
-        const householdId = String(inviteSnap.data().householdId);
+        // A malformed invite must not become a membership path such as households/undefined/members/{uid}.
+        const householdId: unknown = inviteSnap.data().householdId;
+        if (typeof householdId !== 'string' || householdId === '') throw new HouseholdError('invalid-invite');
         if (toDate(inviteSnap.data().expiresAt).getTime() <= at.getTime()) {
           throw new HouseholdError('expired-invite');
         }
@@ -202,14 +211,6 @@ export function createFirestoreDataBackend(): DataBackend {
       return onSnapshot(q, (snap) => listener(snap.docs.map((d) => toGroceryItem(d))));
     },
 
-    async addCategoryWord(householdId, category, word) {
-      await editCategoryMap(householdId, category, (map) => addWord(map, category, word));
-    },
-
-    async removeCategoryWord(householdId, category, word) {
-      await editCategoryMap(householdId, category, (map) => removeWord(map, category, word));
-    },
-
     subscribeToCategoryMap(householdId, listener): Unsubscribe {
       return onSnapshot(doc(db(), 'households', householdId, 'configuration', 'categoryMap'), (snap) => {
         listener(readCategoryMap(snap.data()) ?? defaultCategoryMap);
@@ -221,19 +222,9 @@ export function createFirestoreDataBackend(): DataBackend {
     try {
       await updateDoc(doc(db(), 'households', householdId, 'groceries', id), patch);
     } catch (error) {
-      const code = (error as { code?: string }).code;
+      const code = hasCode(error) ? error.code : undefined;
       throw new GroceryError(code === 'not-found' ? 'not-found' : 'unknown');
     }
-  }
-
-  // Transactional read-modify-write so concurrent edits to the map are not lost.
-  async function editCategoryMap(householdId: string, category: string, edit: (map: CategoryMap) => CategoryMap) {
-    const ref = doc(db(), 'households', householdId, 'configuration', 'categoryMap');
-    await runTransaction(db(), async (tx) => {
-      const current = readCategoryMap((await tx.get(ref)).data()) ?? defaultCategoryMap;
-      if (!Object.hasOwn(current, category)) throw new GroceryError('unknown-category');
-      tx.set(ref, { map: edit(current) });
-    });
   }
 
   const recipeBackend: RecipeBackend = {
@@ -286,7 +277,10 @@ export function createFirestoreDataBackend(): DataBackend {
       const menuQuery = query(collection(db(), 'households', householdId, 'menu'), where(documentId(), 'in', dates));
       return onSnapshot(menuQuery, (snap) => {
         const menu: Record<string, Partial<DayMenu>> = {};
-        for (const day of snap.docs) menu[day.id] = day.data() as Partial<DayMenu>;
+        for (const day of snap.docs) {
+          const data: unknown = day.data();
+          menu[day.id] = isPartialDayMenu(data) ? data : {};
+        }
         listener(menu);
       });
     },

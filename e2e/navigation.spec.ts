@@ -5,7 +5,7 @@ import { addItem, signUp } from './helpers';
 const PAGES = [
   { tab: 'Recipes', path: '/recipes', heading: 'Everyday Recipes' },
   { tab: 'Menu', path: '/weekly-menu', heading: 'Plan the week' },
-  { tab: 'Manage', path: '/manage-categories', heading: /Some items have not been included/ },
+  { tab: 'Household', path: '/household', heading: 'Household' },
 ] as const;
 
 test('each bottom nav tab opens its page', async ({ page }) => {
@@ -13,7 +13,7 @@ test('each bottom nav tab opens its page', async ({ page }) => {
   for (const { tab, path, heading } of PAGES) {
     await page.getByRole('link', { name: tab, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`${path}$`));
-    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible();
   }
   await page.getByRole('link', { name: 'Shopping' }).click();
   await expect(page.getByRole('heading', { name: "What's missing?" })).toBeVisible();
@@ -39,6 +39,31 @@ test('list item names use regular weight and rows have 16px vertical padding', a
 
 test('header icons use the primary colour', async ({ page }) => {
   await signUp(page);
-  await expect(page.getByRole('link', { name: 'Open household menu' })).toHaveCSS('color', 'rgb(45, 60, 89)');
+  await expect(page.getByRole('button', { name: 'Open menu' })).toHaveCSS('color', 'rgb(45, 60, 89)');
   await expect(page.getByRole('button', { name: 'Log out' })).toHaveCSS('color', 'rgb(45, 60, 89)');
+});
+
+test('the header burger opens the legacy side menu, and its links go to their pages', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const menu = page.locator('aside[aria-label="Menu"]');
+  await expect(menu).toHaveAttribute('data-open', 'true');
+  // The menu brand is text, not a heading, so the page keeps the header title as its only h1.
+  await expect(menu.getByText('Dispensium', { exact: true })).toBeVisible();
+  await expect(menu.getByRole('heading', { level: 1 })).toHaveCount(0);
+  await expect(menu.getByText('Plan. Shop. Cook.')).toBeVisible();
+  await menu.getByRole('link', { name: /Weekly Menu/ }).click();
+  await expect(page).toHaveURL(/\/weekly-menu$/);
+  // Next keeps the previous page mounted, so check that no menu is still open anywhere on the page.
+  await expect(page.locator('aside[aria-label="Menu"][data-open="true"]')).toHaveCount(0);
+});
+
+test('the open side menu sits above the bottom bar', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  const menu = page.locator('aside[aria-label="Menu"][data-open="true"]');
+  await expect(menu).toBeVisible();
+  const menuZ = await menu.evaluate((el) => Number(getComputedStyle(el).zIndex));
+  const navZ = await page.locator('nav[aria-label="Main"]').first().evaluate((el) => Number(getComputedStyle(el).zIndex));
+  expect(menuZ).toBeGreaterThan(navZ);
 });

@@ -6,5 +6,12 @@
 
 .back {
   color: var(--primary-color);
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: var(--font-weight-title);
+  color: var(--primary-color);
 }

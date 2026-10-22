@@ -1,6 +1,7 @@
 // True only for addresses on the public internet. Anything local, private, shared, link-local or reserved is refused,
 // so the importer cannot be pointed at our own network or cloud metadata endpoints.
 const IPV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+const HEXTET = /^[0-9a-f]{1,4}$/;
 
 function isPublicIpv4(ip: string): boolean {
   const match = IPV4.exec(ip);
@@ -12,26 +13,63 @@ function isPublicIpv4(ip: string): boolean {
   if (a === 169 && b === 254) return false;
   if (a === 172 && b >= 16 && b <= 31) return false;
   if (a === 192 && b === 168) return false;
-  if (a === 192 && b === 0 && c === 0) return false;
+  if (a === 192 && b === 0 && c === 0) return false; // 192.0.0.0/24 IETF protocol assignments
+  if (a === 192 && b === 88 && c === 99) return false; // 192.88.99.0/24 deprecated 6to4 relay anycast
+  if (a === 192 && b === 0 && c === 2) return false; // 192.0.2.0/24 TEST-NET-1 documentation
+  if (a === 198 && b === 51 && c === 100) return false; // 198.51.100.0/24 TEST-NET-2 documentation
+  if (a === 203 && b === 0 && c === 113) return false; // 203.0.113.0/24 TEST-NET-3 documentation
   if (a === 198 && (b === 18 || b === 19)) return false;
   return true;
 }
 
-function isPublicIpv6(ip: string): boolean {
-  const lower = ip.toLowerCase();
-  if (lower.startsWith('::ffff:')) {
-    const mapped = lower.slice('::ffff:'.length);
-    // Mapped IPv4 is judged by its IPv4 rules. Hex-mapped forms are refused.
-    return IPV4.test(mapped) && isPublicIpv4(mapped);
+// Expands an IPv6 address to its eight 16-bit groups, whatever the written form: leading zeros, "::" or a dotted IPv4 tail.
+// Returns null for a malformed address, which callers treat as not public.
+// dottedTail is true when the address ends in a dotted IPv4 address, such as ::ffff:8.8.8.8.
+function expandIpv6(ip: string): { groups: number[]; dottedTail: boolean } | null {
+  let text = ip.toLowerCase();
+  let dottedTail = false;
+  const tail = /:(\d{1,3}(?:\.\d{1,3}){3})$/.exec(text);
+  if (tail) {
+    const dotted = tail[1];
+    if (!IPV4.test(dotted)) return null;
+    const [a, b, c, d] = dotted.split('.').map(Number);
+    if ([a, b, c, d].some((octet) => octet > 255)) return null;
+    text = `${text.slice(0, -dotted.length)}${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+    dottedTail = true;
   }
-  // ::/96 (IPv4-compatible, loopback, unspecified) and the NAT64 and 6to4 prefixes can embed private IPv4.
-  if (lower.startsWith('::') || lower.startsWith('64:ff9b:') || lower.startsWith('2002:')) return false;
-  // Teredo (2001::/32) and the discard prefix (100::/64) are not public destinations.
-  if (lower.startsWith('2001:0:') || lower.startsWith('2001::') || lower.startsWith('100::')) return false;
-  const first = parseInt(lower.split(':')[0] || '0', 16);
-  if (first >= 0xfc00 && first <= 0xfdff) return false; // unique local fc00::/7
-  if (first >= 0xfe80 && first <= 0xfebf) return false; // link-local fe80::/10
-  if (first >= 0xff00) return false; // multicast ff00::/8
+
+  const halves = text.split('::');
+  if (halves.length > 2) return null;
+  const compressed = halves.length === 2;
+  const head = halves[0] === '' ? [] : halves[0].split(':');
+  const rest = compressed && halves[1] !== '' ? halves[1].split(':') : [];
+  const fill = 8 - head.length - rest.length;
+  if (compressed ? fill < 1 : fill !== 0) return null;
+
+  const parts = [...head, ...Array<string>(compressed ? fill : 0).fill('0'), ...rest];
+  if (parts.length !== 8 || !parts.every((part) => HEXTET.test(part))) return null;
+  return { groups: parts.map((part) => parseInt(part, 16)), dottedTail };
+}
+
+function isPublicIpv6(ip: string): boolean {
+  const expanded = expandIpv6(ip);
+  if (!expanded) return false;
+  const { groups: g, dottedTail } = expanded;
+
+  // IPv4-mapped ::ffff:a.b.c.d is judged by its IPv4 rules. Hex-mapped forms are refused.
+  if (g.slice(0, 5).every((group) => group === 0) && g[5] === 0xffff) {
+    if (!dottedTail) return false;
+    return isPublicIpv4(`${g[6] >> 8}.${g[6] & 0xff}.${g[7] >> 8}.${g[7] & 0xff}`);
+  }
+  // Only 2000::/3 is globally routed unicast. This also refuses the unspecified address, loopback and IPv4-compatible ::/96,
+  // and the unique-local fc00::/7, link-local fe80::/10 and multicast ff00::/8 ranges.
+  if ((g[0] & 0xe000) !== 0x2000) return false;
+  // NAT64 64:ff9b::/32, 6to4 2002::/16 and Teredo 2001::/32 can embed private IPv4 addresses.
+  if ((g[0] === 0x64 && g[1] === 0xff9b) || g[0] === 0x2002 || (g[0] === 0x2001 && g[1] === 0)) return false;
+  // Discard prefix 100::/64.
+  if (g[0] === 0x100 && g[1] === 0 && g[2] === 0 && g[3] === 0) return false;
+  // 2001:db8::/32 documentation prefix.
+  if (g[0] === 0x2001 && g[1] === 0x0db8) return false;
   return true;
 }
 

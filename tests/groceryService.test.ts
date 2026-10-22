@@ -45,16 +45,6 @@ describe('addItem', () => {
     const { service } = setup();
     await expect(service.addItem(HID, 'alice', 'a'.repeat(101))).rejects.toMatchObject({ code: 'invalid-name' });
   });
-
-  it('uses the household custom category map', async () => {
-    const { service, backend } = setup();
-    await service.addItem(HID, 'alice', 'dragonfruit');
-    expect(itemsOf(backend).at(-1)?.category).toBe('other');
-
-    await service.addWordToCategory(HID, 'fruits', 'Dragonfruit');
-    await service.addItem(HID, 'alice', 'dragonfruit');
-    expect(itemsOf(backend).at(-1)?.category).toBe('fruits');
-  });
 });
 
 describe('renameItem', () => {
@@ -141,37 +131,6 @@ describe('category map', () => {
   it('emits the default map when none is stored', () => {
     const { backend } = setup();
     expect(mapOf(backend)).toEqual(defaultCategoryMap);
-  });
-
-  it('adds a sanitised, lowercased word and notifies subscribers', async () => {
-    const { service, backend } = setup();
-    await service.addWordToCategory(HID, 'fruits', '  <Dragonfruit> ');
-    expect(mapOf(backend).fruits).toContain('dragonfruit');
-  });
-
-  it('ignores a word that is already in the category', async () => {
-    const { service, backend } = setup();
-    await service.addWordToCategory(HID, 'fruits', 'apple');
-    expect(mapOf(backend).fruits.filter((w) => w === 'apple')).toHaveLength(1);
-  });
-
-  it('rejects a blank word with invalid-word', async () => {
-    const { service } = setup();
-    await expect(service.addWordToCategory(HID, 'fruits', '   ')).rejects.toMatchObject({ code: 'invalid-word' });
-  });
-
-  it('rejects an unknown category with unknown-category', async () => {
-    const { service } = setup();
-    await expect(service.addWordToCategory(HID, 'gadgets', 'phone')).rejects.toMatchObject({
-      code: 'unknown-category',
-    });
-  });
-
-  it('removes a word from the category', async () => {
-    const { service, backend } = setup();
-    await service.addWordToCategory(HID, 'fruits', 'dragonfruit');
-    await service.removeWordFromCategory(HID, 'fruits', 'dragonfruit');
-    expect(mapOf(backend).fruits).not.toContain('dragonfruit');
   });
 
   it('throws GroceryError instances', async () => {

@@ -1,6 +1,6 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
 import { generateInviteCode, isValidInviteCode, normalizeInviteCode } from '../utils/inviteCode';
-import type { HouseholdMember, InviteCode } from '../types/household';
+import type { HouseholdMember, HouseholdService, InviteCode } from '../types/household';
 import type { Unsubscribe } from '../types/subscription';
 
 export type HouseholdErrorCode =
@@ -71,7 +71,5 @@ export function createHouseholdService(backend: HouseholdBackend, options: House
     subscribeToMembers(householdId: string, listener: (members: HouseholdMember[]) => void): Unsubscribe {
       return backend.subscribeToMembers(householdId, listener);
     },
-  };
+  } satisfies HouseholdService;
 }
-
-export type HouseholdService = ReturnType<typeof createHouseholdService>;

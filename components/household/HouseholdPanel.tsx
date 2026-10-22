@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMembers } from '../../hooks/useMembers';
 import { householdService as defaultService } from '../../services/dataClient';
-import { HouseholdError, type HouseholdErrorCode, type HouseholdService } from '../../services/householdService';
-import type { InviteCode } from '../../types/household';
+import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
+import type { HouseholdService, InviteCode } from '../../types/household';
 import styles from './HouseholdPanel.module.css';
 
 const ERROR_MESSAGES: Record<HouseholdErrorCode, string> = {

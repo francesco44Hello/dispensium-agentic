@@ -10,6 +10,7 @@ import {
 } from 'firebase/auth';
 import { AuthError, type AuthBackend, type AuthErrorCode, type AuthUser } from '../authService';
 import { getFirebaseApp } from '../firebaseApp';
+import { hasCode } from '../../utils/hasCode';
 
 const FIREBASE_ERROR_MAP: Record<string, AuthErrorCode> = {
   'auth/invalid-email': 'invalid-email',
@@ -25,7 +26,7 @@ const FIREBASE_ERROR_MAP: Record<string, AuthErrorCode> = {
 };
 
 function toAuthError(error: unknown): AuthError {
-  const code = (error as { code?: string })?.code ?? '';
+  const code = hasCode(error) ? error.code : '';
   return new AuthError(FIREBASE_ERROR_MAP[code] ?? 'unknown');
 }
 

@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-weight: 600;
+  font-weight: var(--font-weight-brand);
 }
 
 .field input {
@@ -33,12 +33,12 @@
 .error {
   margin: 0;
   color: var(--error-color);
-  font-weight: 600;
+  font-weight: var(--font-weight-brand);
 }
 
 .button {
   padding: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-brand);
   color: var(--primary-color);
   background: var(--secondary-color);
   border: none;

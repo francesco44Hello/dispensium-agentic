@@ -1,7 +1,8 @@
 'use client';
 
 import { useContext } from 'react';
-import { HouseholdContext, type HouseholdContextValue } from '../components/household/HouseholdProvider';
+import { HouseholdContext } from '../components/household/HouseholdProvider';
+import type { HouseholdContextValue } from '../types/household';
 
 export function useHousehold(): HouseholdContextValue {
   const context = useContext(HouseholdContext);
