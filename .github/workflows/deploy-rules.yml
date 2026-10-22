@@ -1,4 +1,4 @@
-name: Deploy Firestore rules (production)
+name: Deploy Firestore and Storage rules (production)
 
 # Runs after a merge to main that changes the rules. The "production" environment must be
 # configured in GitHub (Settings > Environments) with you as a required reviewer, so every
@@ -8,7 +8,12 @@ on:
     branches: [main]
     paths:
       - firestore.rules
+      - storage.rules
       - firebase.json
+
+# The job only reads the repository; it never writes back to it.
+permissions:
+  contents: read
 
 jobs:
   deploy:
@@ -21,8 +26,13 @@ jobs:
           node-version: 22
       - run: npm install -g firebase-tools
       - name: Write service account
-        run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > "$RUNNER_TEMP/sa.json"
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
       - name: Deploy rules
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/sa.json
-        run: firebase deploy --only firestore:rules --project dispensium-agentic
+        run: firebase deploy --only firestore:rules,storage --project dispensium-agentic
+      - name: Delete service account
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"

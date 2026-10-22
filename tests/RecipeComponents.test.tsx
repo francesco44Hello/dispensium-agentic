@@ -4,6 +4,8 @@ import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
+// The import panel asks the auth client for a token. Mock auth is opt-in, so this file selects it explicitly.
+vi.hoisted(() => vi.stubEnv('NEXT_PUBLIC_AUTH_MOCK', 'true'));
 const { pathname } = vi.hoisted(() => ({ pathname: { current: '/recipes' } }));
 const { compressed } = vi.hoisted(() => ({ compressed: new Blob(['compressed'], { type: 'image/webp' }) }));
 vi.mock('../utils/compressImage', () => ({ compressImage: vi.fn(async () => compressed) }));

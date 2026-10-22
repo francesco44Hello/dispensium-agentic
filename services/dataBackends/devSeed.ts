@@ -1,21 +1,8 @@
 import type { RecipeBackend } from '../recipeService';
+import type { SeedFile } from '../../types/seed';
 
 // Local mock mode only: recipes fetched once with scripts/seed-dev-recipes.mjs are added to a household on first use,
 // so a fresh page load already has them. Never used in production builds.
-export interface SeedRecipe {
-  title: string;
-  time: string;
-  category: string;
-  label: string;
-  ingredients: string[];
-  steps: string[];
-  photoBase64?: string;
-  photoType?: string;
-}
-
-export interface SeedFile {
-  recipes: SeedRecipe[];
-}
 
 const SEED_USER = 'dev-seed';
 

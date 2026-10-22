@@ -19,11 +19,22 @@ service cloud.firestore {
     }
 
     // Codes are document ids, so a joiner can only read a code they already know. Listing is denied.
+    // Any signed-in user may get a code they know: joining needs the invite document (its householdId and expiry)
+    // before the user is a member. Signed-out reads are refused. Codes are random and short-lived, so this is accepted.
+    // createdAt is the server time of the write, and an invite lives at most 7 days plus a 5 minute clock skew allowance
+    // (a device clock slightly ahead must not make the client's 7-day expiry fail).
+    // The code id is 8 characters from the client's alphabet (no I, O, 0 or 1), the same format as utils/inviteCode.ts.
+    // Only the four fields the client writes are allowed, so an invite cannot carry extra data.
     match /inviteCodes/{code} {
       allow get: if signedIn();
       allow create: if signedIn()
+        && code.matches('^[A-HJ-NP-Z2-9]{8}$')
+        && request.resource.data.keys().hasOnly(['householdId', 'createdBy', 'createdAt', 'expiresAt'])
         && request.resource.data.createdBy == request.auth.uid
-        && isMember(request.resource.data.householdId);
+        && isMember(request.resource.data.householdId)
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.expiresAt > request.time
+        && request.resource.data.expiresAt <= request.time + duration.value(7, 'd') + duration.value(5, 'm');
       allow delete: if signedIn() && isMember(resource.data.householdId);
     }
 
@@ -52,12 +63,24 @@ service cloud.firestore {
         allow update, delete: if false;
       }
 
+      // Items: the client sends only these keys. Items are created by their owner, so createdBy is checked on create.
       match /groceries/{id} {
+        function validItem() {
+          return request.resource.data.keys().hasOnly(['name', 'category', 'completed', 'createdBy', 'createdAt'])
+            && validText(request.resource.data.name)
+            && validText(request.resource.data.category)
+            && request.resource.data.completed is bool;
+        }
+
         allow read, delete: if signedIn() && isMember(hid);
-        allow create, update: if signedIn()
+        allow create: if signedIn()
           && isMember(hid)
-          && validText(request.resource.data.name)
-          && request.resource.data.completed is bool;
+          && request.resource.data.createdBy == request.auth.uid
+          && validItem();
+        allow update: if signedIn()
+          && isMember(hid)
+          && request.resource.data.createdBy == resource.data.createdBy
+          && validItem();
       }
 
       // Recipes: members create and read their household's recipes. No edits in this version.
@@ -110,6 +133,7 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // The category map is written once, when the household is created. Members can read it; no client edits it.
       match /configuration/{doc} {
         allow read: if signedIn() && isMember(hid);
         allow create: if signedIn()
@@ -118,10 +142,6 @@ service cloud.firestore {
           // Owner bootstrap: the household and member doc are created in the same transaction,
           // so membership cannot be checked yet. Only allowed while the household does not exist.
           && !exists(/databases/$(database)/documents/households/$(hid));
-        allow update: if signedIn()
-          && isMember(hid)
-          && doc == 'categoryMap'
-          && request.resource.data.keys().hasOnly(['map']);
         allow delete: if false;
       }
     }

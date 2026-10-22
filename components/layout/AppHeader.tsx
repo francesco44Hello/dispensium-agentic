@@ -1,16 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MdLogout, MdMenu } from 'react-icons/md';
 import { useAuth } from '../../hooks/useAuth';
+import { SideMenu } from './SideMenu';
 import styles from './AppHeader.module.css';
 
 export function AppHeader() {
   const { service } = useAuth();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -20,9 +21,9 @@ export function AppHeader() {
 
   return (
     <header className={styles.header}>
-      <Link href="/household" className={styles.icon} aria-label="Open household menu">
+      <button type="button" className={styles.icon} aria-label="Open menu" onClick={() => setMenuOpen(true)}>
         <MdMenu aria-hidden="true" />
-      </Link>
+      </button>
       <h1 className={styles.title}>Dispensium</h1>
       <button
         type="button"
@@ -33,6 +34,7 @@ export function AppHeader() {
       >
         <MdLogout aria-hidden="true" />
       </button>
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </header>
   );
 }

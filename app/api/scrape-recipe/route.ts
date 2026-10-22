@@ -1,22 +1,13 @@
 import { NextResponse } from 'next/server';
-import { AuthError, authenticateRequest, KeysUnavailableError } from '../../../services/requestAuth';
-import { importRecipeFromUrl, RecipeImportError } from '../../../services/recipeImportService';
+import { authenticateRequest } from '../../../services/requestAuth';
+import { importRecipeFromUrl } from '../../../services/recipeImportService';
 import { sanitizeInput } from '../../../utils/sanitizeInput';
 import { readCapped } from '../../../utils/readCapped';
-import type { RecipeImportErrorCode } from '../../../utils/recipeImportError';
+import { RECIPE_IMPORT_STATUS, RecipeImportError, type RecipeImportErrorCode } from '../../../utils/recipeImportError';
+import { importAuthFailure } from '../../../utils/importAuthError';
 
 // The request is a single URL, so a larger body is refused before it is parsed.
 const MAX_BODY_CHARS = 4096;
-
-const STATUS: Record<RecipeImportErrorCode, number> = {
-  'invalid-url': 400,
-  'blocked-address': 400,
-  'too-many-redirects': 502,
-  'fetch-failed': 502,
-  'no-recipe': 404,
-  'too-large': 413,
-  'not-an-image': 415,
-};
 
 const MESSAGE: Record<RecipeImportErrorCode, string> = {
   'invalid-url': 'Use a full https link, for example https://site.com/recipe.',
@@ -33,8 +24,8 @@ export async function POST(request: Request) {
   try {
     await authenticateRequest(request);
   } catch (error) {
-    if (error instanceof AuthError) return NextResponse.json({ error: 'Sign in to import recipes.' }, { status: 401 });
-    if (error instanceof KeysUnavailableError) return NextResponse.json({ error: 'Try again in a moment.' }, { status: 503 });
+    const failure = importAuthFailure(error);
+    if (failure) return failure;
     throw error;
   }
 
@@ -58,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json(await importRecipeFromUrl(url));
   } catch (error) {
     if (error instanceof RecipeImportError) {
-      return NextResponse.json({ error: MESSAGE[error.code] }, { status: STATUS[error.code] });
+      return NextResponse.json({ error: MESSAGE[error.code] }, { status: RECIPE_IMPORT_STATUS[error.code] });
     }
     console.error('Recipe import failed:', error);
     return NextResponse.json({ error: 'Import failed. Try again later.' }, { status: 500 });

@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { HouseholdService } from '../services/householdService';
-import type { HouseholdMember } from '../types/household';
+import type { HouseholdMember, HouseholdService } from '../types/household';
 
 export function useMembers(householdId: string, service: HouseholdService): HouseholdMember[] | null {
   const [members, setMembers] = useState<{ householdId: string; list: HouseholdMember[] } | null>(null);

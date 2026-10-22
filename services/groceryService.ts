@@ -5,7 +5,7 @@ import type { CategoryMap } from '../types/category';
 import type { GroceryItem } from '../types/grocery';
 import type { Unsubscribe } from '../types/subscription';
 
-export type GroceryErrorCode = 'invalid-name' | 'invalid-word' | 'unknown-category' | 'not-found' | 'unknown';
+export type GroceryErrorCode = 'invalid-name' | 'not-found' | 'unknown';
 
 export class GroceryError extends Error {
   code: GroceryErrorCode;
@@ -17,7 +17,7 @@ export class GroceryError extends Error {
   }
 }
 
-export interface NewGroceryItem {
+interface NewGroceryItem {
   name: string;
   category: string;
   createdBy: string;
@@ -31,8 +31,6 @@ export interface GroceryBackend {
   deleteItem(householdId: string, id: string): Promise<void>;
   deleteCompleted(householdId: string): Promise<void>;
   subscribeToGroceries(householdId: string, listener: (items: GroceryItem[]) => void): Unsubscribe;
-  addCategoryWord(householdId: string, category: string, word: string): Promise<void>;
-  removeCategoryWord(householdId: string, category: string, word: string): Promise<void>;
   subscribeToCategoryMap(householdId: string, listener: (map: CategoryMap) => void): Unsubscribe;
 }
 
@@ -86,18 +84,6 @@ export function createGroceryService(backend: GroceryBackend) {
 
     subscribeToCategoryMap(householdId: string, listener: (map: CategoryMap) => void): Unsubscribe {
       return backend.subscribeToCategoryMap(householdId, listener);
-    },
-
-    async addWordToCategory(householdId: string, category: string, rawWord: string): Promise<void> {
-      const word = cleanText(rawWord).toLowerCase();
-      if (!word) throw new GroceryError('invalid-word');
-      return backend.addCategoryWord(householdId, category, word);
-    },
-
-    async removeWordFromCategory(householdId: string, category: string, rawWord: string): Promise<void> {
-      const word = cleanText(rawWord).toLowerCase();
-      if (!word) throw new GroceryError('invalid-word');
-      return backend.removeCategoryWord(householdId, category, word);
     },
   };
 }

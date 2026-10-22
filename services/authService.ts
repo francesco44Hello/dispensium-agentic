@@ -1,7 +1,5 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
 
-export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
-
 export type AuthUser = {
   uid: string;
   email: string | null;

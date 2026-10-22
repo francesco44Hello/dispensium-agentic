@@ -2,7 +2,7 @@ import { createVerify } from 'node:crypto';
 
 // Checks a Firebase ID token (a signed JWT) without the admin SDK: the signature, the issuer, the audience,
 // the expiry and the user id. getKey maps a key id to the PEM certificate or public key that signed the token.
-export interface VerifyOptions {
+interface VerifyOptions {
   projectId: string;
   getKey: (kid: string) => Promise<string | undefined>;
   now?: number;

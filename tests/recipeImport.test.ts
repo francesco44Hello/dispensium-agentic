@@ -3,7 +3,8 @@ import { isPublicAddress } from '../utils/isPublicAddress';
 import { parseImportUrl } from '../utils/importUrl';
 import { extractRecipe } from '../utils/recipeJsonLd';
 import { isExtractedRecipe } from '../utils/isExtractedRecipe';
-import { createPinnedLookup, importRecipeFromUrl, RecipeImportError, type PageResponse } from '../services/recipeImportService';
+import { createPinnedLookup, importRecipeFromUrl, type PageResponse } from '../services/recipeImportService';
+import { RecipeImportError } from '../utils/recipeImportError';
 
 describe('isPublicAddress', () => {
   it('accepts ordinary public addresses', () => {

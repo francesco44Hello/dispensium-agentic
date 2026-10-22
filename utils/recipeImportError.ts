@@ -16,3 +16,14 @@ export class RecipeImportError extends Error {
     this.code = code;
   }
 }
+
+// HTTP status for each import failure. Every import route uses this one table.
+export const RECIPE_IMPORT_STATUS: Record<RecipeImportErrorCode, number> = {
+  'invalid-url': 400,
+  'blocked-address': 400,
+  'too-many-redirects': 502,
+  'fetch-failed': 502,
+  'no-recipe': 404,
+  'too-large': 413,
+  'not-an-image': 415,
+};
