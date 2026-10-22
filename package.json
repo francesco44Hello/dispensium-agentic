@@ -12,7 +12,7 @@
     "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
     "test:e2e": "playwright test --project=mobile",
     "test:visual": "playwright test --project=visual",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-dispensium \"vitest run -c vitest.rules.config.js\"",
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-dispensium \"vitest run -c vitest.rules.config.js\"",
     "audit": "npm audit --omit=dev --audit-level=critical",
     "audit:full": "npm audit --audit-level=high",
     "verify:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run verify"
@@ -38,5 +38,8 @@
     "jsdom": "^30.1.3",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.6"
   }
 }

@@ -1,0 +1,14 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  padding-bottom: calc(var(--nav-height) + 24px + 56px + 24px);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: var(--font-weight-title);
+  color: var(--primary-color);
+}

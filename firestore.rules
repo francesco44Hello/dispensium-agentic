@@ -60,6 +60,32 @@ service cloud.firestore {
           && request.resource.data.completed is bool;
       }
 
+      // Recipes: members create and read their household's recipes. No edits in this version.
+      // Rules cannot loop over list items, so per-item lengths and blocked characters in ingredients and steps
+      // are checked only in services/recipeService.ts. Titles are checked here.
+      match /recipes/{id} {
+        allow read, delete: if signedIn() && isMember(hid);
+        allow create: if signedIn()
+          && isMember(hid)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.keys().hasOnly(['title', 'time', 'category', 'label', 'ingredients', 'steps', 'image', 'createdAt', 'createdBy'])
+          && validText(request.resource.data.title)
+          && request.resource.data.time is string
+          && request.resource.data.time.size() <= 50
+          && !request.resource.data.time.matches('.*[<>{}"].*')
+          && request.resource.data.category in ['Breakfast', 'Lunch', 'Dinner', 'Drinks', 'Snacks', 'Desserts']
+          && request.resource.data.label in ['Summer Fresh ☀️', 'Cozy Winter ❄️', 'Quick & Easy ⚡', 'Comfort Food 🥣']
+          && request.resource.data.ingredients is list
+          && request.resource.data.ingredients.size() <= 50
+          && request.resource.data.steps is list
+          && request.resource.data.steps.size() <= 50
+          && request.resource.data.image is string
+          && request.resource.data.image.size() <= 2048
+          && (request.resource.data.image == '' || request.resource.data.image.matches('households/' + hid + '/recipes/[A-Za-z0-9-]+[.]webp'));
+        allow update: if false;
+      }
+
       match /configuration/{doc} {
         allow read: if signedIn() && isMember(hid);
         allow create: if signedIn()

@@ -1,4 +1,6 @@
+import { getAuth } from 'firebase/auth';
 import { createAuthService } from './authService';
+import { getFirebaseApp } from './firebaseApp';
 import { createFirebaseAuthBackend } from './authBackends/firebaseAuthBackend';
 import { createMockAuthBackend } from './authBackends/mockAuthBackend';
 
@@ -9,3 +11,11 @@ export const isMockAuth =
 export const authService = createAuthService(
   isMockAuth ? createMockAuthBackend() : createFirebaseAuthBackend(),
 );
+
+// The signed-in user's ID token, sent to our routes so the server can check who is asking.
+export async function currentIdToken(): Promise<string> {
+  if (isMockAuth) return 'mock-token';
+  const user = getAuth(getFirebaseApp()).currentUser;
+  if (!user) throw new Error('Sign in to import recipes.');
+  return user.getIdToken();
+}
