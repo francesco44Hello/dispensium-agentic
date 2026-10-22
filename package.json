@@ -15,7 +15,8 @@
     "test:rules": "firebase emulators:exec --only firestore,storage --project demo-dispensium \"vitest run -c vitest.rules.config.js\"",
     "audit": "npm audit --omit=dev --audit-level=critical",
     "audit:full": "npm audit --audit-level=high",
-    "verify:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run verify"
+    "verify:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run verify",
+    "dev:seed": "node scripts/seed-dev-recipes.mjs"
   },
   "dependencies": {
     "cheerio": "^1.2.0",

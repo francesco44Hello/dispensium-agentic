@@ -3,6 +3,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  documentId,
   getDoc,
   getDocs,
   getFirestore,
@@ -28,6 +29,8 @@ import { defaultCategoryMap } from '../../constants/categories';
 import type { CategoryMap } from '../../types/category';
 import type { GroceryItem } from '../../types/grocery';
 import type { Recipe } from '../../types/recipe';
+import type { MenuBackend } from '../menuService';
+import type { DayMenu, MealEntry, MealType } from '../../types/menu';
 import type { HouseholdMember, InviteCode } from '../../types/household';
 import type { Unsubscribe } from '../../types/subscription';
 import type { DataBackend } from './dataBackend';
@@ -268,5 +271,26 @@ export function createFirestoreDataBackend(): DataBackend {
     },
   };
 
-  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend };
+  // Layout: households/{hid}/menu/{YYYY-MM-DD} holds { lunch: entry, dinner: entry }.
+  const menuBackend: MenuBackend = {
+    async setMeal(householdId, date, meal: MealType, entry: MealEntry) {
+      await setDoc(doc(db(), 'households', householdId, 'menu', date), { [meal]: entry }, { merge: true });
+    },
+
+    subscribeToMenu(householdId, dates, listener): Unsubscribe {
+      if (dates.length === 0) {
+        listener({});
+        return () => undefined;
+      }
+      // 'in' takes at most 30 values, and the screen asks for 14 days.
+      const menuQuery = query(collection(db(), 'households', householdId, 'menu'), where(documentId(), 'in', dates));
+      return onSnapshot(menuQuery, (snap) => {
+        const menu: Record<string, Partial<DayMenu>> = {};
+        for (const day of snap.docs) menu[day.id] = day.data() as Partial<DayMenu>;
+        listener(menu);
+      });
+    },
+  };
+
+  return { households: householdBackend, groceries: groceryBackend, recipes: recipeBackend, menu: menuBackend };
 }

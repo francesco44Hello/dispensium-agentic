@@ -1,0 +1,88 @@
+/* Copied from the legacy MealEditForm.css, with suggestions added. */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+  margin-left: 4px;
+}
+
+.input {
+  width: 100%;
+  padding: 20px;
+  border-radius: 20px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  font-size: 18px;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--primary-color);
+}
+
+.suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.suggestion {
+  padding: 12px;
+  border-radius: 12px;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.suggestion:hover,
+.suggestion:focus-visible {
+  background-color: var(--secondary-color);
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.cancel {
+  flex: 1;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+  color: #666;
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.save {
+  flex: 2;
+  padding: 16px;
+  border-radius: 16px;
+  border: none;
+  background: var(--primary-button);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
