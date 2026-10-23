@@ -42,7 +42,8 @@ function parseDateId(id: string): Date {
   return new Date(year, month - 1, day);
 }
 
-export function dayLabel(id: string): { dayName: string; dayNumber: number } {
+// The locale is a BCP 47 tag such as 'it-IT'. English is the default.
+export function dayLabel(id: string, locale = 'en-US'): { dayName: string; dayNumber: number } {
   const date = parseDateId(id);
-  return { dayName: date.toLocaleDateString('en-US', { weekday: 'short' }), dayNumber: date.getDate() };
+  return { dayName: date.toLocaleDateString(locale, { weekday: 'short' }), dayNumber: date.getDate() };
 }

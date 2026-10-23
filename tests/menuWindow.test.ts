@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { listDays, menuWindow, previousAction, toDateId } from '../utils/menuWindow';
+import { dayLabel, listDays, menuWindow, previousAction, toDateId } from '../utils/menuWindow';
 
 describe('toDateId', () => {
   it('formats a local date as YYYY-MM-DD', () => {
@@ -44,5 +44,12 @@ describe('previousAction', () => {
     expect(previousAction(0)).toBe('load');
     expect(previousAction(7)).toBe('load');
     expect(previousAction(14)).toBe('hide');
+  });
+});
+
+describe('dayLabel', () => {
+  it('names the day in English by default and in the requested locale', () => {
+    expect(dayLabel('2026-10-22')).toEqual({ dayName: 'Thu', dayNumber: 22 });
+    expect(dayLabel('2026-10-22', 'it-IT')).toEqual({ dayName: 'gio', dayNumber: 22 });
   });
 });

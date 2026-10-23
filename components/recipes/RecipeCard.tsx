@@ -3,14 +3,18 @@ import { BiCategory } from 'react-icons/bi';
 import { FiClock } from 'react-icons/fi';
 import { useRecipePhoto } from '../../hooks/useRecipePhoto';
 import type { Recipe } from '../../types/recipe';
+import { RECIPE_LABEL_KEYS } from '../../i18n/messages';
 import styles from './RecipeCard.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 const PLACEHOLDER_IMAGE = '/fruit-login.jpg';
 
 // Card layout copied from the legacy recipe list: photo on top, title, time and category, label bar at the bottom.
 export function RecipeCard({ recipe }: { recipe: Recipe }) {
+  const { t } = useLocale();
   const photoUrl = useRecipePhoto(recipe.image);
 
+  const label = RECIPE_LABEL_KEYS[recipe.label] ? t(RECIPE_LABEL_KEYS[recipe.label]) : recipe.label;
   return (
     <Link href={`/recipes/${recipe.id}`} className={styles.link} aria-label={recipe.title}>
       <article className={styles.card}>
@@ -34,7 +38,7 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
           </div>
         </div>
 
-        {recipe.label && <div className={styles.label}>{recipe.label}</div>}
+        {recipe.label && <div className={styles.label}>{label}</div>}
       </article>
     </Link>
   );

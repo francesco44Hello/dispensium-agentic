@@ -4,6 +4,8 @@ import type { Recipe } from '../../types/recipe';
 import type { MealEntry, MealType } from '../../types/menu';
 import { RecipeMealCard } from './RecipeMealCard';
 import styles from './MealDisplay.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
+import { MEAL_KEYS } from '../../i18n/messages';
 
 interface Props {
   meal: MealType;
@@ -14,9 +16,10 @@ interface Props {
 
 // Shows the main and side of one meal. A meal linked to a recipe shows the recipe card; otherwise a custom card.
 export function MealDisplay({ meal, entry, recipes, onEdit }: Props) {
+  const { t } = useLocale();
   if (!entry.main && !entry.side) {
     return (
-      <button type="button" aria-label={`Add ${meal}`} className={styles.empty} onClick={onEdit}>
+      <button type="button" aria-label={t('menu.addMeal', { meal: t(MEAL_KEYS[meal]) })} className={styles.empty} onClick={onEdit}>
         <span className={styles.emptyIcon}>
           <FiPlus />
         </span>
@@ -39,7 +42,7 @@ export function MealDisplay({ meal, entry, recipes, onEdit }: Props) {
               <ImSpoonKnife />
             </div>
             <h3>{text}</h3>
-            <p>Custom meal (Not in recipe book)</p>
+            <p>{t('meal.custom')}</p>
           </div>
         )}
       </div>

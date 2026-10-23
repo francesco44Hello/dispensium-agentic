@@ -14,11 +14,13 @@ import { MealEditForm } from './MealEditForm';
 import { MealTabs } from './MealTabs';
 import { MenuListView } from './MenuListView';
 import styles from './MenuScreen.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 type View = 'calendar' | 'list';
 
 
 export function MenuScreen() {
+  const { t } = useLocale();
   const { status, householdId, error } = useHousehold();
   const [today] = useState(() => new Date());
   // Earlier days start hidden, so both views open on today. The same setting drives both views.
@@ -62,7 +64,7 @@ export function MenuScreen() {
       await menuService.setMeal(householdId, selectedDate, meal, entry);
       setEditing(false);
     } catch {
-      setSaveError('Could not save the meal. Check the text and try again.');
+      setSaveError(t('menu.saveFailed'));
     }
   };
 
@@ -73,7 +75,7 @@ export function MenuScreen() {
   if (status === 'error') {
     body = <p role="alert">We could not load your household ({error ?? 'unknown error'}). Please refresh the page.</p>;
   } else if (!ready) {
-    body = <p role="status" className={styles.loading}>Loading menu…</p>;
+    body = <p role="status" className={styles.loading}>{t('menu.loading')}</p>;
   } else if (view === 'list') {
     body = <MenuListView days={dayList} menu={menu} recipes={recipes} previous={previous} onPrevious={togglePrevious} />;
   } else {
@@ -109,11 +111,11 @@ export function MenuScreen() {
     <AppShell flushBottom>
       <div className={styles.page}>
         <div className={styles.header}>
-          <h1 className={styles.title}>Plan the week</h1>
+          <h1 className={styles.title}>{t('menu.title')}</h1>
           <div className={styles.toggle}>
             <button
               type="button"
-              aria-label="Calendar view"
+              aria-label={t('menu.calendarView')}
               aria-pressed={view === 'calendar'}
               className={`${styles.toggleButton} ${view === 'calendar' ? styles.toggleActive : ''}`}
               onClick={() => setView('calendar')}
@@ -122,7 +124,7 @@ export function MenuScreen() {
             </button>
             <button
               type="button"
-              aria-label="List view"
+              aria-label={t('menu.listView')}
               aria-pressed={view === 'list'}
               className={`${styles.toggleButton} ${view === 'list' ? styles.toggleActive : ''}`}
               onClick={() => setView('list')}

@@ -21,7 +21,7 @@ const ERROR_KEYS: Record<AuthErrorCode, MessageKey | null> = {
   'email-in-use': 'auth.error.emailInUse',
   'invalid-credentials': 'auth.error.invalidCredentials',
   'popup-closed': null,
-  unknown: 'auth.error.unknown',
+  unknown: 'error.unknown',
 };
 
 export function AuthForm({ mode }: AuthFormProps) {

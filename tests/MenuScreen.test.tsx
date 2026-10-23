@@ -62,7 +62,7 @@ describe('MenuScreen', () => {
   it('shows an alert when a meal cannot be saved', async () => {
     mocks.setMeal.mockRejectedValueOnce(new Error('rejected'));
     render(<MenuScreen />);
-    fireEvent.click(screen.getByRole('button', { name: 'Add lunch' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add Lunch' }));
     fireEvent.change(screen.getByLabelText('Main'), { target: { value: 'Soup' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Could not save the meal'));

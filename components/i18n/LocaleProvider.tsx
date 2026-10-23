@@ -9,14 +9,14 @@ const STORAGE_KEY = 'dispensium-locale';
 interface LocaleValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: MessageKey) => string;
+  t: (key: MessageKey, params?: Record<string, string>) => string;
 }
 
 // Outside a provider the app stays in English, so a component renders correctly even in isolation.
 const ENGLISH: LocaleValue = {
   locale: DEFAULT_LOCALE,
   setLocale: () => undefined,
-  t: (key) => translate(DEFAULT_LOCALE, key),
+  t: (key, params) => translate(DEFAULT_LOCALE, key, params),
 };
 
 const LocaleContext = createContext<LocaleValue>(ENGLISH);
@@ -70,7 +70,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<LocaleValue>(
-    () => ({ locale, setLocale, t: (key) => translate(locale, key) }),
+    () => ({ locale, setLocale, t: (key, params) => translate(locale, key, params) }),
     [locale, setLocale],
   );
 

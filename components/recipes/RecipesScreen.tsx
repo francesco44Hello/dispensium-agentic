@@ -8,9 +8,11 @@ import { recipeService } from '../../services/dataClient';
 import type { Recipe, RecipeDraft } from '../../types/recipe';
 import { RecipeList } from './RecipeList';
 import { RecipeSheet } from './RecipeSheet';
+import { useLocale } from '../i18n/LocaleProvider';
 import styles from './RecipesScreen.module.css';
 
 export function RecipesScreen() {
+  const { t } = useLocale();
   const { user } = useAuth();
   const { status, householdId, error } = useHousehold();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -31,7 +33,7 @@ export function RecipesScreen() {
       await recipeService.addRecipe(householdId, user.uid, draft, photo ?? undefined);
       setSheetOpen(false);
     } catch {
-      setSaveError('Could not save the recipe. Check the fields and try again.');
+      setSaveError(t('recipes.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -42,11 +44,11 @@ export function RecipesScreen() {
   return (
     <AppShell onAdd={() => setSheetOpen(true)}>
       <div className={styles.page}>
-        <h1 className={styles.title}>Everyday Recipes</h1>
+        <h1 className={styles.title}>{t('recipes.title')}</h1>
         {status === 'error' && (
           <p role="alert">We could not load your household ({error ?? 'unknown error'}). Please refresh the page.</p>
         )}
-        {status !== 'error' && !ready && <p role="status">Loading recipes…</p>}
+        {status !== 'error' && !ready && <p role="status">{t('recipes.loading')}</p>}
         {ready && <RecipeList recipes={recipes} />}
       </div>
       <RecipeSheet

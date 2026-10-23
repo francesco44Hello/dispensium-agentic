@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { getGuardDecision } from '../../utils/authGuard';
 import styles from './ProtectedRoute.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 type ProtectedRouteProps = {
   children: ReactNode;
@@ -12,6 +13,7 @@ type ProtectedRouteProps = {
 };
 
 export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
+  const { t } = useLocale();
   const { status } = useAuth();
   const router = useRouter();
   const decision = getGuardDecision(status);
@@ -23,7 +25,7 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
   if (decision === 'render') return <>{children}</>;
 
   return (
-    <div role="status" aria-label="Checking your session" className={styles.loader}>
+    <div role="status" aria-label={t('auth.checkingSession')} className={styles.loader}>
       <span className={styles.spinner} aria-hidden="true" />
     </div>
   );

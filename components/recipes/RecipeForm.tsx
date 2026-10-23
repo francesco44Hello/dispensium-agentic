@@ -5,6 +5,8 @@ import { MdAdd, MdAddAPhoto } from 'react-icons/md';
 import { compressImage } from '../../utils/compressImage';
 import { RECIPE_CATEGORIES, RECIPE_LABELS, type RecipeDraft } from '../../types/recipe';
 import styles from './RecipeForm.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
+import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS } from '../../i18n/messages';
 
 const DEFAULT_INGREDIENT_ROWS = 4;
 const DEFAULT_STEP_ROWS = 3;
@@ -23,6 +25,7 @@ interface Props {
 
 // Blank rows are kept here so the user can fill them in; the service drops empty rows on save.
 export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = false, error }: Props) {
+  const { t } = useLocale();
   const [title, setTitle] = useState(initial?.title ?? '');
   const [time, setTime] = useState(initial?.time ?? '');
   const [category, setCategory] = useState(initial?.category ?? 'Dinner');
@@ -67,7 +70,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
         {preview ? (
           // Photos are local object URLs, so a plain img is right here.
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="Recipe cover" className={styles.coverImage} />
+          <img src={preview} alt={t('recipes.coverAlt')} className={styles.coverImage} />
         ) : (
           <span className={styles.photoPlaceholder}>
             <MdAddAPhoto aria-hidden="true" /> Add a cover photo
@@ -76,7 +79,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          aria-label="Recipe photo"
+          aria-label={t('recipes.photo')}
           className={styles.fileInput}
           onChange={handlePhoto}
         />
@@ -85,30 +88,30 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
 
       <div className={styles.section}>
         <label className={styles.field}>
-          <span className={styles.visuallyHidden}>Recipe title</span>
+          <span className={styles.visuallyHidden}>{t('recipes.titleField')}</span>
           <input
             type="text"
-            placeholder="Recipe title"
+            placeholder={t('recipes.titleField')}
             className={`${styles.input} ${styles.inputLarge}`}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            aria-label="Recipe title"
+            aria-label={t('recipes.titleField')}
           />
         </label>
         <div className={styles.row}>
           <input
             type="text"
-            placeholder="Time (e.g. 45 min)"
-            aria-label="Time"
+            placeholder={t('recipes.timePlaceholder')}
+            aria-label={t('recipes.time')}
             className={styles.input}
             value={time}
             onChange={(e) => setTime(e.target.value)}
           />
-          <select aria-label="Category" className={styles.input} value={category} onChange={(e) => setCategory(e.target.value)}>
+          <select aria-label={t('recipes.category')} className={styles.input} value={category} onChange={(e) => setCategory(e.target.value)}>
             {RECIPE_CATEGORIES.map((option) => (
               <option key={option} value={option}>
-                {option}
+                {t(RECIPE_CATEGORY_KEYS[option])}
               </option>
             ))}
           </select>
@@ -116,7 +119,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
       </div>
 
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Perfect for...</h3>
+        <h3 className={styles.sectionTitle}>{t('recipes.perfectFor')}</h3>
         <div className={styles.pills}>
           {RECIPE_LABELS.map((option) => (
             <button
@@ -126,19 +129,19 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
               className={`${styles.pill} ${label === option ? styles.pillActive : ''}`}
               onClick={() => setLabel(option)}
             >
-              {option}
+              {t(RECIPE_LABEL_KEYS[option])}
             </button>
           ))}
         </div>
       </div>
 
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Ingredients</h3>
+        <h3 className={styles.sectionTitle}>{t('recipes.ingredients')}</h3>
         {ingredients.map((ingredient, i) => (
           <input
             key={`ingredient-${i}`}
             type="text"
-            placeholder={`Ingredient ${i + 1}`}
+            placeholder={t('recipes.ingredientPlaceholder', { n: String(i + 1) })}
             aria-label={`Ingredient ${i + 1}`}
             className={styles.input}
             value={ingredient}
@@ -151,11 +154,11 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
       </div>
 
       <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Steps</h3>
+        <h3 className={styles.sectionTitle}>{t('recipes.steps')}</h3>
         {steps.map((step, i) => (
           <textarea
             key={`step-${i}`}
-            placeholder={`Step ${i + 1}`}
+            placeholder={t('recipes.stepPlaceholder', { n: String(i + 1) })}
             aria-label={`Step ${i + 1}`}
             className={`${styles.input} ${styles.textarea}`}
             value={step}
@@ -170,7 +173,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
       {error && <p role="alert" className={styles.error}>{error}</p>}
 
       <button type="submit" className={styles.submit} disabled={saving}>
-        {saving ? 'Saving…' : 'Save recipe'}
+        {saving ? t('recipes.saving') : t('recipes.save')}
       </button>
     </form>
   );

@@ -6,12 +6,14 @@ import { groceryService as defaultService } from '../../services/dataClient';
 import type { GroceryErrorCode, GroceryService } from '../../services/groceryService';
 import { CategoryGroup } from './CategoryGroup';
 import { GroceryInput } from './GroceryInput';
+import { useLocale } from '../i18n/LocaleProvider';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './GroceryList.module.css';
 
-const ERROR_MESSAGES: Record<GroceryErrorCode, string> = {
-  'invalid-name': 'Please enter a valid item name (1–100 characters, without < > { } ").',
-  'not-found': 'That item no longer exists.',
-  unknown: 'Something went wrong. Please try again.',
+const ERROR_KEYS: Record<GroceryErrorCode, MessageKey> = {
+  'invalid-name': 'grocery.error.invalidName',
+  'not-found': 'grocery.error.notFound',
+  unknown: 'error.unknown',
 };
 
 type GroceryListProps = {
@@ -22,11 +24,12 @@ type GroceryListProps = {
 
 export function GroceryList({ householdId, uid, service = defaultService }: GroceryListProps) {
   const { items, error, addItem, setCompleted, clearCompleted } = useGroceries(householdId, uid, service);
+  const { t } = useLocale();
 
   if (items === null) {
     return (
       <p role="status" className={styles.status}>
-        Loading list…
+        {t('grocery.loading')}
       </p>
     );
   }
@@ -35,17 +38,17 @@ export function GroceryList({ householdId, uid, service = defaultService }: Groc
 
   return (
     <section className={styles.list}>
-      <h2 className={styles.title}>What&apos;s missing?</h2>
+      <h2 className={styles.title}>{t('grocery.title')}</h2>
 
       <GroceryInput onAdd={addItem} />
 
       {error && (
         <p role="alert" className={styles.error}>
-          {ERROR_MESSAGES[error]}
+          {t(ERROR_KEYS[error])}
         </p>
       )}
 
-      {items.length === 0 && <p className={styles.status}>Your list is empty.</p>}
+      {items.length === 0 && <p className={styles.status}>{t('grocery.empty')}</p>}
 
       {groupByCategory(items).map((group) => (
         <CategoryGroup
@@ -58,7 +61,7 @@ export function GroceryList({ householdId, uid, service = defaultService }: Groc
 
       <div className={styles.footer}>
         <button type="button" className={styles.complete} onClick={clearCompleted} disabled={!hasCompleted}>
-          Grocery completed
+          {t('grocery.completed')}
         </button>
       </div>
     </section>

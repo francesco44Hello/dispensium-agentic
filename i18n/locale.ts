@@ -23,3 +23,6 @@ export function resolveLocale({ saved, account, browser }: LocaleSources): Local
   if (browser?.toLowerCase().startsWith('it')) return 'it';
   return DEFAULT_LOCALE;
 }
+
+// The browser locale used for dates and day names.
+export const INTL_LOCALE: Record<Locale, string> = { en: 'en-US', it: 'it-IT' };
