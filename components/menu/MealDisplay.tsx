@@ -23,7 +23,7 @@ export function MealDisplay({ meal, entry, recipes, onEdit }: Props) {
         <span className={styles.emptyIcon}>
           <FiPlus />
         </span>
-        <p>Tap to add {meal}</p>
+        <p>{t('menu.tapToAdd', { meal: t(MEAL_KEYS[meal]) })}</p>
       </button>
     );
   }
@@ -52,10 +52,10 @@ export function MealDisplay({ meal, entry, recipes, onEdit }: Props) {
   return (
     <div className={styles.container}>
       <button type="button" className={styles.editButton} onClick={onEdit}>
-        <FiEdit2 /> Edit {meal}
+        <FiEdit2 /> {t('menu.editMeal', { meal: t(MEAL_KEYS[meal]) })}
       </button>
-      {section('Main', entry.main, entry.mainRecipeId)}
-      {section('Side', entry.side, entry.sideRecipeId)}
+      {section(t('menu.main'), entry.main, entry.mainRecipeId)}
+      {section(t('menu.side'), entry.side, entry.sideRecipeId)}
     </div>
   );
 }

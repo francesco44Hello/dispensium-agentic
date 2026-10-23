@@ -46,7 +46,7 @@ export function RecipesScreen() {
       <div className={styles.page}>
         <h1 className={styles.title}>{t('recipes.title')}</h1>
         {status === 'error' && (
-          <p role="alert">We could not load your household ({error ?? 'unknown error'}). Please refresh the page.</p>
+          <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>
         )}
         {status !== 'error' && !ready && <p role="status">{t('recipes.loading')}</p>}
         {ready && <RecipeList recipes={recipes} />}

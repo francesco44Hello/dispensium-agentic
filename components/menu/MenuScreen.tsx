@@ -73,7 +73,7 @@ export function MenuScreen() {
 
   let body: ReactNode;
   if (status === 'error') {
-    body = <p role="alert">We could not load your household ({error ?? 'unknown error'}). Please refresh the page.</p>;
+    body = <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>;
   } else if (!ready) {
     body = <p role="status" className={styles.loading}>{t('menu.loading')}</p>;
   } else if (view === 'list') {

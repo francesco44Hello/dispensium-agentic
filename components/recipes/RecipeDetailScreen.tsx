@@ -32,7 +32,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 
   let content;
   if (status === 'error') {
-    content = <p role="alert">We could not load your household ({error ?? 'unknown error'}). Please refresh the page.</p>;
+    content = <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>;
   } else if (status !== 'ready' || recipes === null) {
     content = <p role="status">{t('recipes.loadingOne')}</p>;
   } else if (!recipe) {

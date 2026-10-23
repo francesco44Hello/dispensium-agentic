@@ -13,7 +13,7 @@ export function GroceryScreen() {
   if (status === 'error') {
     return (
       <p role="alert">
-        {t('grocery.loadError', { error: error ?? t('grocery.unknownError') })}
+        {t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}
       </p>
     );
   }
