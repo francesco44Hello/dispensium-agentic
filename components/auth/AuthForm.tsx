@@ -5,28 +5,33 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { AuthError, type AuthErrorCode } from '../../services/authService';
+import { useLocale } from '../i18n/LocaleProvider';
+import { LanguageSelect } from '../i18n/LanguageSelect';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './AuthForm.module.css';
 
 type AuthFormProps = {
   mode: 'login' | 'signup';
 };
 
-const ERROR_MESSAGES: Record<AuthErrorCode, string> = {
-  'invalid-email': 'Please enter a valid email address.',
-  'weak-password': 'Password must be at least 6 characters.',
-  'email-in-use': 'An account with this email already exists.',
-  'invalid-credentials': 'Email or password is incorrect.',
-  'popup-closed': '',
-  unknown: 'Something went wrong. Please try again.',
+// Errors are stored as message keys and translated when shown. Closing the Google popup has no message.
+const ERROR_KEYS: Record<AuthErrorCode, MessageKey | null> = {
+  'invalid-email': 'auth.error.invalidEmail',
+  'weak-password': 'auth.error.weakPassword',
+  'email-in-use': 'auth.error.emailInUse',
+  'invalid-credentials': 'auth.error.invalidCredentials',
+  'popup-closed': null,
+  unknown: 'auth.error.unknown',
 };
 
 export function AuthForm({ mode }: AuthFormProps) {
   const { service, status } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<MessageKey | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const isSignup = mode === 'signup';
@@ -44,7 +49,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     } catch (err) {
       const code = err instanceof AuthError ? err.code : 'unknown';
       // Closing the Google popup is a deliberate choice, so no error is shown.
-      if (code !== 'popup-closed') setError(ERROR_MESSAGES[code]);
+      if (code !== 'popup-closed') setError(ERROR_KEYS[code]);
     } finally {
       setSubmitting(false);
     }
@@ -55,7 +60,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setError(null);
 
     if (isSignup && password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('auth.error.passwordMismatch');
       return;
     }
 
@@ -69,7 +74,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       router.replace('/');
     } catch (err) {
       const code = err instanceof AuthError ? err.code : 'unknown';
-      setError(ERROR_MESSAGES[code]);
+      setError(ERROR_KEYS[code]);
     } finally {
       setSubmitting(false);
     }
@@ -77,10 +82,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <h1 className={styles.title}>{isSignup ? 'Create account' : 'Log in'}</h1>
+      <h1 className={styles.title}>{isSignup ? t('auth.signup') : t('auth.login')}</h1>
 
       <label className={styles.field}>
-        <span>Email</span>
+        <span>{t('auth.email')}</span>
         <input
           type="email"
           name="email"
@@ -92,7 +97,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       </label>
 
       <label className={styles.field}>
-        <span>Password</span>
+        <span>{t('auth.password')}</span>
         <input
           type="password"
           name="password"
@@ -105,7 +110,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {isSignup && (
         <label className={styles.field}>
-          <span>Confirm password</span>
+          <span>{t('auth.confirmPassword')}</span>
           <input
             type="password"
             name="confirmPassword"
@@ -119,33 +124,37 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {error && (
         <p role="alert" className={styles.error}>
-          {error}
+          {t(error)}
         </p>
       )}
 
       <button type="submit" className={styles.submit} disabled={submitting}>
-        {submitting ? 'Please wait…' : isSignup ? 'Sign up' : 'Log in'}
+        {submitting ? t('auth.submit.wait') : isSignup ? t('auth.submit.signup') : t('auth.login')}
       </button>
 
       <div className={styles.divider} role="separator">
-        <span>or</span>
+        <span>{t('auth.or')}</span>
       </div>
 
       <button type="button" className={styles.google} onClick={handleGoogleSignIn} disabled={submitting}>
-        Continue with Google
+        {t('auth.google')}
       </button>
 
       <p className={styles.switch}>
         {isSignup ? (
           <>
-            Already have an account? <Link href="/login">Log in</Link>
+            {t('auth.haveAccount')} <Link href="/login">{t('auth.login')}</Link>
           </>
         ) : (
           <>
-            New here? <Link href="/signup">Create an account</Link>
+            {t('auth.newHere')} <Link href="/signup">{t('auth.createAccountLink')}</Link>
           </>
         )}
       </p>
+
+      <div className={styles.language}>
+        <LanguageSelect />
+      </div>
     </form>
   );
 }

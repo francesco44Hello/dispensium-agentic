@@ -98,3 +98,7 @@
   opacity: 0.6;
   cursor: progress;
 }
+
+.language {
+  margin-top: 16px;
+}

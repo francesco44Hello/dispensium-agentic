@@ -49,13 +49,9 @@ describe('LocaleProvider', () => {
     await screen.findByText('locale:en');
   });
 
-  it('throws a clear error when useLocale is used outside the provider', () => {
-    const original = console.error;
-    console.error = () => undefined;
-    try {
-      expect(() => render(<Probe />)).toThrow(/LocaleProvider/);
-    } finally {
-      console.error = original;
-    }
+  it('falls back to English outside the provider', () => {
+    render(<Probe />);
+    expect(screen.getByText('locale:en')).toBeTruthy();
+    expect(screen.getByText('Language')).toBeTruthy();
   });
 });

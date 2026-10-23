@@ -12,7 +12,14 @@ interface LocaleValue {
   t: (key: MessageKey) => string;
 }
 
-const LocaleContext = createContext<LocaleValue | null>(null);
+// Outside a provider the app stays in English, so a component renders correctly even in isolation.
+const ENGLISH: LocaleValue = {
+  locale: DEFAULT_LOCALE,
+  setLocale: () => undefined,
+  t: (key) => translate(DEFAULT_LOCALE, key),
+};
+
+const LocaleContext = createContext<LocaleValue>(ENGLISH);
 
 // Storage can be blocked (private windows, disabled site data). The app still works, in the default language.
 function readSavedLocale(): string | null {
@@ -71,7 +78,5 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 }
 
 export function useLocale(): LocaleValue {
-  const value = useContext(LocaleContext);
-  if (!value) throw new Error('useLocale must be used inside LocaleProvider');
-  return value;
+  return useContext(LocaleContext);
 }
