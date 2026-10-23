@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { dayLabel, toDateId, type PreviousAction } from '../../utils/menuWindow';
 import type { Recipe } from '../../types/recipe';
-import { MEALS, emptyDay, type DayMenu, type MealEntry, type MealType } from '../../types/menu';
+import { MEALS, emptyDay, type DayMenu, type MealEntry } from '../../types/menu';
 import styles from './MenuListView.module.css';
 import { useLocale } from '../i18n/LocaleProvider';
 import { INTL_LOCALE } from '../../i18n/locale';
