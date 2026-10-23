@@ -6,6 +6,7 @@ import type { ExtractedRecipe } from '../../types/recipe';
 import { isExtractedRecipe } from '../../utils/isExtractedRecipe';
 import { currentIdToken } from '../../services/authClient';
 import styles from './ImportPanel.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 interface Props {
   onImported: (recipe: ExtractedRecipe) => void;
@@ -13,6 +14,7 @@ interface Props {
 
 // Sends the link to our own route, which fetches the page and reads its recipe data.
 export function ImportPanel({ onImported }: Props) {
+  const { t } = useLocale();
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,21 +38,21 @@ export function ImportPanel({ onImported }: Props) {
       onImported(data);
       setUrl('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Import failed. Try another link.');
+      setError(err instanceof Error ? err.message : t('recipes.importFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className={styles.panel} aria-label="Import from web">
-      <h3 className={styles.title}>Import from web</h3>
-      <p className={styles.subtitle}>Paste a link to a recipe page.</p>
+    <section className={styles.panel} aria-label={t('recipes.importTitle')}>
+      <h3 className={styles.title}>{t('recipes.importTitle')}</h3>
+      <p className={styles.subtitle}>{t('recipes.importSubtitle')}</p>
       <form className={styles.form} onSubmit={handleImport}>
         <input
           type="url"
           placeholder="https://..."
-          aria-label="Recipe link"
+          aria-label={t('recipes.importLink')}
           className={styles.input}
           value={url}
           onChange={(e) => setUrl(e.target.value)}
@@ -58,7 +60,7 @@ export function ImportPanel({ onImported }: Props) {
         />
         <button type="submit" className={styles.button} disabled={loading}>
           <MdFileDownload aria-hidden="true" />
-          {loading ? 'Importing…' : 'Import'}
+          {loading ? t('recipes.importing') : t('recipes.import')}
         </button>
       </form>
       {error && <p role="alert" className={styles.error}>{error}</p>}

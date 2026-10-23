@@ -40,7 +40,6 @@ test('list item names use regular weight and rows have 16px vertical padding', a
 test('header icons use the primary colour', async ({ page }) => {
   await signUp(page);
   await expect(page.getByRole('button', { name: 'Open menu' })).toHaveCSS('color', 'rgb(45, 60, 89)');
-  await expect(page.getByRole('button', { name: 'Log out' })).toHaveCSS('color', 'rgb(45, 60, 89)');
 });
 
 test('the header burger opens the legacy side menu, and its links go to their pages', async ({ page }) => {

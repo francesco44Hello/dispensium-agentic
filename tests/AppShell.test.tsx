@@ -8,6 +8,7 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }), usePathname:
 
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { AppShell } from '../components/AppShell';
+import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
 
@@ -20,11 +21,13 @@ async function renderShell() {
   const auth = createAuthService(createMockAuthBackend());
   await auth.signUp('alice@example.com', 'secret123');
   render(
-    <AuthProvider service={auth}>
-      <AppShell>
-        <p>list body</p>
-      </AppShell>
-    </AuthProvider>,
+    <LocaleProvider>
+      <AuthProvider service={auth}>
+        <AppShell>
+          <p>list body</p>
+        </AppShell>
+      </AuthProvider>
+    </LocaleProvider>,
   );
   return auth;
 }
@@ -37,9 +40,10 @@ describe('AppShell', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
 
-  it('signs out from the header icon and redirects to login', async () => {
+  it('signs out from the side menu and redirects to login', async () => {
     const auth = await renderShell();
     const spy = vi.spyOn(auth, 'signOut');
+    fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
     fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(spy).toHaveBeenCalledTimes(1);

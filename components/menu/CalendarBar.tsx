@@ -2,6 +2,8 @@ import { useLayoutEffect, useRef } from 'react';
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import { PREVIOUS_STEP_DAYS, dayLabel, type PreviousAction } from '../../utils/menuWindow';
 import styles from './CalendarBar.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
+import { INTL_LOCALE } from '../../i18n/locale';
 
 interface Props {
   days: string[];
@@ -16,6 +18,7 @@ const STEP_PX = 72;
 
 // The horizontal day strip, copied from the legacy weekly menu.
 export function CalendarBar({ days, selected, onSelect, previous, onPrevious }: Props) {
+  const { t, locale } = useLocale();
   const strip = useRef<HTMLDivElement>(null);
   const pendingShift = useRef(0);
 
@@ -44,16 +47,16 @@ export function CalendarBar({ days, selected, onSelect, previous, onPrevious }: 
       {previous && onPrevious && (
         <button
           type="button"
-          aria-label={previous === 'load' ? 'Load previous days' : 'Hide previous days'}
+          aria-label={previous === 'load' ? t('menu.loadPrevious') : t('menu.hidePrevious')}
           className={styles.previous}
           onClick={handlePrevious}
         >
           {previous === 'load' ? <MdChevronLeft aria-hidden="true" /> : <MdChevronRight aria-hidden="true" />}
-          <span>{previous === 'load' ? 'Prev' : 'Hide'}</span>
+          <span>{previous === 'load' ? t('menu.prev') : t('menu.hide')}</span>
         </button>
       )}
       {days.map((date) => {
-        const { dayName, dayNumber } = dayLabel(date);
+        const { dayName, dayNumber } = dayLabel(date, INTL_LOCALE[locale]);
         const isSelected = date === selected;
         return (
           <button

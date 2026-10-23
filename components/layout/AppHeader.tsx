@@ -2,13 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MdLogout, MdMenu } from 'react-icons/md';
+import { MdMenu } from 'react-icons/md';
 import { useAuth } from '../../hooks/useAuth';
+import { useLocale } from '../i18n/LocaleProvider';
+import { LanguageMenu } from '../i18n/LanguageMenu';
 import { SideMenu } from './SideMenu';
 import styles from './AppHeader.module.css';
 
 export function AppHeader() {
   const { service } = useAuth();
+  const { t } = useLocale();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,20 +24,12 @@ export function AppHeader() {
 
   return (
     <header className={styles.header}>
-      <button type="button" className={styles.icon} aria-label="Open menu" onClick={() => setMenuOpen(true)}>
+      <button type="button" className={styles.icon} aria-label={t('nav.openMenu')} onClick={() => setMenuOpen(true)}>
         <MdMenu aria-hidden="true" />
       </button>
       <h1 className={styles.title}>Dispensium</h1>
-      <button
-        type="button"
-        className={styles.icon}
-        aria-label="Log out"
-        onClick={handleSignOut}
-        disabled={signingOut}
-      >
-        <MdLogout aria-hidden="true" />
-      </button>
-      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <LanguageMenu />
+      <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} onSignOut={handleSignOut} signingOut={signingOut} />
     </header>
   );
 }

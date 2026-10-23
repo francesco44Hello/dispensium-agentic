@@ -1,0 +1,20 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+}
+
+.select {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--muted);
+  background: #fff;
+  color: var(--primary-color);
+}
