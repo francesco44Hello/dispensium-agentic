@@ -10,7 +10,7 @@ export function isLocale(value: unknown): value is Locale {
 interface LocaleSources {
   // The choice the person made on this device.
   saved: string | null | undefined;
-  // The locale stored on their account (users/{uid}).
+  // The locale stored on their account (users/{uid}). Not read yet: the provider passes nothing until account sync lands.
   account: string | null | undefined;
   // The browser language, such as 'it-IT'.
   browser: string | null | undefined;

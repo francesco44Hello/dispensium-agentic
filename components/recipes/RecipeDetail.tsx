@@ -2,7 +2,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { MdAccessTime, MdAddShoppingCart, MdArrowBack, MdCategory, MdCheck } from 'react-icons/md';
 import type { Recipe } from '../../types/recipe';
-import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS } from '../../i18n/messages';
+import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS, translateStored } from '../../i18n/messages';
 import styles from './RecipeDetail.module.css';
 import { useLocale } from '../i18n/LocaleProvider';
 
@@ -43,7 +43,7 @@ export function RecipeDetail({ recipe, imageUrl, onAddIngredient }: Props) {
 
       <div className={styles.card}>
         <div className={styles.labelRow}>
-          <span className={styles.label}>{recipe.label ? (RECIPE_LABEL_KEYS[recipe.label] ? t(RECIPE_LABEL_KEYS[recipe.label]) : recipe.label) : t('recipes.delicious')}</span>
+          <span className={styles.label}>{recipe.label ? translateStored(recipe.label, RECIPE_LABEL_KEYS, t) : t('recipes.delicious')}</span>
         </div>
 
         <h1 className={styles.title}>{recipe.title}</h1>
@@ -55,7 +55,7 @@ export function RecipeDetail({ recipe, imageUrl, onAddIngredient }: Props) {
           </span>
           <span className={styles.infoItem}>
             <MdCategory aria-hidden="true" className={styles.icon} />
-            <span>{recipe.category ? (RECIPE_CATEGORY_KEYS[recipe.category] ? t(RECIPE_CATEGORY_KEYS[recipe.category]) : recipe.category) : '--'}</span>
+            <span>{recipe.category ? translateStored(recipe.category, RECIPE_CATEGORY_KEYS, t) : '--'}</span>
           </span>
         </div>
 

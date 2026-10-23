@@ -1,7 +1,7 @@
 'use client';
 
 import { categoryEmojis } from '../../constants/categories';
-import { CATEGORY_KEYS } from '../../i18n/messages';
+import { CATEGORY_KEYS, translateStored } from '../../i18n/messages';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { GroceryItem } from '../../types/grocery';
 import { GroceryItemRow } from './GroceryItemRow';
@@ -15,7 +15,7 @@ type CategoryGroupProps = {
 
 export function CategoryGroup({ category, items, onToggle }: CategoryGroupProps) {
   const { t } = useLocale();
-  const label = CATEGORY_KEYS[category] ? t(CATEGORY_KEYS[category]) : category;
+  const label = translateStored(category, CATEGORY_KEYS, t);
   return (
     <section className={styles.group}>
       <h2 className={styles.heading}>

@@ -6,7 +6,7 @@ import { compressImage } from '../../utils/compressImage';
 import { RECIPE_CATEGORIES, RECIPE_LABELS, type RecipeDraft } from '../../types/recipe';
 import styles from './RecipeForm.module.css';
 import { useLocale } from '../i18n/LocaleProvider';
-import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS } from '../../i18n/messages';
+import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS, translateStored } from '../../i18n/messages';
 
 const DEFAULT_INGREDIENT_ROWS = 4;
 const DEFAULT_STEP_ROWS = 3;
@@ -111,7 +111,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
           <select aria-label={t('recipes.category')} className={styles.input} value={category} onChange={(e) => setCategory(e.target.value)}>
             {RECIPE_CATEGORIES.map((option) => (
               <option key={option} value={option}>
-                {t(RECIPE_CATEGORY_KEYS[option])}
+                {translateStored(option, RECIPE_CATEGORY_KEYS, t)}
               </option>
             ))}
           </select>

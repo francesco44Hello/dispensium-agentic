@@ -1,4 +1,6 @@
 import type { Locale } from './locale';
+import type { RECIPE_CATEGORIES, RECIPE_LABELS } from '../types/recipe';
+import type { MealType } from '../types/menu';
 
 // English is the source of truth. Italian is typed against it, so a missing key fails typecheck.
 const en = {
@@ -6,6 +8,8 @@ const en = {
   'language.english': 'English',
   'language.italian': 'Italiano',
 
+  'common.cancel': 'Cancel',
+  'common.save': 'Save',
   'error.unknown': 'Something went wrong. Please try again.',
 
   'auth.login': 'Log in',
@@ -158,6 +162,8 @@ const it: Record<MessageKey, string> = {
   'language.english': 'English',
   'language.italian': 'Italiano',
 
+  'common.cancel': 'Annulla',
+  'common.save': 'Salva',
   'error.unknown': 'Qualcosa è andato storto. Riprova.',
 
   'auth.login': 'Accedi',
@@ -306,7 +312,7 @@ const it: Record<MessageKey, string> = {
 export const messages: Record<Locale, Record<MessageKey, string>> = { en, it };
 
 // Recipe categories and labels are stored in English. These maps only choose the text shown on screen.
-export const RECIPE_CATEGORY_KEYS: Record<string, MessageKey> = {
+export const RECIPE_CATEGORY_KEYS: Record<(typeof RECIPE_CATEGORIES)[number], MessageKey> = {
   Breakfast: 'recipes.category.Breakfast',
   Lunch: 'recipes.category.Lunch',
   Dinner: 'recipes.category.Dinner',
@@ -315,7 +321,7 @@ export const RECIPE_CATEGORY_KEYS: Record<string, MessageKey> = {
   Desserts: 'recipes.category.Desserts',
 };
 
-export const RECIPE_LABEL_KEYS: Record<string, MessageKey> = {
+export const RECIPE_LABEL_KEYS: Record<(typeof RECIPE_LABELS)[number], MessageKey> = {
   'Summer Fresh ☀️': 'recipes.label.summer',
   'Cozy Winter ❄️': 'recipes.label.winter',
   'Quick & Easy ⚡': 'recipes.label.quick',
@@ -338,7 +344,16 @@ export const CATEGORY_KEYS: Record<string, MessageKey> = {
 };
 
 // Meal keys: lunch and dinner are stored as these ids.
-export const MEAL_KEYS: Record<string, MessageKey> = { lunch: 'meal.lunch', dinner: 'meal.dinner' };
+export const MEAL_KEYS: Record<MealType, MessageKey> = { lunch: 'meal.lunch', dinner: 'meal.dinner' };
+
+// Shows the translation of a stored value (a category, label or grocery category). Values without a translation show as stored.
+export function translateStored<K extends string>(
+  value: string,
+  keys: Record<K, MessageKey>,
+  t: (key: MessageKey) => string,
+): string {
+  return Object.prototype.hasOwnProperty.call(keys, value) ? t(keys[value as K]) : value;
+}
 
 export function translate(locale: Locale, key: MessageKey, params?: Record<string, string>): string {
   const text = messages[locale][key];

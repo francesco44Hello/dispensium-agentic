@@ -118,10 +118,10 @@ export function MealEditForm({ entry, recipes, onSave, onCancel }: Props) {
       />
       <div className={styles.actions}>
         <button type="button" onClick={onCancel} className={styles.cancel}>
-          Cancel
+          {t('common.cancel')}
         </button>
         <button type="submit" className={styles.save}>
-          Save
+          {t('common.save')}
         </button>
       </div>
     </form>
