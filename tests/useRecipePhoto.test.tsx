@@ -34,4 +34,14 @@ describe('useRecipePhoto', () => {
     render(<Photo path="" />);
     expect(photoUrl).not.toHaveBeenCalled();
   });
+
+  it('shows an already loaded photo on the first render, so moving between cards does not flash the placeholder', async () => {
+    const path = 'households/h/recipes/remounted.webp';
+    const first = render(<Photo path={path} />);
+    await waitFor(() => expect(screen.getByTestId(path)).toHaveTextContent('blob:'));
+    first.unmount();
+
+    render(<Photo path={path} />);
+    expect(screen.getByTestId(path)).toHaveTextContent(`blob:${path}`);
+  });
 });

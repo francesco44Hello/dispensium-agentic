@@ -5,14 +5,16 @@ import { useMembers } from '../../hooks/useMembers';
 import { householdService as defaultService } from '../../services/dataClient';
 import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
 import type { HouseholdService, InviteCode } from '../../types/household';
+import { useLocale } from '../i18n/LocaleProvider';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './HouseholdPanel.module.css';
 
-const ERROR_MESSAGES: Record<HouseholdErrorCode, string> = {
-  'invalid-invite': 'That invite code is not valid.',
-  'expired-invite': 'This invite code has expired.',
-  'already-member': 'You are already in this household.',
-  'not-a-member': 'Only household members can create invites.',
-  unknown: 'Something went wrong. Please try again.',
+const ERROR_KEYS: Record<HouseholdErrorCode, MessageKey> = {
+  'invalid-invite': 'household.error.invalidInvite',
+  'expired-invite': 'household.error.expiredInvite',
+  'already-member': 'household.error.alreadyMember',
+  'not-a-member': 'household.error.notMember',
+  unknown: 'error.unknown',
 };
 
 type HouseholdPanelProps = {
@@ -23,6 +25,7 @@ type HouseholdPanelProps = {
 
 export function HouseholdPanel({ householdId, uid, service = defaultService }: HouseholdPanelProps) {
   const members = useMembers(householdId, service);
+  const { t } = useLocale();
   const [invite, setInvite] = useState<InviteCode | null>(null);
   const [error, setError] = useState<HouseholdErrorCode | null>(null);
 
@@ -37,31 +40,31 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
 
   return (
     <section className={styles.panel}>
-      <h2 className={styles.heading}>Members</h2>
+      <h2 className={styles.heading}>{t('household.members')}</h2>
       {members === null ? (
-        <p role="status">Loading members…</p>
+        <p role="status">{t('household.loadingMembers')}</p>
       ) : (
         <ul className={styles.members}>
           {members.map((member) => (
             <li key={member.uid}>
-              {member.uid === uid ? 'You' : 'Housemate'} · {member.role}
+              {member.uid === uid ? t('household.you') : t('household.housemate')} · {member.role}
             </li>
           ))}
         </ul>
       )}
 
-      <h2 className={styles.heading}>Invite a housemate</h2>
+      <h2 className={styles.heading}>{t('household.inviteTitle')}</h2>
       <button type="button" className={styles.button} onClick={handleCreateInvite}>
-        Create invite code
+        {t('household.createInvite')}
       </button>
       {invite && (
         <p className={styles.invite}>
-          Share this code: <code>{invite.code}</code> (valid for 7 days)
+          {t('household.shareBefore')} <code>{invite.code}</code> {t('household.shareAfter')}
         </p>
       )}
       {error && (
         <p role="alert" className={styles.error}>
-          {ERROR_MESSAGES[error]}
+          {t(ERROR_KEYS[error])}
         </p>
       )}
     </section>

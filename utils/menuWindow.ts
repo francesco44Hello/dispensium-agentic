@@ -1,3 +1,5 @@
+import { INTL_LOCALE } from '../i18n/locale';
+
 // The weekly menu runs from earlier days up to six days after today. The earlier part grows on request.
 const DAYS_FORWARD = 6;
 export const PREVIOUS_STEP_DAYS = 7;
@@ -42,7 +44,8 @@ function parseDateId(id: string): Date {
   return new Date(year, month - 1, day);
 }
 
-export function dayLabel(id: string): { dayName: string; dayNumber: number } {
+// The locale is a BCP 47 tag such as 'it-IT'. English is the default.
+export function dayLabel(id: string, locale = INTL_LOCALE.en): { dayName: string; dayNumber: number } {
   const date = parseDateId(id);
-  return { dayName: date.toLocaleDateString('en-US', { weekday: 'short' }), dayNumber: date.getDate() };
+  return { dayName: date.toLocaleDateString(locale, { weekday: 'short' }), dayNumber: date.getDate() };
 }

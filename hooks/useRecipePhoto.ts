@@ -7,11 +7,16 @@ import { recipeService } from '../services/dataClient';
 // Object URLs are kept until the page reloads, which keeps repeat views free. A failed fetch is dropped,
 // so the next mount can retry it, but a single component never refetches on its own.
 const urls = new Map<string, Promise<string>>();
+// Once a photo has loaded, its URL is kept here too, so a card that mounts again shows it on the first render.
+const resolved = new Map<string, string>();
 
 function photoFor(path: string): Promise<string> {
   let pending = urls.get(path);
   if (!pending) {
-    pending = recipeService.photoUrl(path);
+    pending = recipeService.photoUrl(path).then((url) => {
+      resolved.set(path, url);
+      return url;
+    });
     urls.set(path, pending);
     pending.catch(() => urls.delete(path));
   }
@@ -21,6 +26,7 @@ function photoFor(path: string): Promise<string> {
 // Turns a stored photo path into a local URL. Empty paths resolve to ''.
 export function useRecipePhoto(path: string): string {
   const [photo, setPhoto] = useState<{ path: string; url: string } | null>(null);
+  const cached = path ? resolved.get(path) : undefined;
 
   useEffect(() => {
     if (!path) return;
@@ -36,5 +42,6 @@ export function useRecipePhoto(path: string): string {
     };
   }, [path]);
 
+  if (cached !== undefined) return cached;
   return photo?.path === path ? photo.url : '';
 }

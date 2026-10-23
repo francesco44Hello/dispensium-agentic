@@ -1,5 +1,6 @@
 import type { Recipe } from '../../types/recipe';
 import { RecipeCard } from './RecipeCard';
+import { useLocale } from '../i18n/LocaleProvider';
 import styles from './RecipeList.module.css';
 
 interface Props {
@@ -7,8 +8,9 @@ interface Props {
 }
 
 export function RecipeList({ recipes }: Props) {
+  const { t } = useLocale();
   if (recipes.length === 0) {
-    return <p className={styles.empty}>No recipes yet. Tap + to add your first one.</p>;
+    return <p className={styles.empty}>{t('recipes.empty')}</p>;
   }
 
   return (

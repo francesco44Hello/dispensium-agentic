@@ -6,6 +6,7 @@ const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 
 import { AuthProvider } from '../components/auth/AuthProvider';
+import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { AuthForm } from '../components/auth/AuthForm';
 import { AuthError, createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
@@ -59,5 +60,37 @@ describe('AuthForm Google button', () => {
 
     await waitFor(() => expect(screen.getByRole('button', { name: /continue with google/i })).toBeTruthy());
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+});
+
+describe('AuthForm in Italian', () => {
+  afterEach(() => window.localStorage.clear());
+
+  it('shows the form text and errors in Italian when Italian is the chosen language', async () => {
+    window.localStorage.setItem('dispensium-locale', 'it');
+    const service = createAuthService(createMockAuthBackend());
+    render(
+      <LocaleProvider>
+        <AuthProvider service={service}>
+          <AuthForm mode="login" />
+        </AuthProvider>
+      </LocaleProvider>,
+    );
+    expect(await screen.findByRole('heading', { name: 'Accedi' })).toBeTruthy();
+    expect(screen.getByLabelText('Password')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Continua con Google' })).toBeTruthy();
+    expect(screen.getByText('Sei nuovo qui?')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Accedi' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('Inserisci un indirizzo email valido.');
+  });
+});
+
+describe('AuthForm language selector', () => {
+  it('lets a signed-out person choose the language on the login and signup pages', () => {
+    renderForm('login');
+    expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+    cleanup();
+    renderForm('signup');
+    expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
   });
 });
