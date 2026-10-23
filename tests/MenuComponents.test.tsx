@@ -88,7 +88,7 @@ describe('MealDisplay', () => {
   it('opens the editor from the empty state', () => {
     const onEdit = vi.fn();
     render(<MealDisplay meal="dinner" entry={EMPTY} recipes={[]} onEdit={onEdit} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Add dinner' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add Dinner' }));
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 });

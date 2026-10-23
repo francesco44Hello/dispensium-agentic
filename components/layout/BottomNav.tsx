@@ -4,15 +4,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
 import { MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
+import { useLocale } from '../i18n/LocaleProvider';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './BottomNav.module.css';
 
-type Tab = { label: string; icon: IconType; href: string };
+type Tab = { labelKey: MessageKey; icon: IconType; href: string };
 
 const TABS: Tab[] = [
-  { label: 'Shopping', icon: MdChecklist, href: '/' },
-  { label: 'Recipes', icon: MdRestaurant, href: '/recipes' },
-  { label: 'Menu', icon: MdCalendarMonth, href: '/weekly-menu' },
-  { label: 'Household', icon: MdGroups, href: '/household' },
+  { labelKey: 'nav.shopping', icon: MdChecklist, href: '/' },
+  { labelKey: 'nav.recipes', icon: MdRestaurant, href: '/recipes' },
+  { labelKey: 'nav.menu', icon: MdCalendarMonth, href: '/weekly-menu' },
+  { labelKey: 'nav.household', icon: MdGroups, href: '/household' },
 ];
 
 interface Props {
@@ -22,23 +24,24 @@ interface Props {
 
 export function BottomNav({ onAdd }: Props) {
   const pathname = usePathname();
+  const { t } = useLocale();
   const showAdd = pathname === '/recipes' && onAdd;
 
   return (
-    <nav className={styles.nav} aria-label="Main">
-      {TABS.map(({ label, icon: Icon, href }) => {
+    <nav className={styles.nav} aria-label={t('nav.main')}>
+      {TABS.map(({ labelKey, icon: Icon, href }) => {
         const isCurrent = pathname === href;
         return (
-          <Link key={label} href={href} className={styles.tab} aria-current={isCurrent ? 'page' : undefined}>
+          <Link key={labelKey} href={href} className={styles.tab} aria-current={isCurrent ? 'page' : undefined}>
             <span className={`${styles.iconWrap} ${isCurrent ? styles.active : ''}`}>
               <Icon aria-hidden="true" />
             </span>
-            <span className={styles.label}>{label}</span>
+            <span className={styles.label}>{t(labelKey)}</span>
           </Link>
         );
       })}
       {showAdd && (
-        <button type="button" className={styles.fab} aria-label="Add recipe" onClick={onAdd}>
+        <button type="button" className={styles.fab} aria-label={t('nav.addRecipe')} onClick={onAdd}>
           <MdAdd aria-hidden="true" />
         </button>
       )}

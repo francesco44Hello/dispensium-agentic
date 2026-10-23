@@ -1,0 +1,47 @@
+.container {
+  position: relative;
+  width: 44px;
+  height: 44px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.list {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  z-index: 30;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 160px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.option {
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.option:hover,
+.option:focus-visible {
+  background: var(--muted);
+  outline: none;
+}

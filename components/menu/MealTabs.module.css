@@ -16,7 +16,7 @@
   font-weight: var(--font-weight-brand);
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s ease;
+  /* No fade: a quick second click would otherwise catch the tabs mid-colour and look like a flicker. */
   display: flex;
   flex-direction: column-reverse;
   align-items: center;

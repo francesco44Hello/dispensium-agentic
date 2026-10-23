@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { useRecipePhoto } from '../../hooks/useRecipePhoto';
 import type { Recipe } from '../../types/recipe';
 import styles from './MealDisplay.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 // A planned meal that matches a recipe: the photo, title and time, linking to the recipe.
 export function RecipeMealCard({ recipe }: { recipe: Recipe }) {
+  const { t } = useLocale();
   const photoUrl = useRecipePhoto(recipe.image);
   return (
     <Link href={`/recipes/${recipe.id}`} className={styles.recipeLink}>
@@ -19,7 +21,7 @@ export function RecipeMealCard({ recipe }: { recipe: Recipe }) {
           <div className={styles.recipeMeta}>
             <span>{recipe.time || '--'}</span>
             <span>•</span>
-            <span className={styles.viewLink}>View Recipe →</span>
+            <span className={styles.viewLink}>{t('recipes.viewRecipe')}</span>
           </div>
         </div>
       </article>

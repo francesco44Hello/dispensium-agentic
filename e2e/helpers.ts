@@ -31,6 +31,7 @@ export async function addItem(page: Page, name: string) {
 }
 
 export async function logOut(page: Page) {
+  await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('button', { name: 'Log out' }).click();
   await expect(page).toHaveURL(/\/login$/);
 }

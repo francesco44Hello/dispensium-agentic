@@ -6,12 +6,13 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 vi.mock('next/navigation', () => ({ usePathname: () => '/' }));
 
 import { SideMenu } from '../components/layout/SideMenu';
+import { LocaleProvider } from '../components/i18n/LocaleProvider';
 
 afterEach(cleanup);
 
 describe('SideMenu', () => {
   it('shows the app name, its tagline and the Explore links, as in the legacy menu', () => {
-    render(<SideMenu open onClose={vi.fn()} />);
+    render(<LocaleProvider><SideMenu open onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     expect(screen.getByText('Dispensium')).toBeInTheDocument();
     expect(screen.getByText('Plan. Shop. Cook.')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Explore' })).toBeInTheDocument();
@@ -23,29 +24,38 @@ describe('SideMenu', () => {
   });
 
   it('shows the app name as text, not as a heading, so the page keeps one h1', () => {
-    render(<SideMenu open={false} onClose={vi.fn()} />);
+    render(<LocaleProvider><SideMenu open={false} onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     expect(screen.queryByRole('heading', { name: 'Dispensium', hidden: true })).toBeNull();
     expect(screen.getByText('Dispensium')).toBeInTheDocument();
   });
 
   it('shows the copyright footer', () => {
-    render(<SideMenu open onClose={vi.fn()} />);
+    render(<LocaleProvider><SideMenu open onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     expect(screen.getByText('© Francesco Longo')).toBeInTheDocument();
     expect(screen.getByText('All rights Reserved')).toBeInTheDocument();
   });
 
   it('reports whether it is open', () => {
-    const { rerender } = render(<SideMenu open={false} onClose={vi.fn()} />);
+    const { rerender } = render(<LocaleProvider><SideMenu open={false} onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     expect(screen.getByRole('complementary', { hidden: true })).toHaveAttribute('data-open', 'false');
-    rerender(<SideMenu open onClose={vi.fn()} />);
+    rerender(<LocaleProvider><SideMenu open onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     expect(screen.getByRole('complementary')).toHaveAttribute('data-open', 'true');
   });
 
   it('closes from the close button and when a link is chosen', () => {
     const onClose = vi.fn();
-    render(<SideMenu open onClose={onClose} />);
+    render(<LocaleProvider><SideMenu open onClose={onClose} onSignOut={vi.fn()} signingOut={false} /></LocaleProvider>);
     fireEvent.click(screen.getByRole('button', { name: 'Close menu' }));
     fireEvent.click(screen.getByRole('link', { name: /Recipes/ }));
     expect(onClose).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('SideMenu log out', () => {
+  it('has a log out button that signs out', () => {
+    const onSignOut = vi.fn();
+    render(<SideMenu open onClose={vi.fn()} onSignOut={onSignOut} signingOut={false} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    expect(onSignOut).toHaveBeenCalledTimes(1);
   });
 });

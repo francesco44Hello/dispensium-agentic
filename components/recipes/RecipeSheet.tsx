@@ -8,6 +8,7 @@ import type { ExtractedRecipe, RecipeDraft } from '../../types/recipe';
 import { ImportPanel } from './ImportPanel';
 import { RecipeForm } from './RecipeForm';
 import styles from './RecipeSheet.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 interface Props {
   open: boolean;
@@ -43,6 +44,7 @@ interface Session {
 
 // Slides up from the bottom. Each opening starts empty; an import fills the form and fetches its photo.
 export function RecipeSheet({ open, onClose, onSave, saving, error }: Props) {
+  const { t } = useLocale();
   const [session, setSession] = useState<Session>({ version: 0, recipe: null, photo: null });
   const [wasOpen, setWasOpen] = useState(open);
 
@@ -65,10 +67,10 @@ export function RecipeSheet({ open, onClose, onSave, saving, error }: Props) {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="recipe-sheet-title" data-open={open ? 'true' : 'false'} className={styles.sheet} aria-hidden={!open} inert={!open}>
       <header className={styles.header}>
-        <button type="button" className={styles.close} aria-label="Close" onClick={onClose}>
+        <button type="button" className={styles.close} aria-label={t('recipes.close')} onClick={onClose}>
           <MdClose aria-hidden="true" />
         </button>
-        <h2 id="recipe-sheet-title" className={styles.title}>New recipe</h2>
+        <h2 id="recipe-sheet-title" className={styles.title}>{t('recipes.new')}</h2>
         <span className={styles.spacer} aria-hidden="true" />
       </header>
       <div className={styles.body}>

@@ -2,51 +2,59 @@
 
 import Link from 'next/link';
 import { MdChevronRight, MdClose } from 'react-icons/md';
+import { useLocale } from '../i18n/LocaleProvider';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './SideMenu.module.css';
 
 // The side menu, copied from the legacy app: the app name, tagline, the Explore links and the footer.
-const LINKS = [
-  { label: 'Shopping List', href: '/' },
-  { label: 'Recipes', href: '/recipes' },
-  { label: 'Weekly Menu', href: '/weekly-menu' },
-  { label: 'Household', href: '/household' },
+const LINKS: { labelKey: MessageKey; href: string }[] = [
+  { labelKey: 'menu.shoppingList', href: '/' },
+  { labelKey: 'nav.recipes', href: '/recipes' },
+  { labelKey: 'menu.weeklyMenu', href: '/weekly-menu' },
+  { labelKey: 'nav.household', href: '/household' },
 ];
 
 interface Props {
   open: boolean;
   onClose: () => void;
+  onSignOut: () => void;
+  signingOut: boolean;
 }
 
-export function SideMenu({ open, onClose }: Props) {
+export function SideMenu({ open, onClose, onSignOut, signingOut }: Props) {
+  const { t } = useLocale();
   return (
     <>
       <div className={`${styles.overlay} ${open ? styles.overlayOpen : ''}`} onClick={onClose} aria-hidden="true" />
-      <aside aria-label="Menu" data-open={open ? 'true' : 'false'} className={`${styles.container} ${open ? styles.open : ''}`} aria-hidden={!open} inert={!open}>
+      <aside aria-label={t('menu.label')} data-open={open ? 'true' : 'false'} className={`${styles.container} ${open ? styles.open : ''}`} aria-hidden={!open} inert={!open}>
         <div className={styles.decor} aria-hidden="true" />
         <div className={styles.content}>
           <div className={styles.header}>
             <div className={styles.title}>
               <p className={styles.brand}>Dispensium</p>
-              <p className={styles.tagline}>Plan. Shop. Cook.</p>
+              <p className={styles.tagline}>{t('menu.tagline')}</p>
             </div>
-            <button type="button" className={styles.close} aria-label="Close menu" onClick={onClose}>
+            <button type="button" className={styles.close} aria-label={t('menu.close')} onClick={onClose}>
               <MdClose aria-hidden="true" />
             </button>
           </div>
-          <h2 className={styles.explore}>Explore</h2>
+          <h2 className={styles.explore}>{t('menu.explore')}</h2>
           <ul className={styles.links}>
-            {LINKS.map(({ label, href }) => (
+            {LINKS.map(({ labelKey, href }) => (
               <li key={href} className={styles.link}>
                 <Link href={href} onClick={onClose}>
-                  {label} <MdChevronRight aria-hidden="true" />
+                  {t(labelKey)} <MdChevronRight aria-hidden="true" />
                 </Link>
               </li>
             ))}
           </ul>
+          <button type="button" className={styles.logout} onClick={onSignOut} disabled={signingOut}>
+            {t('nav.logOut')}
+          </button>
           <footer className={styles.footer}>
             <p>© Francesco Longo</p>
             <p>2026</p>
-            <p>All rights Reserved</p>
+            <p>{t('menu.rights')}</p>
           </footer>
         </div>
       </aside>

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from 'react';
 import { MdOutlineAddCircleOutline } from 'react-icons/md';
+import { useLocale } from '../i18n/LocaleProvider';
 import styles from './GroceryInput.module.css';
 
 type GroceryInputProps = {
@@ -10,6 +11,7 @@ type GroceryInputProps = {
 
 export function GroceryInput({ onAdd }: GroceryInputProps) {
   const [value, setValue] = useState('');
+  const { t } = useLocale();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,11 +26,11 @@ export function GroceryInput({ onAdd }: GroceryInputProps) {
       <input
         type="text"
         className={styles.input}
-        placeholder="Add a grocery item (e.g., apple)…"
+        placeholder={t('grocery.placeholder')}
         value={value}
         onChange={(event) => setValue(event.target.value)}
       />
-      <button type="submit" className={styles.submit} aria-label="Add item">
+      <button type="submit" className={styles.submit} aria-label={t('grocery.add')}>
         <MdOutlineAddCircleOutline aria-hidden="true" />
       </button>
     </form>

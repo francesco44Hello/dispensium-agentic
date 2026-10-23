@@ -5,6 +5,7 @@ import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 import type { Recipe } from '../../types/recipe';
 import type { MealEntry } from '../../types/menu';
 import styles from './MealEditForm.module.css';
+import { useLocale } from '../i18n/LocaleProvider';
 
 const MAX_SUGGESTIONS = 5;
 // Suggestions appear after the user pauses, not on every key.
@@ -31,6 +32,7 @@ function RecipeField({
   recipes: Recipe[];
   onChange: (text: string, recipeId: string) => void;
 }) {
+  const { t } = useLocale();
   const inputId = useId();
   const typed = useDebouncedValue(text, SUGGESTION_DELAY_MS).trim().toLowerCase();
   const linked = recipes.find((recipe) => recipe.id === recipeId);
@@ -58,7 +60,7 @@ function RecipeField({
         }}
       />
       {suggestions.length > 0 && (
-        <ul role="listbox" aria-label={`${label} suggestions`} className={styles.suggestions}>
+        <ul role="listbox" aria-label={t('menu.suggestions', { label })} className={styles.suggestions}>
           {suggestions.map((recipe) => (
             <li
               key={recipe.id}
@@ -81,6 +83,7 @@ function RecipeField({
 }
 
 export function MealEditForm({ entry, recipes, onSave, onCancel }: Props) {
+  const { t } = useLocale();
   const [main, setMain] = useState(entry.main);
   const [mainRecipeId, setMainRecipeId] = useState(entry.mainRecipeId);
   const [side, setSide] = useState(entry.side);
@@ -94,7 +97,7 @@ export function MealEditForm({ entry, recipes, onSave, onCancel }: Props) {
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <RecipeField
-        label="Main"
+        label={t('menu.main')}
         text={main}
         recipeId={mainRecipeId}
         recipes={recipes}
@@ -104,7 +107,7 @@ export function MealEditForm({ entry, recipes, onSave, onCancel }: Props) {
         }}
       />
       <RecipeField
-        label="Side (Optional)"
+        label={t('menu.sideOptional')}
         text={side}
         recipeId={sideRecipeId}
         recipes={recipes}
@@ -115,10 +118,10 @@ export function MealEditForm({ entry, recipes, onSave, onCancel }: Props) {
       />
       <div className={styles.actions}>
         <button type="button" onClick={onCancel} className={styles.cancel}>
-          Cancel
+          {t('common.cancel')}
         </button>
         <button type="submit" className={styles.save}>
-          Save
+          {t('common.save')}
         </button>
       </div>
     </form>

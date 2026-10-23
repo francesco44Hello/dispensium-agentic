@@ -4,14 +4,16 @@ import { useState, type FormEvent } from 'react';
 import { householdService as defaultService } from '../../services/dataClient';
 import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
 import type { HouseholdService } from '../../types/household';
+import { useLocale } from '../i18n/LocaleProvider';
+import type { MessageKey } from '../../i18n/messages';
 import styles from './JoinHouseholdForm.module.css';
 
-const ERROR_MESSAGES: Record<HouseholdErrorCode, string> = {
-  'invalid-invite': 'That invite code is not valid.',
-  'expired-invite': 'This invite code has expired.',
-  'already-member': 'You are already in this household.',
-  'not-a-member': 'Only household members can create invites.',
-  unknown: 'Something went wrong. Please try again.',
+const ERROR_KEYS: Record<HouseholdErrorCode, MessageKey> = {
+  'invalid-invite': 'household.error.invalidInvite',
+  'expired-invite': 'household.error.expiredInvite',
+  'already-member': 'household.error.alreadyMember',
+  'not-a-member': 'household.error.notMember',
+  unknown: 'error.unknown',
 };
 
 type JoinHouseholdFormProps = {
@@ -21,6 +23,7 @@ type JoinHouseholdFormProps = {
 
 export function JoinHouseholdForm({ uid, service = defaultService }: JoinHouseholdFormProps) {
   const [code, setCode] = useState('');
+  const { t } = useLocale();
   const [status, setStatus] = useState<'idle' | 'submitting' | 'joined'>('idle');
   const [error, setError] = useState<HouseholdErrorCode | null>(null);
 
@@ -40,9 +43,9 @@ export function JoinHouseholdForm({ uid, service = defaultService }: JoinHouseho
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
-      <h2 className={styles.heading}>Join a household</h2>
+      <h2 className={styles.heading}>{t('household.joinTitle')}</h2>
       <label className={styles.field}>
-        <span>Invite code</span>
+        <span>{t('household.inviteCode')}</span>
         <input
           type="text"
           name="inviteCode"
@@ -54,12 +57,12 @@ export function JoinHouseholdForm({ uid, service = defaultService }: JoinHouseho
       </label>
       {error && (
         <p role="alert" className={styles.error}>
-          {ERROR_MESSAGES[error]}
+          {t(ERROR_KEYS[error])}
         </p>
       )}
-      {status === 'joined' && <p role="status">You joined the household.</p>}
+      {status === 'joined' && <p role="status">{t('household.joined')}</p>}
       <button type="submit" className={styles.button} disabled={status === 'submitting'}>
-        Join household
+        {t('household.joinButton')}
       </button>
     </form>
   );
