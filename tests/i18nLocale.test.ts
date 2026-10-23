@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { DEFAULT_LOCALE, LOCALES, isLocale, resolveLocale } from '../i18n/locale';
-import { messages } from '../i18n/messages';
+import { messages, translateStored, RECIPE_CATEGORY_KEYS, type MessageKey } from '../i18n/messages';
 
 describe('isLocale', () => {
   it('accepts only the supported locales', () => {
@@ -43,5 +43,17 @@ describe('messages', () => {
       }
     }
     expect(Object.keys(messages.it).sort()).toEqual(Object.keys(messages.en).sort());
+  });
+});
+
+describe('translateStored', () => {
+  const t = (key: MessageKey) => messages.it[key];
+
+  it('shows the translation of a known stored value', () => {
+    expect(translateStored('Dinner', RECIPE_CATEGORY_KEYS, t)).toBe('Cena');
+  });
+
+  it('shows an unknown stored value as it is stored', () => {
+    expect(translateStored('Brunch', RECIPE_CATEGORY_KEYS, t)).toBe('Brunch');
   });
 });
