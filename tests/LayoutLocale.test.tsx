@@ -32,7 +32,7 @@ describe('layout in Italian', () => {
   it('translates the side menu headings and links', async () => {
     render(
       <LocaleProvider>
-        <SideMenu open onClose={vi.fn()} />
+        <SideMenu open onClose={vi.fn()} onSignOut={vi.fn()} signingOut={false} />
       </LocaleProvider>,
     );
     expect(await screen.findByRole('heading', { level: 2, name: 'Esplora' })).toBeTruthy();

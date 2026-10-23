@@ -7,6 +7,7 @@ const en = {
   'language.label': 'Language',
   'language.english': 'English',
   'language.italian': 'Italiano',
+  'language.change': 'Change language',
 
   'common.cancel': 'Cancel',
   'common.save': 'Save',
@@ -163,6 +164,7 @@ const it: Record<MessageKey, string> = {
   'language.label': 'Lingua',
   'language.english': 'English',
   'language.italian': 'Italiano',
+  'language.change': 'Cambia lingua',
 
   'common.cancel': 'Annulla',
   'common.save': 'Salva',

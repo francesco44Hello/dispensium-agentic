@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { MdChevronRight, MdClose } from 'react-icons/md';
-import { LanguageSelect } from '../i18n/LanguageSelect';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { MessageKey } from '../../i18n/messages';
 import styles from './SideMenu.module.css';
@@ -18,9 +17,11 @@ const LINKS: { labelKey: MessageKey; href: string }[] = [
 interface Props {
   open: boolean;
   onClose: () => void;
+  onSignOut: () => void;
+  signingOut: boolean;
 }
 
-export function SideMenu({ open, onClose }: Props) {
+export function SideMenu({ open, onClose, onSignOut, signingOut }: Props) {
   const { t } = useLocale();
   return (
     <>
@@ -47,9 +48,9 @@ export function SideMenu({ open, onClose }: Props) {
               </li>
             ))}
           </ul>
-          <div className={styles.language}>
-            <LanguageSelect />
-          </div>
+          <button type="button" className={styles.logout} onClick={onSignOut} disabled={signingOut}>
+            {t('nav.logOut')}
+          </button>
           <footer className={styles.footer}>
             <p>© Francesco Longo</p>
             <p>2026</p>

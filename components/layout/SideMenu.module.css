@@ -147,7 +147,18 @@
   margin: 0;
 }
 
-.language {
-  margin-top: 16px;
-  margin-inline: 16px;
+.logout {
+  margin: 16px;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 20px;
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  font: inherit;
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.logout:disabled {
+  opacity: 0.5;
 }
