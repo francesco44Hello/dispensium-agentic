@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
@@ -82,6 +84,27 @@ describe('AuthForm in Italian', () => {
     expect(screen.getByText('Sei nuovo qui?')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Accedi' }));
     expect((await screen.findByRole('alert')).textContent).toBe('Inserisci un indirizzo email valido.');
+  });
+});
+
+describe('AuthForm login button colour', () => {
+  const css = readFileSync(join(process.cwd(), 'components/auth/AuthForm.module.css'), 'utf8');
+  const ruleFor = (selector: string) => new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+
+  it('gives the login submit button a blue background with white text', () => {
+    renderForm('login');
+    const loginButton = screen.getByRole('button', { name: 'Log in' });
+    expect(loginButton.className).toMatch(/loginSubmit/);
+
+    const rule = ruleFor('loginSubmit');
+    expect(rule).toMatch(/background:\s*#6b7fe0;/);
+    expect(rule).toMatch(/color:\s*#ffffff;/);
+  });
+
+  it('keeps the signup submit button on the default colours', () => {
+    renderForm('signup');
+    const signupButton = screen.getByRole('button', { name: 'Sign up' });
+    expect(signupButton.className).not.toMatch(/loginSubmit/);
   });
 });
 
