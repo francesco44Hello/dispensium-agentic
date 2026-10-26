@@ -87,18 +87,19 @@ describe('AuthForm in Italian', () => {
   });
 });
 
-describe('AuthForm login button colour', () => {
+describe('AuthForm submit button colour', () => {
   const css = readFileSync(join(process.cwd(), 'components/auth/AuthForm.module.css'), 'utf8');
   const ruleFor = (selector: string) => new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
 
-  it('gives the login submit button a blue background with white text', () => {
+  it('gives the login submit button the default green background', () => {
     renderForm('login');
     const loginButton = screen.getByRole('button', { name: 'Log in' });
-    expect(loginButton.className).toMatch(/loginSubmit/);
+    expect(loginButton.className).not.toMatch(/loginSubmit/);
+    expect(ruleFor('submit')).toMatch(/background:\s*var\(--primary-button\);/);
+  });
 
-    const rule = ruleFor('loginSubmit');
-    expect(rule).toMatch(/background:\s*#6b7fe0;/);
-    expect(rule).toMatch(/color:\s*#ffffff;/);
+  it('has no blue override for the login submit button in the stylesheet', () => {
+    expect(css).not.toMatch(/\.loginSubmit/);
   });
 
   it('keeps the signup submit button on the default colours', () => {
