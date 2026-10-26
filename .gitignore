@@ -45,8 +45,7 @@ next-env.d.ts
 /test-results/
 /e2e-artifacts/
 /.vercel
-/.claude/.verify-stamp
-/.claude/settings.local.json
+/.claude/
 *-firebase-adminsdk-*.json
 firebase-debug.log
 firestore-debug.log
