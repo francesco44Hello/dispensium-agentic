@@ -11,6 +11,7 @@ export const visibleForm = (page: Page) => page.locator('form:visible');
 // client-side (links, router) and never reload the page between users.
 export async function fillSignUp(page: Page, email: string, password = PASSWORD) {
   const form = visibleForm(page);
+  await form.getByLabel('Name', { exact: true }).fill('Test User');
   await form.getByLabel('Email').fill(email);
   await form.getByLabel('Password', { exact: true }).fill(password);
   await form.getByLabel('Confirm password').fill(password);

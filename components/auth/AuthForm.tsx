@@ -20,6 +20,7 @@ const ERROR_KEYS: Record<AuthErrorCode, MessageKey | null> = {
   'weak-password': 'auth.error.weakPassword',
   'email-in-use': 'auth.error.emailInUse',
   'invalid-credentials': 'auth.error.invalidCredentials',
+  'name-required': 'auth.error.nameRequired',
   'popup-closed': null,
   unknown: 'error.unknown',
 };
@@ -28,6 +29,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const { service, status } = useAuth();
   const { t } = useLocale();
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -67,7 +69,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setSubmitting(true);
     try {
       if (isSignup) {
-        await service.signUp(email, password);
+        await service.signUp(email, password, name);
       } else {
         await service.signIn(email, password);
       }
@@ -83,6 +85,20 @@ export function AuthForm({ mode }: AuthFormProps) {
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
       <h1 className={styles.title}>{isSignup ? t('auth.signup') : t('auth.login')}</h1>
+
+      {isSignup && (
+        <label className={styles.field}>
+          <span>{t('auth.name')}</span>
+          <input
+            type="text"
+            name="name"
+            autoComplete="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </label>
+      )}
 
       <label className={styles.field}>
         <span>{t('auth.email')}</span>

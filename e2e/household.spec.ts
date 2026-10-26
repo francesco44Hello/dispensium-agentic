@@ -6,7 +6,8 @@ test('a housemate joins with an invite code and sees the shared list', async ({ 
   await signUp(page, 'alice@example.com');
   await addItem(page, 'Parmigiano');
   await page.getByRole('link', { name: 'Household', exact: true }).click();
-  await expect(page.getByText('You · owner')).toBeVisible();
+  await expect(page.getByText('You', { exact: true })).toBeVisible();
+  await expect(page.getByText('owner', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Create invite code' }).click();
   const code = (await page.locator('code').innerText()).trim();
   expect(code).toMatch(/^[A-Z2-9]{8}$/);
@@ -19,7 +20,9 @@ test('a housemate joins with an invite code and sees the shared list', async ({ 
   await visibleForm(page).getByLabel('Invite code').fill(code.toLowerCase());
   await page.getByRole('button', { name: 'Join household' }).click();
   await expect(page.getByText('You joined the household.')).toBeVisible();
-  await expect(page.getByText('Housemate · owner')).toBeVisible();
+  // Members show the name they signed up with, here the sign-up helper's name.
+  await expect(page.getByText('Test User', { exact: true })).toBeVisible();
+  await expect(page.getByText('owner', { exact: true })).toBeVisible();
 
   // Bob now sees Alice's item on the shared list.
   await page.getByRole('link', { name: 'Shopping' }).click();

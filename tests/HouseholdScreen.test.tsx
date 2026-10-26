@@ -25,6 +25,11 @@ describe('HouseholdScreen', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Household' })).toBeInTheDocument();
   });
 
+  it('explains the page in one line under the heading', () => {
+    render(<HouseholdScreen />);
+    expect(screen.getByText('Share a grocery list with the people you live with.')).toBeInTheDocument();
+  });
+
   it('keeps the heading when the household cannot be loaded', () => {
     state.status = 'error';
     render(<HouseholdScreen />);

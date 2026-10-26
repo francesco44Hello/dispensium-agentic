@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { HouseholdPanel } from '../components/household/HouseholdPanel';
 import { JoinHouseholdForm } from '../components/household/JoinHouseholdForm';
@@ -8,6 +8,7 @@ import { createMemoryDataBackend } from '../services/dataBackends/memoryDataBack
 
 afterEach(() => {
   cleanup();
+  vi.unstubAllGlobals();
 });
 
 function setup(generateCode?: () => string) {
@@ -26,8 +27,10 @@ describe('HouseholdPanel', () => {
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
 
-    expect(await screen.findByText(/You · owner/)).toBeTruthy();
-    expect(screen.getByText('Housemate · member')).toBeTruthy();
+    expect(await screen.findByText('You')).toBeTruthy();
+    expect(screen.getByText('owner')).toBeTruthy();
+    expect(screen.getByText('Housemate')).toBeTruthy();
+    expect(screen.getByText('member')).toBeTruthy();
   });
 
   it('creates an invite code and displays it', async () => {
@@ -36,6 +39,43 @@ describe('HouseholdPanel', () => {
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
     fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
+
+    expect(await screen.findByText('ABCD2345')).toBeTruthy();
+  });
+});
+
+describe('HouseholdPanel layout', () => {
+  it('shows the role as a pill beside each member name', async () => {
+    const { service } = setup(() => 'ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
+
+    const owner = await screen.findByText('owner');
+    expect(owner.tagName).toBe('SPAN');
+    expect(owner.parentElement?.textContent).toContain('You');
+  });
+
+  it('copies the invite code to the clipboard from its own button', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', { clipboard: { writeText } });
+    const { service } = setup(() => 'ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+
+    render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
+    fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /^copy$/i }));
+
+    expect(writeText).toHaveBeenCalledWith('ABCD2345');
+  });
+
+  it('keeps the invite code on screen when the clipboard refuses', async () => {
+    vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } });
+    const { service } = setup(() => 'ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+
+    render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
+    fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /^copy$/i }));
 
     expect(await screen.findByText('ABCD2345')).toBeTruthy();
   });
