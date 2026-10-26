@@ -128,7 +128,11 @@ export function AuthForm({ mode }: AuthFormProps) {
         </p>
       )}
 
-      <button type="submit" className={styles.submit} disabled={submitting}>
+      <button
+        type="submit"
+        className={isSignup ? styles.submit : `${styles.submit} ${styles.loginSubmit}`}
+        disabled={submitting}
+      >
         {submitting ? t('auth.submit.wait') : isSignup ? t('auth.submit.signup') : t('auth.login')}
       </button>
 
