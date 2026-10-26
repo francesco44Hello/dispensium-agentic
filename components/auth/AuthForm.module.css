@@ -52,11 +52,6 @@
   cursor: pointer;
 }
 
-.loginSubmit {
-  color: #ffffff;
-  background: #6b7fe0;
-}
-
 .submit:disabled {
   opacity: 0.6;
   cursor: progress;
