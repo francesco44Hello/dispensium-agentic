@@ -99,7 +99,7 @@ describe('joinWithCode (Firestore)', () => {
     };
     fx.runTransaction.mockImplementation((_db: unknown, work: (t: FakeTx) => Promise<unknown>) => work(tx));
 
-    await expect(createFirestoreDataBackend().households.joinWithCode('bob', 'ABCD2345', now)).rejects.toMatchObject({
+    await expect(createFirestoreDataBackend().households.joinWithCode('bob', 'ABCD2345', now, '', '')).rejects.toMatchObject({
       code: 'invalid-invite',
     });
     expect(set).not.toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('joinWithCode (Firestore)', () => {
     };
     fx.runTransaction.mockImplementation((_db: unknown, work: (t: FakeTx) => Promise<unknown>) => work(tx));
 
-    await expect(createFirestoreDataBackend().households.joinWithCode('bob', 'ABCD2345', now)).rejects.toMatchObject({
+    await expect(createFirestoreDataBackend().households.joinWithCode('bob', 'ABCD2345', now, '', '')).rejects.toMatchObject({
       code: 'invalid-invite',
     });
   });

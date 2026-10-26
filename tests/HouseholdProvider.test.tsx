@@ -42,7 +42,7 @@ describe('HouseholdProvider', () => {
 
   it('creates the default household after sign-in and becomes ready', async () => {
     const auth = createAuthService(createMockAuthBackend());
-    await auth.signUp('alice@example.com', 'secret123');
+    await auth.signUp('alice@example.com', 'secret123', 'Alice');
     renderWith(createHouseholdService(createMemoryDataBackend().households), auth);
 
     await waitFor(() => expect(screen.getByTestId('household').textContent).toMatch(/^ready:hh-\d+$/));
@@ -50,7 +50,7 @@ describe('HouseholdProvider', () => {
 
   it('ensures the household only once', async () => {
     const auth = createAuthService(createMockAuthBackend());
-    await auth.signUp('alice@example.com', 'secret123');
+    await auth.signUp('alice@example.com', 'secret123', 'Alice');
     const household = createHouseholdService(createMemoryDataBackend().households);
     const spy = vi.spyOn(household, 'ensureDefaultHousehold');
 
@@ -62,7 +62,7 @@ describe('HouseholdProvider', () => {
 
   it('reports an error when the household cannot be ensured', async () => {
     const auth = createAuthService(createMockAuthBackend());
-    await auth.signUp('alice@example.com', 'secret123');
+    await auth.signUp('alice@example.com', 'secret123', 'Alice');
     const household = createHouseholdService(createMemoryDataBackend().households);
     vi.spyOn(household, 'ensureDefaultHousehold').mockRejectedValueOnce(new HouseholdError('unknown'));
 

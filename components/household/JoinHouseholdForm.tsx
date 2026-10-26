@@ -18,10 +18,12 @@ const ERROR_KEYS: Record<HouseholdErrorCode, MessageKey> = {
 
 type JoinHouseholdFormProps = {
   uid: string;
+  displayName?: string | null;
+  photoUrl?: string | null;
   service?: HouseholdService;
 };
 
-export function JoinHouseholdForm({ uid, service = defaultService }: JoinHouseholdFormProps) {
+export function JoinHouseholdForm({ uid, displayName, photoUrl, service = defaultService }: JoinHouseholdFormProps) {
   const [code, setCode] = useState('');
   const { t } = useLocale();
   const [status, setStatus] = useState<'idle' | 'submitting' | 'joined'>('idle');
@@ -32,7 +34,7 @@ export function JoinHouseholdForm({ uid, service = defaultService }: JoinHouseho
     setError(null);
     setStatus('submitting');
     try {
-      await service.joinWithCode(uid, code);
+      await service.joinWithCode(uid, code, displayName ?? '', photoUrl ?? '');
       setStatus('joined');
       setCode('');
     } catch (err) {
