@@ -1,8 +1,11 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
+import { cleanDisplayName } from '../utils/displayName';
 
 export type AuthUser = {
   uid: string;
   email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
 };
 
 export type AuthErrorCode =
@@ -10,6 +13,7 @@ export type AuthErrorCode =
   | 'weak-password'
   | 'email-in-use'
   | 'invalid-credentials'
+  | 'name-required'
   | 'popup-closed'
   | 'unknown';
 
@@ -24,7 +28,7 @@ export class AuthError extends Error {
 }
 
 export interface AuthBackend {
-  signUp(email: string, password: string): Promise<AuthUser>;
+  signUp(email: string, password: string, displayName: string): Promise<AuthUser>;
   signIn(email: string, password: string): Promise<AuthUser>;
   signInWithGoogle(): Promise<AuthUser>;
   signOut(): Promise<void>;
@@ -42,12 +46,14 @@ function normalizeEmail(email: unknown): string {
 
 export function createAuthService(backend: AuthBackend) {
   return {
-    async signUp(email: string, password: string): Promise<AuthUser> {
+    async signUp(email: string, password: string, displayName = ''): Promise<AuthUser> {
       const cleanEmail = normalizeEmail(email);
       if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
         throw new AuthError('weak-password');
       }
-      return backend.signUp(cleanEmail, password);
+      const name = cleanDisplayName(displayName);
+      if (name === '') throw new AuthError('name-required');
+      return backend.signUp(cleanEmail, password, name);
     },
 
     async signIn(email: string, password: string): Promise<AuthUser> {

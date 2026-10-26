@@ -1,7 +1,7 @@
 .screen {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 28px;
 }
 
 .back {
@@ -9,9 +9,20 @@
   font-weight: var(--font-weight-brand);
 }
 
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .title {
-  margin: 0;
+  margin: 8px 0 0;
   font-size: 28px;
   font-weight: var(--font-weight-title);
   color: var(--primary-color);
+}
+
+.subtitle {
+  margin: 0;
+  opacity: 0.8;
 }

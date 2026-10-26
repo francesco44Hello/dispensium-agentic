@@ -11,7 +11,17 @@ service cloud.firestore {
     }
 
     function validText(value) {
-      return value is string && value.size() > 0 && value.size() <= 100 && !value.matches('.*[<>{}"].*');
+      return value is string && value.size() > 0 && value.size() <= 100 && !value.matches('(?s).*[<>{}"].*');
+    }
+
+    // Member names are optional: an empty string means no name saved yet.
+    function validName(value) {
+      return value == '' || validText(value);
+    }
+
+    // Profile pictures come only from Google's image host, so members never load arbitrary URLs.
+    function validPhoto(value) {
+      return value == '' || (value is string && value.size() <= 300 && value.matches('https://lh3[.]googleusercontent[.]com/[^ <>{}\"]+'));
     }
 
     match /users/{uid} {
@@ -59,8 +69,16 @@ service cloud.firestore {
               && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.inviteCode)).data.householdId == hid
               && get(/databases/$(database)/documents/inviteCodes/$(request.resource.data.inviteCode)).data.expiresAt > request.time
             )
-          );
-        allow update, delete: if false;
+          )
+          && validName(request.resource.data.get('displayName', ''))
+          && validPhoto(request.resource.data.get('photoUrl', ''));
+        // A member may change only their own display name and picture, never role, join date or invite.
+        allow update: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoUrl'])
+          && validName(request.resource.data.get('displayName', ''))
+          && validPhoto(request.resource.data.get('photoUrl', ''));
+        allow delete: if false;
       }
 
       // Items: the client sends only these keys. Items are created by their owner, so createdBy is checked on create.

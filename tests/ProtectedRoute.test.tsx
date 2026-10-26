@@ -46,7 +46,7 @@ describe('ProtectedRoute', () => {
 
   it('renders children for an authenticated user', async () => {
     const service = createAuthService(createMockAuthBackend());
-    await service.signUp('a@b.co', 'secret123');
+    await service.signUp('a@b.co', 'secret123', 'Ana');
     render(<Protected service={service} />);
     expect(await screen.findByText('secret home')).toBeTruthy();
     expect(replace).not.toHaveBeenCalled();

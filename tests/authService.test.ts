@@ -5,9 +5,9 @@ import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend'
 const setup = () => createAuthService(createMockAuthBackend());
 
 const fakeBackend = (): AuthBackend & { [K in keyof AuthBackend]: ReturnType<typeof vi.fn> } => ({
-  signUp: vi.fn(async (email: string): Promise<AuthUser> => ({ uid: 'u1', email })),
-  signIn: vi.fn(async (email: string): Promise<AuthUser> => ({ uid: 'u1', email })),
-  signInWithGoogle: vi.fn(async (): Promise<AuthUser> => ({ uid: 'g1', email: 'g@x.co' })),
+  signUp: vi.fn(async (email: string): Promise<AuthUser> => ({ uid: 'u1', email, displayName: null, photoURL: null })),
+  signIn: vi.fn(async (email: string): Promise<AuthUser> => ({ uid: 'u1', email, displayName: null, photoURL: null })),
+  signInWithGoogle: vi.fn(async (): Promise<AuthUser> => ({ uid: 'g1', email: 'g@x.co', displayName: null, photoURL: null })),
   signOut: vi.fn(async () => {}),
   onUserChange: vi.fn(() => () => {}),
 });
@@ -35,8 +35,8 @@ describe('authService validation', () => {
 describe('authService sanitization', () => {
   it('strips blocked characters from the email and normalises it', async () => {
     const backend = fakeBackend();
-    await createAuthService(backend).signUp('  <A@B.co>  ', 'secret123');
-    expect(backend.signUp).toHaveBeenCalledWith('a@b.co', 'secret123');
+    await createAuthService(backend).signUp('  <A@B.co>  ', 'secret123', 'Ana');
+    expect(backend.signUp).toHaveBeenCalledWith('a@b.co', 'secret123', 'Ana');
   });
 
   it('passes the password through unchanged', async () => {
@@ -49,7 +49,7 @@ describe('authService sanitization', () => {
 describe('authService with the mock backend', () => {
   it('signs in with credentials created by sign up', async () => {
     const service = setup();
-    await service.signUp('a@b.co', 'secret123');
+    await service.signUp('a@b.co', 'secret123', 'Ana');
     await service.signOut();
     const user = await service.signIn('a@b.co', 'secret123');
     expect(user.email).toBe('a@b.co');
@@ -57,7 +57,7 @@ describe('authService with the mock backend', () => {
 
   it('rejects a wrong password with invalid-credentials', async () => {
     const service = setup();
-    await service.signUp('a@b.co', 'secret123');
+    await service.signUp('a@b.co', 'secret123', 'Ana');
     await expect(service.signIn('a@b.co', 'wrong-pass')).rejects.toMatchObject({ code: 'invalid-credentials' });
   });
 
@@ -67,8 +67,8 @@ describe('authService with the mock backend', () => {
 
   it('rejects a duplicate sign up with email-in-use', async () => {
     const service = setup();
-    await service.signUp('a@b.co', 'secret123');
-    await expect(service.signUp('a@b.co', 'other-pass')).rejects.toMatchObject({ code: 'email-in-use' });
+    await service.signUp('a@b.co', 'secret123', 'Ana');
+    await expect(service.signUp('a@b.co', 'other-pass', 'Ana')).rejects.toMatchObject({ code: 'email-in-use' });
   });
 
   it('notifies subscribers of null, then the user on sign up, then null on sign out', async () => {
@@ -76,7 +76,7 @@ describe('authService with the mock backend', () => {
     const seen: Array<string | null> = [];
     service.onUserChange((user) => seen.push(user?.email ?? null));
 
-    await service.signUp('a@b.co', 'secret123');
+    await service.signUp('a@b.co', 'secret123', 'Ana');
     await service.signOut();
 
     expect(seen).toEqual([null, 'a@b.co', null]);
@@ -89,7 +89,7 @@ describe('authService with the mock backend', () => {
     unsubscribe();
     listener.mockClear();
 
-    await service.signUp('a@b.co', 'secret123');
+    await service.signUp('a@b.co', 'secret123', 'Ana');
     expect(listener).not.toHaveBeenCalled();
   });
 });
@@ -99,7 +99,7 @@ describe('authService Google sign-in', () => {
     const backend = fakeBackend();
     const user = await createAuthService(backend).signInWithGoogle();
     expect(backend.signInWithGoogle).toHaveBeenCalledTimes(1);
-    expect(user).toEqual({ uid: 'g1', email: 'g@x.co' });
+    expect(user).toEqual({ uid: 'g1', email: 'g@x.co', displayName: null, photoURL: null });
   });
 
   it('propagates a popup-closed error from the backend', async () => {

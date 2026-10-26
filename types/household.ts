@@ -13,6 +13,10 @@ export interface HouseholdMember {
   uid: string;
   role: HouseholdRole;
   joinedAt: Date;
+  // Name from the member's sign-up form or Google profile. Missing for members who have not saved one yet.
+  displayName?: string;
+  // Google profile picture link, when the account has one.
+  photoUrl?: string;
 }
 
 export interface InviteCode {
@@ -25,9 +29,11 @@ export interface InviteCode {
 
 // The household operations the UI uses. services/householdService.ts implements it.
 export interface HouseholdService {
-  ensureDefaultHousehold(uid: string): Promise<string>;
+  ensureDefaultHousehold(uid: string, displayName?: string, photoUrl?: string): Promise<string>;
   createInvite(householdId: string, uid: string): Promise<InviteCode>;
-  joinWithCode(uid: string, rawCode: string): Promise<string>;
+  joinWithCode(uid: string, rawCode: string, displayName?: string, photoUrl?: string): Promise<string>;
+  saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
+  saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;
   subscribeToMembers(householdId: string, listener: (members: HouseholdMember[]) => void): Unsubscribe;
 }

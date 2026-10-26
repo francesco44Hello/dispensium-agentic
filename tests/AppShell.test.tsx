@@ -19,7 +19,7 @@ afterEach(() => {
 
 async function renderShell() {
   const auth = createAuthService(createMockAuthBackend());
-  await auth.signUp('alice@example.com', 'secret123');
+  await auth.signUp('alice@example.com', 'secret123', 'Alice');
   render(
     <LocaleProvider>
       <AuthProvider service={auth}>

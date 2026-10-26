@@ -1,16 +1,17 @@
 import {
   createUserWithEmailAndPassword,
-  GoogleAuthProvider,
   getAuth,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
+  updateProfile,
   type User,
 } from 'firebase/auth';
 import { AuthError, type AuthBackend, type AuthErrorCode, type AuthUser } from '../authService';
 import { getFirebaseApp } from '../firebaseApp';
 import { hasCode } from '../../utils/hasCode';
+import { createGoogleProvider } from './googleProvider';
 
 const FIREBASE_ERROR_MAP: Record<string, AuthErrorCode> = {
   'auth/invalid-email': 'invalid-email',
@@ -31,7 +32,7 @@ function toAuthError(error: unknown): AuthError {
 }
 
 function toAuthUser(user: User): AuthUser {
-  return { uid: user.uid, email: user.email };
+  return { uid: user.uid, email: user.email, displayName: user.displayName, photoURL: user.photoURL };
 }
 
 // Firebase Auth is resolved lazily so importing this module on the server is safe.
@@ -39,9 +40,10 @@ export function createFirebaseAuthBackend(): AuthBackend {
   const auth = () => getAuth(getFirebaseApp());
 
   return {
-    async signUp(email, password) {
+    async signUp(email, password, displayName) {
       try {
         const { user } = await createUserWithEmailAndPassword(auth(), email, password);
+        await updateProfile(user, { displayName });
         return toAuthUser(user);
       } catch (error) {
         throw toAuthError(error);
@@ -59,7 +61,7 @@ export function createFirebaseAuthBackend(): AuthBackend {
 
     async signInWithGoogle() {
       try {
-        const { user } = await signInWithPopup(auth(), new GoogleAuthProvider());
+        const { user } = await signInWithPopup(auth(), createGoogleProvider());
         return toAuthUser(user);
       } catch (error) {
         throw toAuthError(error);
