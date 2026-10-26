@@ -73,7 +73,7 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
   };
 
   const householdBackend: HouseholdBackend = {
-    async ensureDefaultHousehold(uid) {
+    async ensureDefaultHousehold(uid, displayName, photoUrl) {
       const existing = activeByUser.get(uid);
       if (existing) return existing;
 
@@ -81,7 +81,7 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       const createdAt = now();
       households.set(id, {
         household: { id, name: 'My household', ownerUid: uid, createdAt },
-        members: new Map([[uid, { uid, role: 'owner', joinedAt: createdAt }]]),
+        members: new Map([[uid, { uid, role: 'owner', joinedAt: createdAt, displayName, ...(photoUrl ? { photoUrl } : {}) }]]),
       });
       categoryMaps.set(id, defaultCategoryMap);
       activeByUser.set(uid, id);
@@ -95,7 +95,7 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       return invite;
     },
 
-    async joinWithCode(uid, code, at) {
+    async joinWithCode(uid, code, at, displayName, photoUrl) {
       const invite = invites.get(code);
       if (!invite) throw new HouseholdError('invalid-invite');
       if (invite.expiresAt.getTime() <= at.getTime()) throw new HouseholdError('expired-invite');
@@ -104,10 +104,24 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       if (!record) throw new HouseholdError('invalid-invite');
       if (record.members.has(uid)) throw new HouseholdError('already-member');
 
-      record.members.set(uid, { uid, role: 'member', joinedAt: at });
+      record.members.set(uid, { uid, role: 'member', joinedAt: at, displayName, ...(photoUrl ? { photoUrl } : {}) });
       activeByUser.set(uid, invite.householdId);
       notifyAll();
       return invite.householdId;
+    },
+
+    async saveMemberPhoto(householdId, uid, photoUrl) {
+      const member = households.get(householdId)?.members.get(uid);
+      if (!member) throw new HouseholdError('not-a-member');
+      if (photoUrl) member.photoUrl = photoUrl;
+      notifyAll();
+    },
+
+    async saveMemberName(householdId, uid, displayName) {
+      const member = households.get(householdId)?.members.get(uid);
+      if (!member) throw new HouseholdError('not-a-member');
+      member.displayName = displayName;
+      notifyAll();
     },
 
     subscribeToActiveHousehold(uid, listener) {

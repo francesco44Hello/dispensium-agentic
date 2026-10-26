@@ -1,3 +1,4 @@
+import { cleanPhotoUrl } from '../../utils/photoUrl';
 import {
   addDoc,
   collection,
@@ -95,7 +96,7 @@ const sortByJoined = (members: HouseholdMember[]) =>
 
 export function createFirestoreDataBackend(): DataBackend {
   const householdBackend: HouseholdBackend = {
-    async ensureDefaultHousehold(uid) {
+    async ensureDefaultHousehold(uid, displayName, photoUrl) {
       const userRef = doc(db(), 'users', uid);
       return runTransaction(db(), async (tx) => {
         const userSnap = await tx.get(userRef);
@@ -105,7 +106,12 @@ export function createFirestoreDataBackend(): DataBackend {
         const householdRef = doc(collection(db(), 'households'));
         const createdAt = new Date();
         tx.set(householdRef, { name: 'My household', ownerUid: uid, createdAt });
-        tx.set(doc(householdRef, 'members', uid), { role: 'owner', joinedAt: createdAt });
+        tx.set(doc(householdRef, 'members', uid), {
+          role: 'owner',
+          joinedAt: createdAt,
+          displayName,
+          ...(photoUrl ? { photoUrl } : {}),
+        });
         tx.set(doc(householdRef, 'configuration', 'categoryMap'), { map: defaultCategoryMap });
         tx.set(userRef, { activeHouseholdId: householdRef.id, createdAt }, { merge: true });
         return householdRef.id;
@@ -125,7 +131,7 @@ export function createFirestoreDataBackend(): DataBackend {
       return invite;
     },
 
-    async joinWithCode(uid, code, at) {
+    async joinWithCode(uid, code, at, displayName, photoUrl) {
       return runTransaction(db(), async (tx) => {
         const inviteSnap = await tx.get(doc(db(), 'inviteCodes', code));
         if (!inviteSnap.exists()) throw new HouseholdError('invalid-invite');
@@ -140,10 +146,25 @@ export function createFirestoreDataBackend(): DataBackend {
         const memberRef = doc(db(), 'households', householdId, 'members', uid);
         if ((await tx.get(memberRef)).exists()) throw new HouseholdError('already-member');
 
-        tx.set(memberRef, { role: 'member', joinedAt: at, inviteCode: code });
+        tx.set(memberRef, {
+          role: 'member',
+          joinedAt: at,
+          inviteCode: code,
+          displayName,
+          ...(photoUrl ? { photoUrl } : {}),
+        });
         tx.set(doc(db(), 'users', uid), { activeHouseholdId: householdId }, { merge: true });
         return householdId;
       });
+    },
+
+    async saveMemberPhoto(householdId, uid, photoUrl) {
+      if (!photoUrl) return;
+      await updateDoc(doc(db(), 'households', householdId, 'members', uid), { photoUrl });
+    },
+
+    async saveMemberName(householdId, uid, displayName) {
+      await updateDoc(doc(db(), 'households', householdId, 'members', uid), { displayName });
     },
 
     subscribeToActiveHousehold(uid, listener): Unsubscribe {
@@ -157,11 +178,18 @@ export function createFirestoreDataBackend(): DataBackend {
       return onSnapshot(collection(db(), 'households', householdId, 'members'), (snap) => {
         listener(
           sortByJoined(
-            snap.docs.map((d) => ({
-              uid: d.id,
-              role: d.data().role === 'owner' ? 'owner' : 'member',
-              joinedAt: toDate(d.data().joinedAt),
-            })),
+            snap.docs.map((d) => {
+              const name: unknown = d.data().displayName;
+              const photo: unknown = d.data().photoUrl;
+              const cleanPhoto = typeof photo === 'string' ? cleanPhotoUrl(photo) : '';
+              return {
+                uid: d.id,
+                role: d.data().role === 'owner' ? 'owner' : 'member',
+                joinedAt: toDate(d.data().joinedAt),
+                ...(typeof name === 'string' && name !== '' ? { displayName: name } : {}),
+                ...(cleanPhoto !== '' ? { photoUrl: cleanPhoto } : {}),
+              };
+            }),
           ),
         );
       });

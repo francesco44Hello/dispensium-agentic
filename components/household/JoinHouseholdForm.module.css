@@ -2,15 +2,12 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 20px;
-  background: var(--surface);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(45, 60, 89, 0.15);
 }
 
 .heading {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-brand);
 }
 
 .field {
@@ -21,12 +18,13 @@
 }
 
 .field input {
-  padding: 12px;
-  font-size: 1rem;
-  letter-spacing: 0.1em;
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border: 1px solid var(--muted);
-  border-radius: 10px;
+  background: var(--surface);
+  border: 2px solid var(--primary-color);
+  border-radius: 12px;
   color: var(--primary-color);
 }
 
@@ -37,11 +35,13 @@
 }
 
 .button {
-  padding: 12px;
+  align-self: stretch;
+  padding: 12px 22px;
+  font: inherit;
   font-weight: var(--font-weight-brand);
   color: var(--primary-color);
-  background: var(--secondary-color);
-  border: none;
+  background: var(--primary-button);
+  border: 2px solid var(--primary-color);
   border-radius: 999px;
   cursor: pointer;
 }

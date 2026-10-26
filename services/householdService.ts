@@ -2,6 +2,8 @@ import { sanitizeInput } from '../utils/sanitizeInput';
 import { generateInviteCode, isValidInviteCode, normalizeInviteCode } from '../utils/inviteCode';
 import type { HouseholdMember, HouseholdService, InviteCode } from '../types/household';
 import type { Unsubscribe } from '../types/subscription';
+import { cleanDisplayName } from '../utils/displayName';
+import { cleanPhotoUrl } from '../utils/photoUrl';
 
 export type HouseholdErrorCode =
   | 'invalid-invite'
@@ -21,9 +23,11 @@ export class HouseholdError extends Error {
 }
 
 export interface HouseholdBackend {
-  ensureDefaultHousehold(uid: string): Promise<string>;
+  ensureDefaultHousehold(uid: string, displayName: string, photoUrl: string): Promise<string>;
   createInvite(householdId: string, createdBy: string, invite: InviteCode): Promise<InviteCode>;
-  joinWithCode(uid: string, code: string, now: Date): Promise<string>;
+  joinWithCode(uid: string, code: string, now: Date, displayName: string, photoUrl: string): Promise<string>;
+  saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
+  saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;
   subscribeToMembers(householdId: string, listener: (members: HouseholdMember[]) => void): Unsubscribe;
 }
@@ -42,8 +46,8 @@ export function createHouseholdService(backend: HouseholdBackend, options: House
   const generateCode = options.generateCode ?? (() => generateInviteCode());
 
   return {
-    ensureDefaultHousehold(uid: string): Promise<string> {
-      return backend.ensureDefaultHousehold(uid);
+    ensureDefaultHousehold(uid: string, displayName = '', photoUrl = ''): Promise<string> {
+      return backend.ensureDefaultHousehold(uid, cleanDisplayName(displayName), cleanPhotoUrl(photoUrl));
     },
 
     async createInvite(householdId: string, uid: string): Promise<InviteCode> {
@@ -58,10 +62,18 @@ export function createHouseholdService(backend: HouseholdBackend, options: House
       return backend.createInvite(householdId, uid, invite);
     },
 
-    async joinWithCode(uid: string, rawCode: string): Promise<string> {
+    async joinWithCode(uid: string, rawCode: string, displayName = '', photoUrl = ''): Promise<string> {
       const code = normalizeInviteCode(sanitizeInput(rawCode));
       if (!isValidInviteCode(code)) throw new HouseholdError('invalid-invite');
-      return backend.joinWithCode(uid, code, now());
+      return backend.joinWithCode(uid, code, now(), cleanDisplayName(displayName), cleanPhotoUrl(photoUrl));
+    },
+
+    saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void> {
+      return backend.saveMemberPhoto(householdId, uid, cleanPhotoUrl(photoUrl));
+    },
+
+    saveMemberName(householdId: string, uid: string, displayName: string): Promise<void> {
+      return backend.saveMemberName(householdId, uid, cleanDisplayName(displayName));
     },
 
     subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe {

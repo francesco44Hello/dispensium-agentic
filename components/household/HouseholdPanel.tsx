@@ -38,35 +38,61 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
     }
   }
 
-  return (
-    <section className={styles.panel}>
-      <h2 className={styles.heading}>{t('household.members')}</h2>
-      {members === null ? (
-        <p role="status">{t('household.loadingMembers')}</p>
-      ) : (
-        <ul className={styles.members}>
-          {members.map((member) => (
-            <li key={member.uid}>
-              {member.uid === uid ? t('household.you') : t('household.housemate')} · {member.role}
-            </li>
-          ))}
-        </ul>
-      )}
+  async function handleCopy(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      // Clipboard access can be refused. The code stays on screen, so the user can still select it.
+    }
+  }
 
-      <h2 className={styles.heading}>{t('household.inviteTitle')}</h2>
-      <button type="button" className={styles.button} onClick={handleCreateInvite}>
-        {t('household.createInvite')}
-      </button>
-      {invite && (
-        <p className={styles.invite}>
-          {t('household.shareBefore')} <code>{invite.code}</code> {t('household.shareAfter')}
-        </p>
-      )}
-      {error && (
-        <p role="alert" className={styles.error}>
-          {t(ERROR_KEYS[error])}
-        </p>
-      )}
-    </section>
+  return (
+    <>
+      <section className={styles.section}>
+        <h2 className={styles.heading}>{t('household.members')}</h2>
+        {members === null ? (
+          <p role="status">{t('household.loadingMembers')}</p>
+        ) : (
+          <ul className={styles.members}>
+            {members.map((member) => (
+              <li key={member.uid} className={styles.member}>
+                {member.photoUrl && (
+                  // Plain img: the picture is Google's own link, shown as is.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img className={styles.avatar} src={member.photoUrl} alt="" referrerPolicy="no-referrer" />
+                )}
+                <span className={styles.name}>
+                  {member.uid === uid ? t('household.you') : member.displayName || t('household.housemate')}
+                </span>
+                <span className={styles.role}>{member.role}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.heading}>{t('household.inviteTitle')}</h2>
+        <button type="button" className={styles.addButton} onClick={handleCreateInvite}>
+          {t('household.createInvite')}
+        </button>
+        {invite && (
+          <>
+            <div className={styles.code}>
+              <code className={styles.codeText}>{invite.code}</code>
+              <button type="button" className={styles.copyButton} onClick={() => handleCopy(invite.code)}>
+                {t('household.copyCode')}
+              </button>
+            </div>
+            <p className={styles.note}>{t('household.shareAfter')}</p>
+          </>
+        )}
+        {error && (
+          <p role="alert" className={styles.error}>
+            {t(ERROR_KEYS[error])}
+          </p>
+        )}
+      </section>
+    </>
   );
 }

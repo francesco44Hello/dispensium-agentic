@@ -31,6 +31,8 @@ export function HouseholdProvider({ children, service = defaultService }: Househ
   const { status: authStatus, user } = useAuth();
   const [state, setState] = useState<HouseholdState | null>(null);
   const uid = user?.uid ?? null;
+  const name = user?.displayName ?? '';
+  const photo = user?.photoURL ?? '';
 
   useEffect(() => {
     if (authStatus === 'loading' || !uid) return;
@@ -39,9 +41,20 @@ export function HouseholdProvider({ children, service = defaultService }: Househ
     let unsubscribe: (() => void) | undefined;
 
     service
-      .ensureDefaultHousehold(uid)
-      .then(() => {
+      .ensureDefaultHousehold(uid, name, photo)
+      .then((householdId) => {
         if (!active) return;
+        // Keep the saved name current, so housemates see the same name the user signs in with.
+        if (name) {
+          service.saveMemberName(householdId, uid, name).catch((err: unknown) => {
+            console.error('Could not save member name:', err);
+          });
+        }
+        if (photo) {
+          service.saveMemberPhoto(householdId, uid, photo).catch((err: unknown) => {
+            console.error('Could not save member photo:', err);
+          });
+        }
         unsubscribe = service.subscribeToActiveHousehold(uid, (householdId) => {
           if (!active) return;
           setState({
@@ -62,7 +75,7 @@ export function HouseholdProvider({ children, service = defaultService }: Househ
       active = false;
       unsubscribe?.();
     };
-  }, [authStatus, uid, service]);
+  }, [authStatus, uid, name, photo, service]);
 
   let value: HouseholdContextValue;
   if (!uid) {

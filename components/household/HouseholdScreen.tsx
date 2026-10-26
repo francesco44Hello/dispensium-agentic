@@ -19,13 +19,16 @@ export function HouseholdScreen() {
         {t('household.back')}
       </Link>
 
-      <h1 className={styles.title}>{t('household.title')}</h1>
+      <header className={styles.header}>
+        <h1 className={styles.title}>{t('household.title')}</h1>
+        <p className={styles.subtitle}>{t('household.subtitle')}</p>
+      </header>
 
       {status === 'error' && <p role="alert">{t('household.loadError')}</p>}
       {status === 'ready' && householdId && user && (
         <>
           <HouseholdPanel householdId={householdId} uid={user.uid} />
-          <JoinHouseholdForm uid={user.uid} />
+          <JoinHouseholdForm uid={user.uid} displayName={user.displayName} photoUrl={user.photoURL} />
         </>
       )}
       {status !== 'error' && status !== 'ready' && <p role="status">{t('household.loading')}</p>}
