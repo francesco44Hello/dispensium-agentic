@@ -36,6 +36,11 @@
   border-radius: 50%;
 }
 
+.profile:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
 .icon:disabled {
   opacity: 0.5;
 }
