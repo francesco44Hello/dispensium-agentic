@@ -56,6 +56,11 @@ const en = {
   'profile.name': 'Name',
   'profile.email': 'Email',
   'profile.noName': 'No name yet',
+  'profile.saveName': 'Save name',
+  'profile.saveError': 'We could not save that. Please try again.',
+  'profile.pictureTitle': 'Profile picture',
+  'profile.avatarOption': 'Avatar {number}',
+  'profile.useGooglePicture': 'Use my Google picture',
 
   'household.title': 'Household',
   'household.subtitle': 'Share a grocery list with the people you live with.',
@@ -224,6 +229,11 @@ const it: Record<MessageKey, string> = {
   'profile.name': 'Nome',
   'profile.email': 'Email',
   'profile.noName': 'Nessun nome',
+  'profile.saveName': 'Salva nome',
+  'profile.saveError': 'Non è stato possibile salvare. Riprova.',
+  'profile.pictureTitle': 'Foto profilo',
+  'profile.avatarOption': 'Avatar {number}',
+  'profile.useGooglePicture': 'Usa la mia foto Google',
 
   'household.title': 'Famiglia',
   'household.subtitle': 'Condividi la lista della spesa con le persone con cui vivi.',

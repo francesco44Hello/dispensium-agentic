@@ -51,6 +51,16 @@ export function createMockAuthBackend(): AuthBackend {
       setCurrent(null);
     },
 
+    async updateDisplayName(displayName) {
+      const signedIn = current;
+      if (!signedIn) throw new AuthError('unknown');
+      const stored = [...users.values()].find((user) => user.uid === signedIn.uid);
+      if (stored) stored.displayName = displayName;
+      const updated: AuthUser = { ...signedIn, displayName };
+      setCurrent(updated);
+      return updated;
+    },
+
     onUserChange(listener) {
       listeners.add(listener);
       listener(current);

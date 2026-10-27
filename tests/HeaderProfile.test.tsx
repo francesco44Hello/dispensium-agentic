@@ -7,25 +7,32 @@ vi.mock('next/navigation', () => ({ usePathname: () => '/', useRouter: () => ({ 
 
 import { AppHeader } from '../components/layout/AppHeader';
 import { AuthContext } from '../components/auth/AuthProvider';
+import { HouseholdContext } from '../components/household/HouseholdProvider';
 import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
 import type { AuthUser } from '../services/authService';
+import type { HouseholdMember } from '../types/household';
+import { createHouseholdStub } from './householdStub';
 
 const GOOGLE_PHOTO = 'https://lh3.googleusercontent.com/a/abc123';
 
-function renderHeader(user: AuthUser | null) {
+function renderHeader(user: AuthUser | null, members: HouseholdMember[] = []) {
   const service = createAuthService(createMockAuthBackend());
+  const household = createHouseholdStub(members);
   return render(
     <LocaleProvider>
       <AuthContext.Provider value={{ status: user ? 'authenticated' : 'unauthenticated', user, service }}>
-        <AppHeader />
+        <HouseholdContext.Provider value={{ status: 'ready', householdId: 'hh-1', error: null, service: household.service }}>
+          <AppHeader />
+        </HouseholdContext.Provider>
       </AuthContext.Provider>
     </LocaleProvider>,
   );
 }
 
 const alice: AuthUser = { uid: 'alice', email: 'alice@example.com', displayName: 'Alice', photoURL: GOOGLE_PHOTO };
+const aliceMember: HouseholdMember = { uid: 'alice', role: 'owner', joinedAt: new Date(), displayName: 'Alice' };
 
 describe('AppHeader profile link', () => {
   beforeEach(() => {
@@ -46,6 +53,11 @@ describe('AppHeader profile link', () => {
     const { container } = renderHeader(alice);
     expect(screen.getByRole('link', { name: 'Profile' }).querySelector('img')).toHaveAttribute('src', GOOGLE_PHOTO);
     expect(container.querySelectorAll('img')).toHaveLength(1);
+  });
+
+  it('shows the picture chosen on the profile page, from the household member record', () => {
+    renderHeader(alice, [{ ...aliceMember, photoUrl: '/avatars/avatar-3.svg' }]);
+    expect(screen.getByRole('link', { name: 'Profile' }).querySelector('img')).toHaveAttribute('src', '/avatars/avatar-3.svg');
   });
 
   it('shows the placeholder in the header when the user has no picture', () => {

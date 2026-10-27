@@ -1,28 +1,35 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { AuthContext } from '../components/auth/AuthProvider';
+import { HouseholdContext } from '../components/household/HouseholdProvider';
 import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { ProfileScreen } from '../components/profile/ProfileScreen';
 import { createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
 import type { AuthUser } from '../services/authService';
+import { createHouseholdStub } from './householdStub';
 
 const GOOGLE_PHOTO = 'https://lh3.googleusercontent.com/a/abc123';
 
-function renderProfile(user: AuthUser) {
-  const service = createAuthService(createMockAuthBackend());
-  return render(
+const alice: AuthUser = { uid: 'alice', email: 'alice@example.com', displayName: 'Alice', photoURL: GOOGLE_PHOTO };
+
+function renderProfile(user: AuthUser, household = createHouseholdStub()) {
+  const authService = createAuthService(createMockAuthBackend());
+  const updateDisplayName = async (name: string) => ({ ...user, displayName: name });
+  const service = { ...authService, updateDisplayName };
+  const rendered = render(
     <LocaleProvider>
       <AuthContext.Provider value={{ status: 'authenticated', user, service }}>
-        <ProfileScreen />
+        <HouseholdContext.Provider value={{ status: 'ready', householdId: 'hh-1', error: null, service: household.service }}>
+          <ProfileScreen />
+        </HouseholdContext.Provider>
       </AuthContext.Provider>
     </LocaleProvider>,
   );
+  return { ...rendered, household };
 }
-
-const alice: AuthUser = { uid: 'alice', email: 'alice@example.com', displayName: 'Alice', photoURL: GOOGLE_PHOTO };
 
 describe('ProfileScreen', () => {
   beforeEach(() => {
@@ -49,17 +56,49 @@ describe('ProfileScreen', () => {
   });
 
   it('shows the placeholder when there is no picture, or the picture is not from Google', () => {
+    // The large profile picture is a direct child of its section; the avatar picker has images inside buttons.
     const { container, unmount } = renderProfile({ ...alice, photoURL: null });
-    expect(container.querySelector('img')).toBeNull();
+    expect(container.querySelector('section > img')).toBeNull();
     unmount();
 
     const { container: other } = renderProfile({ ...alice, photoURL: 'https://evil.example/face.png' });
-    expect(other.querySelector('img')).toBeNull();
+    expect(other.querySelector('section > img')).toBeNull();
   });
 
   it('shows a fallback label when the account has no name', () => {
     renderProfile({ ...alice, displayName: null });
     expect(screen.getByText('No name yet')).toBeInTheDocument();
+  });
+
+  it('keeps the email read-only', () => {
+    renderProfile(alice);
+    expect(screen.queryByRole('textbox', { name: 'Email' })).toBeNull();
+  });
+
+  it('saves a new name to the account and to the household', async () => {
+    const { household } = renderProfile(alice);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Name' }), { target: { value: 'Bob' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
+
+    expect(await screen.findByText('Bob')).toBeInTheDocument();
+    await waitFor(() => expect(household.saveMemberName).toHaveBeenCalledWith('hh-1', 'alice', 'Bob'));
+  });
+
+  it('lets the user pick a built-in avatar and saves it to the household', async () => {
+    const { container, household } = renderProfile(alice);
+    fireEvent.click(screen.getByRole('button', { name: 'Avatar 2' }));
+
+    await waitFor(() => expect(household.saveMemberPhoto).toHaveBeenCalledWith('hh-1', 'alice', '/avatars/avatar-2.svg'));
+    expect(container.querySelector('img')).toHaveAttribute('src', '/avatars/avatar-2.svg');
+  });
+
+  it('offers the Google picture again after a built-in avatar was picked', async () => {
+    const { household } = renderProfile(alice);
+    fireEvent.click(screen.getByRole('button', { name: 'Avatar 1' }));
+    await waitFor(() => expect(household.saveMemberPhoto).toHaveBeenCalled());
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my Google picture' }));
+    await waitFor(() => expect(household.saveMemberPhoto).toHaveBeenLastCalledWith('hh-1', 'alice', GOOGLE_PHOTO));
   });
 
   it('lets the user pick the app language from the profile', async () => {
