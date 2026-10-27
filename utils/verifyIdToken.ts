@@ -1,4 +1,5 @@
 import { createVerify } from 'node:crypto';
+import { isRecord } from './isRecord';
 
 // Checks a Firebase ID token (a signed JWT) without the admin SDK: the signature, the issuer, the audience,
 // the expiry and the user id. getKey maps a key id to the PEM certificate or public key that signed the token.
@@ -10,8 +11,8 @@ interface VerifyOptions {
 
 const decodeSegment = (segment: string): Record<string, unknown> => {
   const value: unknown = JSON.parse(Buffer.from(segment, 'base64url').toString('utf8'));
-  if (typeof value !== 'object' || value === null) throw new Error('invalid token segment');
-  return value as Record<string, unknown>;
+  if (!isRecord(value)) throw new Error('invalid token segment');
+  return value;
 };
 
 export async function verifyIdToken(token: string, options: VerifyOptions): Promise<string> {
