@@ -19,9 +19,12 @@ service cloud.firestore {
       return value == '' || validText(value);
     }
 
-    // Profile pictures come only from Google's image host, so members never load arbitrary URLs.
+    // Profile pictures come only from Google's image host or the bundled avatars, so members never load arbitrary URLs.
     function validPhoto(value) {
-      return value == '' || (value is string && value.size() <= 300 && value.matches('https://lh3[.]googleusercontent[.]com/[^ <>{}\"]+'));
+      return value == '' || (value is string && value.size() <= 300 && (
+        value.matches('https://lh3[.]googleusercontent[.]com/[^ <>{}\"]+')
+        || value.matches('/avatars/avatar-[1-4][.]svg')
+      ));
     }
 
     match /users/{uid} {

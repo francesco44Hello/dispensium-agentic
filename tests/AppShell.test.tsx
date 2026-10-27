@@ -8,9 +8,11 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }), usePathname:
 
 import { AuthProvider } from '../components/auth/AuthProvider';
 import { AppShell } from '../components/AppShell';
+import { HouseholdContext } from '../components/household/HouseholdProvider';
 import { LocaleProvider } from '../components/i18n/LocaleProvider';
 import { createAuthService } from '../services/authService';
 import { createMockAuthBackend } from '../services/authBackends/mockAuthBackend';
+import { createHouseholdStub } from './householdStub';
 
 afterEach(() => {
   cleanup();
@@ -23,9 +25,11 @@ async function renderShell() {
   render(
     <LocaleProvider>
       <AuthProvider service={auth}>
-        <AppShell>
-          <p>list body</p>
-        </AppShell>
+        <HouseholdContext.Provider value={{ status: 'idle', householdId: null, error: null, service: createHouseholdStub().service }}>
+          <AppShell>
+            <p>list body</p>
+          </AppShell>
+        </HouseholdContext.Provider>
       </AuthProvider>
     </LocaleProvider>,
   );

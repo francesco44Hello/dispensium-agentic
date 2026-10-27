@@ -1,5 +1,6 @@
 import { verifyIdToken } from '../utils/verifyIdToken';
 import { AuthError, KeysUnavailableError } from '../utils/requestAuthErrors';
+import { isRecord } from '../utils/isRecord';
 
 // Google publishes the certificates that sign Firebase ID tokens.
 const CERTIFICATES_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
@@ -53,7 +54,7 @@ async function fetchGoogleKeys(): Promise<PublishedKeys> {
   const response = await fetch(CERTIFICATES_URL, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
   if (!response.ok) throw new AuthError('could not load signing keys');
   const body: unknown = await response.json();
-  if (typeof body !== 'object' || body === null) throw new AuthError('could not load signing keys');
+  if (!isRecord(body)) throw new AuthError('could not load signing keys');
   const keys: Record<string, string> = {};
   for (const [id, pem] of Object.entries(body)) {
     if (typeof pem === 'string') keys[id] = pem;

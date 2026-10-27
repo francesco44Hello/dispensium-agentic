@@ -30,6 +30,7 @@ describe('ProtectedRoute', () => {
       signIn: vi.fn(),
       signInWithGoogle: vi.fn(),
       signOut: vi.fn(),
+      updateDisplayName: vi.fn(),
       onUserChange: () => () => {},
     };
     render(<Protected service={createAuthService(neverResolves)} />);
