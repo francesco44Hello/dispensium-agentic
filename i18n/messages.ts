@@ -49,6 +49,14 @@ const en = {
   'menu.weeklyMenu': 'Weekly Menu',
   'menu.rights': 'All rights Reserved',
 
+  'nav.profile': 'Profile',
+  'profile.title': 'Profile',
+  'profile.subtitle': 'Your details and language.',
+  'profile.back': '← Back to list',
+  'profile.name': 'Name',
+  'profile.email': 'Email',
+  'profile.noName': 'No name yet',
+
   'household.title': 'Household',
   'household.subtitle': 'Share a grocery list with the people you live with.',
   'household.back': '← Back to list',
@@ -208,6 +216,14 @@ const it: Record<MessageKey, string> = {
   'menu.shoppingList': 'Lista della spesa',
   'menu.weeklyMenu': 'Menu settimanale',
   'menu.rights': 'Tutti i diritti riservati',
+
+  'nav.profile': 'Profilo',
+  'profile.title': 'Profilo',
+  'profile.subtitle': 'I tuoi dati e la lingua.',
+  'profile.back': '← Torna alla lista',
+  'profile.name': 'Nome',
+  'profile.email': 'Email',
+  'profile.noName': 'Nessun nome',
 
   'household.title': 'Famiglia',
   'household.subtitle': 'Condividi la lista della spesa con le persone con cui vivi.',
