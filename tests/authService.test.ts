@@ -9,6 +9,7 @@ const fakeBackend = (): AuthBackend & { [K in keyof AuthBackend]: ReturnType<typ
   signIn: vi.fn(async (email: string): Promise<AuthUser> => ({ uid: 'u1', email, displayName: null, photoURL: null })),
   signInWithGoogle: vi.fn(async (): Promise<AuthUser> => ({ uid: 'g1', email: 'g@x.co', displayName: null, photoURL: null })),
   signOut: vi.fn(async () => {}),
+  updateDisplayName: vi.fn(async (displayName: string): Promise<AuthUser> => ({ uid: 'u1', email: null, displayName, photoURL: null })),
   onUserChange: vi.fn(() => () => {}),
 });
 

@@ -50,6 +50,17 @@ export function createFirebaseAuthBackend(): AuthBackend {
       }
     },
 
+    async updateDisplayName(displayName) {
+      const user = auth().currentUser;
+      if (!user) throw new AuthError('unknown');
+      try {
+        await updateProfile(user, { displayName });
+        return toAuthUser(user);
+      } catch (error) {
+        throw toAuthError(error);
+      }
+    },
+
     async signIn(email, password) {
       try {
         const { user } = await signInWithEmailAndPassword(auth(), email, password);

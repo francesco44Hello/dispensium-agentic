@@ -1,0 +1,32 @@
+.small,
+.large {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.small {
+  width: 36px;
+  height: 36px;
+}
+
+.large {
+  width: 88px;
+  height: 88px;
+}
+
+.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+}
+
+.small.placeholder {
+  font-size: 1.4rem;
+}
+
+.large.placeholder {
+  font-size: 3.4rem;
+}
