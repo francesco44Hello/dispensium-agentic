@@ -32,6 +32,7 @@ export interface AuthBackend {
   signIn(email: string, password: string): Promise<AuthUser>;
   signInWithGoogle(): Promise<AuthUser>;
   signOut(): Promise<void>;
+  updateDisplayName(displayName: string): Promise<AuthUser>;
   onUserChange(listener: (user: AuthUser | null) => void): () => void;
 }
 
@@ -67,6 +68,12 @@ export function createAuthService(backend: AuthBackend) {
 
     signOut(): Promise<void> {
       return backend.signOut();
+    },
+
+    async updateDisplayName(displayName: string): Promise<AuthUser> {
+      const name = cleanDisplayName(displayName);
+      if (name === '') throw new AuthError('name-required');
+      return backend.updateDisplayName(name);
     },
 
     onUserChange(listener: (user: AuthUser | null) => void): () => void {

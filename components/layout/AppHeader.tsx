@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { MdMenu } from 'react-icons/md';
 import { useAuth } from '../../hooks/useAuth';
 import { useLocale } from '../i18n/LocaleProvider';
-import { LanguageMenu } from '../i18n/LanguageMenu';
+import { useProfilePhoto } from '../../hooks/useProfilePhoto';
+import { ProfileAvatar } from '../profile/ProfileAvatar';
 import { SideMenu } from './SideMenu';
 import styles from './AppHeader.module.css';
 
 export function AppHeader() {
   const { service } = useAuth();
+  const profilePhoto = useProfilePhoto();
   const { t } = useLocale();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
@@ -28,7 +31,9 @@ export function AppHeader() {
         <MdMenu aria-hidden="true" />
       </button>
       <h1 className={styles.title}>Dispensium</h1>
-      <LanguageMenu />
+      <Link href="/profile" className={styles.profile} aria-label={t('nav.profile')}>
+        <ProfileAvatar photoUrl={profilePhoto} />
+      </Link>
       <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} onSignOut={handleSignOut} signingOut={signingOut} />
     </header>
   );
