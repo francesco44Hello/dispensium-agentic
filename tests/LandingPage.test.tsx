@@ -47,4 +47,9 @@ describe('LandingPage', () => {
     renderLanding();
     expect(screen.getByRole('heading', { level: 1, name: 'Una lista per tutta la settimana.' })).toBeInTheDocument();
   });
+
+  it('does not embed a video until the recorded file exists', () => {
+    const { container } = renderLanding();
+    expect(container.querySelector('video')).toBeNull();
+  });
 });

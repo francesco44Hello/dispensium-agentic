@@ -120,16 +120,9 @@ export function LandingPage() {
             <p className={styles.lead}>{t('landing.video.body')}</p>
           </div>
           <div className={styles.phone}>
-            <video
-              className={styles.video}
-              controls
-              playsInline
-              preload="metadata"
-              poster="/landing/demo-poster.png"
-              aria-label={t('landing.video.label')}
-            >
-              <source src="/landing/demo.webm" type="video/webm" />
-            </video>
+            {/* Still until the walkthrough is recorded: the video file is not in public/ yet, so no player is rendered. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- static capture, as in the feature cards */}
+            <img className={styles.video} src="/landing/demo-poster.png" alt={t('landing.video.label')} width={390} height={844} />
           </div>
         </section>
 

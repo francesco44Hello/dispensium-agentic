@@ -106,7 +106,6 @@ test('records the walkthrough and captures the app screens', async ({ page }) =>
   await page.getByRole('button', { name: 'Join household' }).click();
   await expect(page.getByText('You joined the household.')).toBeVisible();
   await page.waitForTimeout(PAUSE * 2);
-  await page.screenshot({ path: `${OUT}/household.png` });
 
   if (process.env.CAPTURE_VIDEO) {
     const video = page.video();
