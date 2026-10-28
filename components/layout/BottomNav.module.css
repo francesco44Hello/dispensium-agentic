@@ -74,6 +74,11 @@
   transform: translateX(-50%) scale(0.95);
 }
 
+/* Mobile keeps the profile in the header, so the bar has no profile link there. */
+.profileTab {
+  display: none;
+}
+
 /* Desktop: the bar sits in the page flow as a top navigation row, with labelled tabs and no floating button. */
 @media (min-width: 1024px) {
   .nav {
@@ -125,5 +130,16 @@
 
   .fab {
     display: none;
+  }
+
+  .profileTab {
+    display: flex;
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-size: 26px;
+  }
+
+  .profileCurrent {
+    background: var(--primary-button);
   }
 }

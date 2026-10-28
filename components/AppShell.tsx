@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { AppHeader } from './layout/AppHeader';
+import { AppFooter } from './layout/AppFooter';
 import { BottomNav } from './layout/BottomNav';
 import styles from './AppShell.module.css';
 
@@ -23,6 +24,7 @@ export function AppShell({ children, onAdd, hideHeader = false, bleed = false, f
       {!hideHeader && <AppHeader />}
       <main className={`${styles.content} ${bleed ? styles.bleed : ''} ${flushBottom ? styles.flushBottom : ''}`}>{children}</main>
       <BottomNav onAdd={onAdd} />
+      <AppFooter />
     </div>
   );
 }

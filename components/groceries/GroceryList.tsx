@@ -50,14 +50,16 @@ export function GroceryList({ householdId, uid, service = defaultService }: Groc
 
       {items.length === 0 && <p className={styles.status}>{t('grocery.empty')}</p>}
 
-      {groupByCategory(items).map((group) => (
-        <CategoryGroup
-          key={group.category}
-          category={group.category}
-          items={group.items}
-          onToggle={setCompleted}
-        />
-      ))}
+      <div className={styles.groups}>
+        {groupByCategory(items).map((group) => (
+          <CategoryGroup
+            key={group.category}
+            category={group.category}
+            items={group.items}
+            onToggle={setCompleted}
+          />
+        ))}
+      </div>
 
       <div className={styles.footer}>
         <button type="button" className={styles.complete} onClick={clearCompleted} disabled={!hasCompleted}>

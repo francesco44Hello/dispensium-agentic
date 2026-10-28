@@ -45,3 +45,63 @@
 .icon:disabled {
   opacity: 0.5;
 }
+
+.titleGroup {
+  min-width: 0;
+}
+
+.tagline,
+.logout {
+  display: none;
+}
+
+/* Desktop: the title and tagline sit at the left, and sign-out at the far right, above the navigation bar. */
+@media (min-width: 1024px) {
+  .header {
+    grid-template-columns: 1fr auto;
+    padding: 24px 0 16px;
+  }
+
+  .title {
+    text-align: left;
+    font-size: 2.25rem;
+  }
+
+  .titleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .tagline {
+    display: block;
+    margin: 0;
+    font-style: italic;
+    font-size: 1rem;
+    font-weight: var(--font-weight-title);
+    color: var(--primary-color);
+  }
+
+  .icon,
+  .profile {
+    display: none;
+  }
+
+  .logout {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 22px;
+    background: var(--primary-color);
+    color: var(--secondary-color);
+    font: inherit;
+    font-weight: var(--font-weight-brand);
+    cursor: pointer;
+  }
+
+  .logout:disabled {
+    opacity: 0.5;
+  }
+}

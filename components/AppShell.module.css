@@ -49,4 +49,9 @@
   .shell > nav {
     order: -1;
   }
+
+  /* Breathing room between the navigation bar and the first title or back button. */
+  .content {
+    padding-top: 32px;
+  }
 }

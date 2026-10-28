@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
+import { MdAccountCircle, MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { MessageKey } from '../../i18n/messages';
 import styles from './BottomNav.module.css';
@@ -40,6 +40,15 @@ export function BottomNav({ onAdd }: Props) {
           </Link>
         );
       })}
+      {/* Desktop only: the profile link sits at the far right, where the header used to show it. */}
+      <Link
+        href="/profile"
+        className={`${styles.tab} ${styles.profileTab} ${pathname === '/profile' ? styles.profileCurrent : ''}`}
+        aria-label={t('nav.profile')}
+        aria-current={pathname === '/profile' ? 'page' : undefined}
+      >
+        <MdAccountCircle aria-hidden="true" />
+      </Link>
       {showAdd && (
         <button type="button" className={styles.fab} aria-label={t('nav.addRecipe')} onClick={onAdd}>
           <MdAdd aria-hidden="true" />

@@ -13,6 +13,13 @@
   transition: transform 0.3s ease-out;
 }
 
+/* Desktop: the sheet covers the whole page, not just the 480px phone column. */
+@media (min-width: 1024px) {
+  .sheet {
+    max-width: none;
+  }
+}
+
 .sheet[data-open='true'] {
   transform: translateY(0);
 }
