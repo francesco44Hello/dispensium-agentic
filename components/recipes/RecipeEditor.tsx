@@ -6,6 +6,7 @@ import { currentIdToken } from '../../services/authClient';
 import type { ExtractedRecipe, RecipeDraft } from '../../types/recipe';
 import { ImportPanel } from './ImportPanel';
 import { RecipeForm } from './RecipeForm';
+import styles from './RecipeEditor.module.css';
 
 interface Props {
   onSave: (draft: RecipeDraft, photo: Blob | null) => void | Promise<void>;
@@ -53,16 +54,18 @@ export function RecipeEditor({ onSave, saving, error }: Props) {
 
   return (
     <>
-      <ImportPanel onImported={handleImported} />
-      <RecipeForm
-        key={session.version}
-        initial={session.recipe ?? undefined}
-        photo={session.photo}
-        onPhotoChange={setPhoto}
-        onSubmit={onSave}
-        saving={saving}
-        error={error}
-      />
+      <div className={styles.layout}>
+        <ImportPanel onImported={handleImported} />
+        <RecipeForm
+          key={session.version}
+          initial={session.recipe ?? undefined}
+          photo={session.photo}
+          onPhotoChange={setPhoto}
+          onSubmit={onSave}
+          saving={saving}
+          error={error}
+        />
+      </div>
     </>
   );
 }
