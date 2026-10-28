@@ -42,7 +42,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
   }
 
   return (
-    <AppShell hideHeader bleed>
+    <AppShell hideHeader bleed desktopFullPage>
       {content}
     </AppShell>
   );

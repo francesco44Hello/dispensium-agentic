@@ -5,6 +5,20 @@
   gap: 16px;
 }
 
+/* Desktop: the day cards sit in two columns. */
+@media (min-width: 1024px) {
+  .container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  /* The previous-days button spans both columns, so it does not take the first card's place. */
+  .previous {
+    grid-column: 1 / -1;
+  }
+}
+
 .card {
   background-color: var(--primary-color);
   border-radius: 20px;
@@ -31,6 +45,17 @@
   color: var(--secondary-color);
   font-size: 16px;
   margin: 0 0 8px;
+}
+
+/* Breakfast is only on the desktop layout; mobile keeps its lunch and dinner blocks. */
+.desktopOnly {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .desktopOnly {
+    display: block;
+  }
 }
 
 .items {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react';
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }), usePathname: () => '/' }));
@@ -48,7 +48,8 @@ describe('AppShell', () => {
     const auth = await renderShell();
     const spy = vi.spyOn(auth, 'signOut');
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
+    const menu = screen.getByRole('complementary', { name: 'Menu' });
+    fireEvent.click(within(menu).getByRole('button', { name: 'Log out' }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(spy).toHaveBeenCalledTimes(1);
   });

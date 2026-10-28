@@ -10,6 +10,7 @@ const { pathname } = vi.hoisted(() => ({ pathname: { current: '/recipes' } }));
 const { compressed } = vi.hoisted(() => ({ compressed: new Blob(['compressed'], { type: 'image/webp' }) }));
 vi.mock('../utils/compressImage', () => ({ compressImage: vi.fn(async () => compressed) }));
 vi.mock('next/navigation', () => ({ usePathname: () => pathname.current, useRouter: () => ({ replace: vi.fn() }) }));
+vi.mock('../hooks/useProfilePhoto', () => ({ useProfilePhoto: () => null }));
 
 import { RecipeForm } from '../components/recipes/RecipeForm';
 import { ImportPanel } from '../components/recipes/ImportPanel';

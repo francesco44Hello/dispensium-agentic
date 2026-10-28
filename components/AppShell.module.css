@@ -29,3 +29,35 @@
   /* Keeps the end of the list clear of the bottom bar and its floating button. */
   padding-bottom: var(--content-bottom);
 }
+
+/* Desktop: a centred 960px column, with the tab bar placed above the page content.
+   The order rules below need the header and nav to stay direct children of .shell (see AppShell.tsx). */
+@media (min-width: 1024px) {
+  .shell {
+    max-width: 960px;
+    padding: 0 24px;
+  }
+
+  .shell.bleed {
+    padding: 0;
+  }
+
+  .shell > header {
+    order: -2;
+  }
+
+  .shell > nav {
+    order: -1;
+  }
+
+  /* Breathing room between the navigation bar and the first title or back button. */
+  .content {
+    padding-top: 32px;
+  }
+
+  /* Full-page desktop views (the recipe detail page) have no bottom bar and no footer. */
+  .shell.desktopFullPage > nav,
+  .shell.desktopFullPage > footer {
+    display: none;
+  }
+}

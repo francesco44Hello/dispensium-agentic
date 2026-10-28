@@ -1,0 +1,16 @@
+/* Mobile stacks the import link above the form, as before. */
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Desktop: the import link sits in a side column, and the form fills the rest. */
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+    padding: 24px;
+  }
+}
