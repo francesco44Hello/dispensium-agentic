@@ -1,3 +1,4 @@
+import { MdFreeBreakfast } from 'react-icons/md';
 import type { MealType } from '../../types/menu';
 import styles from './MealTabs.module.css';
 import { useLocale } from '../i18n/LocaleProvider';
@@ -8,11 +9,21 @@ interface Props {
   onSelect: (meal: MealType) => void;
 }
 
-// The lunch and dinner icons are the same SVGs the legacy app uses.
+// The lunch and dinner icons are the same SVGs the legacy app uses. Breakfast uses a react-icons glyph.
 export function MealTabs({ selected, onSelect }: Props) {
   const { t } = useLocale();
   return (
     <div className={styles.tabs}>
+      <button
+        type="button"
+        aria-pressed={selected === 'breakfast'}
+        aria-label={t(MEAL_KEYS.breakfast)}
+        className={`${styles.tab} ${selected === 'breakfast' ? styles.active : ''}`}
+        onClick={() => onSelect('breakfast')}
+      >
+        <span>{t(MEAL_KEYS.breakfast)}</span>
+        <MdFreeBreakfast className={styles.icon} aria-hidden="true" />
+      </button>
       <button
         type="button"
         aria-pressed={selected === 'lunch'}

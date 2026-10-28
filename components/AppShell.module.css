@@ -29,3 +29,23 @@
   /* Keeps the end of the list clear of the bottom bar and its floating button. */
   padding-bottom: var(--content-bottom);
 }
+
+/* Desktop: a centred 960px column, with the tab bar placed above the page content. */
+@media (min-width: 1024px) {
+  .shell {
+    max-width: 960px;
+    padding: 0 24px;
+  }
+
+  .shell.bleed {
+    padding: 0;
+  }
+
+  .shell > header {
+    order: -2;
+  }
+
+  .shell > nav {
+    order: -1;
+  }
+}

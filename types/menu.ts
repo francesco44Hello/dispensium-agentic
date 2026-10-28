@@ -1,4 +1,4 @@
-export const MEALS = ['lunch', 'dinner'] as const;
+export const MEALS = ['breakfast', 'lunch', 'dinner'] as const;
 export type MealType = (typeof MEALS)[number];
 
 export interface MealEntry {
@@ -10,6 +10,7 @@ export interface MealEntry {
 }
 
 export interface DayMenu {
+  breakfast: MealEntry;
   lunch: MealEntry;
   dinner: MealEntry;
 }
@@ -17,7 +18,7 @@ export interface DayMenu {
 export const EMPTY_MEAL: MealEntry = { main: '', side: '', mainRecipeId: '', sideRecipeId: '' };
 
 export function emptyDay(): DayMenu {
-  return { lunch: { ...EMPTY_MEAL }, dinner: { ...EMPTY_MEAL } };
+  return { breakfast: { ...EMPTY_MEAL }, lunch: { ...EMPTY_MEAL }, dinner: { ...EMPTY_MEAL } };
 }
 
 export function isMealType(value: string): value is MealType {

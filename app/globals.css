@@ -52,3 +52,11 @@ body {
   margin: 0 auto;
   padding: 16px;
 }
+
+/* Desktop: the bottom bar moves to the top, so pages no longer reserve room for a fixed bar at the bottom. */
+@media (min-width: 1024px) {
+  :root {
+    --nav-height: 0px;
+    --content-bottom: 32px;
+  }
+}

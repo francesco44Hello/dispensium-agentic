@@ -544,8 +544,12 @@ describe('weekly menu', () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', 'tomorrow'), { lunch: entry() }, { merge: true }));
   });
 
-  it('rejects fields other than lunch and dinner, and extra entry fields', async () => {
-    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry() }, { merge: true }));
+  it('accepts a breakfast entry alongside lunch and dinner', async () => {
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry() }, { merge: true }));
+  });
+
+  it('rejects fields other than breakfast, lunch and dinner, and extra entry fields', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { brunch: entry() }, { merge: true }));
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ extra: 'x' }) }, { merge: true }));
   });
 
