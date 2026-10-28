@@ -163,6 +163,16 @@ describe('deleteRecipe', () => {
     await expect(backend.photoUrl(image)).rejects.toThrow();
   });
 
+  it('rejects a photo path outside this household recipe folder', async () => {
+    const { service } = setup();
+    await expectInvalid(service.deleteRecipe(HID, 'r1', 'households/other-house/recipes/x.webp'), 'invalid-image');
+  });
+
+  it('rejects a recipe id that is not a plain id', async () => {
+    const { service } = setup();
+    await expectInvalid(service.deleteRecipe(HID, 'a/b', ''), 'invalid-id');
+  });
+
   it('still removes the recipe when its photo cannot be deleted', async () => {
     const { backend } = setup();
     const failingPhotos = { ...backend, deletePhoto: async () => Promise.reject(new Error('storage down')) };

@@ -182,6 +182,7 @@ test('the end of the recipe page sits about 32px above the bottom bar', async ({
   await expect(page.getByRole('heading', { level: 1, name: 'Long toast' })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
+  // The bottom-most section is the delete block, which now sits under the steps, so it is the element that must clear the bar.
   const lastStep = await page.locator('article section:visible').last().boundingBox();
   const nav = await page.locator('nav[aria-label="Main"]:visible').boundingBox();
   expect(lastStep && nav).toBeTruthy();
