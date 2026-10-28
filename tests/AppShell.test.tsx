@@ -44,13 +44,13 @@ describe('AppShell', () => {
     expect(screen.getByRole('button', { name: 'Open menu' })).toBeInTheDocument();
   });
 
-  it('signs out from the side menu and redirects to login', async () => {
+  it('signs out from the side menu and redirects to welcome', async () => {
     const auth = await renderShell();
     const spy = vi.spyOn(auth, 'signOut');
     fireEvent.click(screen.getByRole('button', { name: 'Open menu' }));
     const menu = screen.getByRole('complementary', { name: 'Menu' });
     fireEvent.click(within(menu).getByRole('button', { name: 'Log out' }));
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/welcome'));
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

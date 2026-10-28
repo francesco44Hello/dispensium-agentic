@@ -39,9 +39,9 @@ describe('ProtectedRoute', () => {
     expect(replace).not.toHaveBeenCalled();
   });
 
-  it('redirects an unauthenticated visitor to /login and hides children', async () => {
+  it('redirects an unauthenticated visitor to /welcome and hides children', async () => {
     render(<Protected service={createAuthService(createMockAuthBackend())} />);
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/welcome'));
     expect(screen.queryByText('secret home')).toBeNull();
   });
 

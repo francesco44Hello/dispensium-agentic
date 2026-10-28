@@ -1,12 +1,12 @@
 import { test, expect } from './fixtures';
 import { PASSWORD, alertOf, goToSignUp, logOut, signUp, visibleForm } from './helpers';
 
-test('redirects an unauthenticated visitor from / to /login', async ({ page }) => {
+test('redirects an unauthenticated visitor from / to /welcome', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/welcome$/);
 });
 
-test('sign up lands on the list and log out returns to login', async ({ page }) => {
+test('sign up lands on the list and log out returns to welcome', async ({ page }) => {
   await signUp(page);
   await expect(page.getByRole('heading', { name: "What's missing?" })).toBeVisible();
   await logOut(page);
@@ -15,6 +15,9 @@ test('sign up lands on the list and log out returns to login', async ({ page }) 
 test('rejects a wrong password, then accepts the right one', async ({ page }) => {
   const email = await signUp(page);
   await logOut(page);
+  // Client-side hop from the welcome page: a reload would clear the in-memory mock accounts.
+  await page.getByRole('link', { name: 'Log in' }).first().click();
+  await expect(page.getByRole('heading', { name: 'Log in' })).toBeVisible();
 
   await visibleForm(page).getByLabel('Email').fill(email);
   await visibleForm(page).getByLabel('Password').fill('wrong-password');

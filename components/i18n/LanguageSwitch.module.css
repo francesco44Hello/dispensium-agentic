@@ -1,0 +1,62 @@
+/* Sized to sit level with the Log in pill beside it. */
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.trigger:focus-visible,
+.option:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+  padding: 6px;
+  border: 2px solid var(--primary-color);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 4px 4px 0 var(--primary-color);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--secondary-color);
+}
+
+.option[aria-current='true'] {
+  background: var(--muted);
+}
