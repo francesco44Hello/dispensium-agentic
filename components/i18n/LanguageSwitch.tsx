@@ -18,7 +18,8 @@ export function LanguageSwitch() {
   useEffect(() => {
     if (!open) return;
     function closeIfOutside(event: MouseEvent) {
-      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target;
+      if (target instanceof Node && !wrapRef.current?.contains(target)) setOpen(false);
     }
     document.addEventListener('mousedown', closeIfOutside);
     return () => document.removeEventListener('mousedown', closeIfOutside);
