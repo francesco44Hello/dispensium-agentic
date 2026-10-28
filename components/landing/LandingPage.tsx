@@ -76,7 +76,7 @@ export function LandingPage() {
 
       <main>
         <section className={styles.hero} aria-labelledby="landing-hero">
-          <div className={styles.heroText}>
+          <div>
             <p className={styles.tagline}>{t('menu.tagline')}</p>
             <h1 id="landing-hero" className={styles.heroTitle}>
               {t('landing.hero.title')}
