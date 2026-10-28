@@ -1,22 +1,24 @@
+/* The import link is a highlighted card on every screen size, so it is the first thing people see in the recipe form. */
 .panel {
   margin: 24px 24px 0;
   padding: 16px;
-  background-color: white;
+  background-color: var(--primary-color);
   border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(255, 142, 113, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .title {
   margin: 0;
   font-size: 18px;
   font-weight: var(--font-weight-brand);
-  color: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 .subtitle {
   margin: 4px 0 12px;
   font-size: 14px;
-  color: #666;
+  color: var(--surface);
+  opacity: 0.85;
 }
 
 .form {
@@ -28,10 +30,11 @@
   flex: 1;
   min-width: 0;
   padding: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: none;
   border-radius: 12px;
+  background-color: var(--surface);
   font-size: 16px;
-  color: #333;
+  color: var(--primary-color);
 }
 
 .button {
@@ -52,26 +55,18 @@
   cursor: default;
 }
 
-/* Desktop: the import link is the highlighted card in the side column, and stays in view while the form scrolls. */
+/* Desktop: the import link is the card in the side column, and stays in view while the form scrolls. */
 @media (min-width: 1024px) {
   .panel {
     margin: 0;
     padding: 24px;
-    background-color: var(--primary-color);
     border-radius: 24px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     position: sticky;
     top: 24px;
   }
 
   .title {
     font-size: 22px;
-    color: var(--secondary-color);
-  }
-
-  .subtitle {
-    color: var(--surface);
-    opacity: 0.85;
   }
 
   .form {
@@ -80,10 +75,7 @@
 
   .input {
     padding: 14px 16px;
-    border: none;
     border-radius: 14px;
-    background-color: var(--surface);
-    color: var(--primary-color);
   }
 
   .button {

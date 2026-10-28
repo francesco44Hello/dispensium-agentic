@@ -564,6 +564,11 @@ describe('weekly menu', () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ side: 'x'.repeat(101) }) }, { merge: true }));
   });
 
+  it('rejects markup that follows a line break in a meal', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ main: 'soup\n<b>x</b>' }) }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry({ side: 'toast\n<i>x' }) }, { merge: true }));
+  });
+
   it('rejects a recipe id that is not a plain id', async () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ mainRecipeId: '../secrets' }) }, { merge: true }));
   });

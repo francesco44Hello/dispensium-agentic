@@ -38,7 +38,7 @@ interface Session {
   photo: Blob | null;
 }
 
-// The import panel and the recipe form. Each mount starts empty, so the sheet and the full page remount it when they open.
+// The import panel and the recipe form. Each mount starts empty: RecipeSheet remounts it every time the sheet opens.
 export function RecipeEditor({ onSave, saving, error }: Props) {
   const [session, setSession] = useState<Session>({ version: 0, recipe: null, photo: null });
 
@@ -53,19 +53,17 @@ export function RecipeEditor({ onSave, saving, error }: Props) {
   const setPhoto = (photo: Blob | null) => setSession((current) => ({ ...current, photo }));
 
   return (
-    <>
-      <div className={styles.layout}>
-        <ImportPanel onImported={handleImported} />
-        <RecipeForm
-          key={session.version}
-          initial={session.recipe ?? undefined}
-          photo={session.photo}
-          onPhotoChange={setPhoto}
-          onSubmit={onSave}
-          saving={saving}
-          error={error}
-        />
-      </div>
-    </>
+    <div className={styles.layout}>
+      <ImportPanel onImported={handleImported} />
+      <RecipeForm
+        key={session.version}
+        initial={session.recipe ?? undefined}
+        photo={session.photo}
+        onPhotoChange={setPhoto}
+        onSubmit={onSave}
+        saving={saving}
+        error={error}
+      />
+    </div>
   );
 }

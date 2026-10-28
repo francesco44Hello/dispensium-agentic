@@ -136,8 +136,8 @@ service cloud.firestore {
         function validMeal(meal) {
           return meal is map
             && meal.keys().hasOnly(['main', 'side', 'mainRecipeId', 'sideRecipeId'])
-            && meal.main is string && meal.main.size() <= 100 && !meal.main.matches('.*[<>{}"].*')
-            && meal.side is string && meal.side.size() <= 100 && !meal.side.matches('.*[<>{}"].*')
+            && meal.main is string && meal.main.size() <= 100 && !meal.main.matches('(?s).*[<>{}"].*')
+            && meal.side is string && meal.side.size() <= 100 && !meal.side.matches('(?s).*[<>{}"].*')
             && meal.mainRecipeId is string && (meal.mainRecipeId == '' || (meal.main != '' && meal.mainRecipeId.matches('[A-Za-z0-9_-]{1,128}')))
             && meal.sideRecipeId is string && (meal.sideRecipeId == '' || (meal.side != '' && meal.sideRecipeId.matches('[A-Za-z0-9_-]{1,128}')));
         }
