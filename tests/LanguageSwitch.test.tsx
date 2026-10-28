@@ -40,4 +40,19 @@ describe('LanguageSwitch', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(window.localStorage.getItem('dispensium-locale')).toBe('it');
   });
+
+  it('closes on Escape', () => {
+    renderSwitch();
+    fireEvent.click(screen.getByRole('button', { name: 'Change language' }));
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Change language' }), { key: 'Escape' });
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('closes when you click outside the menu', () => {
+    renderSwitch();
+    fireEvent.click(screen.getByRole('button', { name: 'Change language' }));
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    fireEvent.mouseDown(document.body);
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
 });

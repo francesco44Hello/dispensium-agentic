@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { LOCALES, LOCALE_FLAGS, type Locale } from '../../i18n/locale';
 import type { MessageKey } from '../../i18n/messages';
 import { useLocale } from './LocaleProvider';
@@ -12,6 +12,17 @@ const LABEL_KEYS: Record<Locale, MessageKey> = { en: 'language.english', it: 'la
 export function LanguageSwitch() {
   const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // A press anywhere outside the switch closes the menu, as it would on a native select.
+  useEffect(() => {
+    if (!open) return;
+    function closeIfOutside(event: MouseEvent) {
+      if (!wrapRef.current?.contains(event.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', closeIfOutside);
+    return () => document.removeEventListener('mousedown', closeIfOutside);
+  }, [open]);
 
   function choose(next: Locale) {
     setLocale(next);
@@ -23,7 +34,7 @@ export function LanguageSwitch() {
   }
 
   return (
-    <div className={styles.wrap} onKeyDown={handleKeyDown}>
+    <div ref={wrapRef} className={styles.wrap} onKeyDown={handleKeyDown}>
       <button
         type="button"
         className={styles.trigger}
