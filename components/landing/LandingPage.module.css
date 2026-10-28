@@ -316,7 +316,7 @@
 }
 
 .card,
-.label {
+.step {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -388,7 +388,7 @@
   list-style: none;
 }
 
-.label {
+.step {
   margin-top: 14px;
   padding-top: 28px;
   border-radius: 14px;
@@ -396,7 +396,7 @@
 }
 
 /* A pantry label: a punched hole at the top, and a dashed inner rule. */
-.label::before {
+.step::before {
   content: "";
   position: absolute;
   top: 10px;
@@ -409,7 +409,7 @@
   background: var(--muted);
 }
 
-.label::after {
+.step::after {
   content: "";
   position: absolute;
   inset: 8px;

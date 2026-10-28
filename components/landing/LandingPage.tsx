@@ -132,7 +132,7 @@ export function LandingPage() {
           </h2>
           <ol className={styles.steps}>
             {STEPS.map((step, index) => (
-              <li key={step.title} className={styles.label}>
+              <li key={step.title} className={styles.step}>
                 <span className={styles.stepNumber} aria-hidden="true">
                   {index + 1}
                 </span>
