@@ -30,7 +30,11 @@ function isMealEntry(value: unknown): value is MealEntry {
 // A day may be partly saved: each meal is optional, but one that is present must be a full entry.
 export function isPartialDayMenu(value: unknown): value is Partial<DayMenu> {
   if (!isPlainObject(value)) return false;
-  return (value.lunch === undefined || isMealEntry(value.lunch)) && (value.dinner === undefined || isMealEntry(value.dinner));
+  return (
+    (value.breakfast === undefined || isMealEntry(value.breakfast)) &&
+    (value.lunch === undefined || isMealEntry(value.lunch)) &&
+    (value.dinner === undefined || isMealEntry(value.dinner))
+  );
 }
 
 function isSeedRecipe(value: unknown): value is SeedRecipe {

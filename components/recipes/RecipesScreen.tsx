@@ -40,11 +40,16 @@ export function RecipesScreen() {
   };
 
   const ready = status === 'ready' && householdId && user;
+  const openSheet = () => setSheetOpen(true);
 
   return (
-    <AppShell onAdd={() => setSheetOpen(true)}>
+    <AppShell onAdd={openSheet}>
       <div className={styles.page}>
         <h1 className={styles.title}>{t('recipes.title')}</h1>
+        {/* Desktop only: the floating add button is hidden there, so the page offers this one instead. */}
+        <button type="button" className={styles.addDesktop} onClick={openSheet}>
+          {t('nav.addRecipe')}
+        </button>
         {status === 'error' && (
           <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>
         )}

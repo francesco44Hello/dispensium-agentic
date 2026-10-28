@@ -56,9 +56,9 @@ describe('setMeal', () => {
       .rejects.toMatchObject({ code: 'invalid-date' });
   });
 
-  it('rejects a meal that is not lunch or dinner', async () => {
+  it('rejects a meal that is not breakfast, lunch or dinner', async () => {
     const { service } = setup();
-    await expect(service.setMeal(HID, DAY, 'breakfast' as 'lunch', { main: 'x', side: '', mainRecipeId: '', sideRecipeId: '' }))
+    await expect(service.setMeal(HID, DAY, 'brunch' as 'lunch', { main: 'x', side: '', mainRecipeId: '', sideRecipeId: '' }))
       .rejects.toMatchObject({ code: 'invalid-meal' });
   });
 

@@ -157,6 +157,31 @@
   color: var(--error-color);
 }
 
+/* Desktop: the photo and the basics sit side by side, then the wide rows, then ingredients and steps in two columns. */
+@media (min-width: 1024px) {
+  .form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 20px 24px;
+    padding: 0 0 24px;
+  }
+
+  .photoBox {
+    height: 240px;
+  }
+
+  .wide,
+  .error {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Mobile stacks every row, so this marker only changes the layout on desktop. */
+.wide {
+  min-width: 0;
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;

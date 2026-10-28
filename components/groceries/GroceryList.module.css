@@ -4,6 +4,23 @@
   gap: 16px;
 }
 
+/* Mobile stacks the categories in one column; desktop puts two side by side. */
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 1024px) {
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 16px;
+    row-gap: 16px;
+    align-items: start;
+  }
+}
+
 .title {
   margin: 8px 0 0;
   font-size: 1.75rem;

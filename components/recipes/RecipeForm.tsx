@@ -118,7 +118,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
         </div>
       </div>
 
-      <div className={styles.section}>
+      <div className={`${styles.section} ${styles.wide}`}>
         <h3 className={styles.sectionTitle}>{t('recipes.perfectFor')}</h3>
         <div className={styles.pills}>
           {RECIPE_LABELS.map((option) => (
@@ -172,7 +172,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
 
       {error && <p role="alert" className={styles.error}>{error}</p>}
 
-      <button type="submit" className={styles.submit} disabled={saving}>
+      <button type="submit" className={`${styles.submit} ${styles.wide}`} disabled={saving}>
         {saving ? t('recipes.saving') : t('recipes.save')}
       </button>
     </form>

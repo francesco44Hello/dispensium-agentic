@@ -62,7 +62,7 @@ function isRealDate(id: string): boolean {
 
 function normalizeDay(raw: Partial<DayMenu> | undefined): DayMenu {
   const day = emptyDay();
-  return { lunch: raw?.lunch ?? day.lunch, dinner: raw?.dinner ?? day.dinner };
+  return { breakfast: raw?.breakfast ?? day.breakfast, lunch: raw?.lunch ?? day.lunch, dinner: raw?.dinner ?? day.dinner };
 }
 
 export function createMenuService(backend: MenuBackend) {

@@ -26,10 +26,10 @@ export function HouseholdScreen() {
 
       {status === 'error' && <p role="alert">{t('household.loadError')}</p>}
       {status === 'ready' && householdId && user && (
-        <>
+        <div className={styles.groups}>
           <HouseholdPanel householdId={householdId} uid={user.uid} />
           <JoinHouseholdForm uid={user.uid} displayName={user.displayName} photoUrl={user.photoURL} />
-        </>
+        </div>
       )}
       {status !== 'error' && status !== 'ready' && <p role="status">{t('household.loading')}</p>}
     </div>
