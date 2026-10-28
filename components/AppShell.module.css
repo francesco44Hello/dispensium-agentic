@@ -54,4 +54,10 @@
   .content {
     padding-top: 32px;
   }
+
+  /* Full-page desktop views (the recipe detail page) have no bottom bar and no footer. */
+  .shell.desktopFullPage > nav,
+  .shell.desktopFullPage > footer {
+    display: none;
+  }
 }

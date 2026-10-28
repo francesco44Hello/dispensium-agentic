@@ -25,10 +25,12 @@ afterEach(() => {
 });
 
 describe('RecipesScreen add button on the page', () => {
-  it('shows an add recipe link in the page that opens the full-page form', () => {
+  it('shows an add recipe button in the page that opens the recipe sheet', () => {
     render(<RecipesScreen />);
     expect(screen.getByText('sheet closed')).toBeInTheDocument();
 
-    expect(screen.getByRole('link', { name: 'Add recipe' })).toHaveAttribute('href', '/recipes/new');
+    fireEvent.click(screen.getByRole('button', { name: 'Add recipe' }));
+
+    expect(screen.getByText('sheet open')).toBeInTheDocument();
   });
 });

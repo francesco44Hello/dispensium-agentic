@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { AppShell } from '../AppShell';
 import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
@@ -47,10 +46,10 @@ export function RecipesScreen() {
     <AppShell onAdd={openSheet}>
       <div className={styles.page}>
         <h1 className={styles.title}>{t('recipes.title')}</h1>
-        {/* Desktop only: the floating add button is hidden there, so this link opens the full-page form instead. */}
-        <Link href="/recipes/new" className={styles.addDesktop}>
+        {/* Desktop only: the floating add button is hidden there, so the page offers this one instead. */}
+        <button type="button" className={styles.addDesktop} onClick={openSheet}>
           {t('nav.addRecipe')}
-        </Link>
+        </button>
         {status === 'error' && (
           <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>
         )}
