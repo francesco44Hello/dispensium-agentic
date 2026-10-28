@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { IconType } from 'react-icons';
-import { MdAccountCircle, MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
+import { MdAdd, MdCalendarMonth, MdChecklist, MdGroups, MdRestaurant } from 'react-icons/md';
+import { useProfilePhoto } from '../../hooks/useProfilePhoto';
+import { ProfileAvatar } from '../profile/ProfileAvatar';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { MessageKey } from '../../i18n/messages';
 import styles from './BottomNav.module.css';
@@ -24,6 +26,7 @@ interface Props {
 
 export function BottomNav({ onAdd }: Props) {
   const pathname = usePathname();
+  const profilePhoto = useProfilePhoto();
   const { t } = useLocale();
   const showAdd = pathname === '/recipes' && onAdd;
 
@@ -47,7 +50,7 @@ export function BottomNav({ onAdd }: Props) {
         aria-label={t('nav.profile')}
         aria-current={pathname === '/profile' ? 'page' : undefined}
       >
-        <MdAccountCircle aria-hidden="true" />
+        <ProfileAvatar photoUrl={profilePhoto} />
       </Link>
       {showAdd && (
         <button type="button" className={styles.fab} aria-label={t('nav.addRecipe')} onClick={onAdd}>

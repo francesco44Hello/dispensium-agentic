@@ -3,6 +3,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 
 vi.mock('next/navigation', () => ({ usePathname: () => '/', useRouter: () => ({ replace: vi.fn() }) }));
+vi.mock('../hooks/useProfilePhoto', () => ({ useProfilePhoto: () => null }));
 
 import { BottomNav } from '../components/layout/BottomNav';
 import { SideMenu } from '../components/layout/SideMenu';

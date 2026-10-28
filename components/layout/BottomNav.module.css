@@ -132,10 +132,17 @@
     display: none;
   }
 
+  /* The profile picture in a 2px ring, the same as the header avatar on mobile. */
   .profileTab {
     display: flex;
     flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
     margin-left: auto;
-    font-size: 26px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
   }
 }
