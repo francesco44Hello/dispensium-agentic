@@ -221,6 +221,10 @@ const en = {
   'landing.share.bread': 'Bread',
   'landing.share.courgette': 'Courgette',
   'landing.language.change': 'Change language',
+  'recipes.delete': 'Delete recipe',
+  'recipes.deleteAsk': 'Delete this recipe? This cannot be undone.',
+  'recipes.deleteConfirm': 'Yes, delete',
+  'recipes.deleteFailed': 'Could not delete the recipe. Try again.',
   'landing.footer.copy': '© Francesco Longo 2026',
 };
 
@@ -444,6 +448,10 @@ const it: Record<MessageKey, string> = {
   'landing.share.bread': 'Pane',
   'landing.share.courgette': 'Zucchine',
   'landing.language.change': 'Cambia lingua',
+  'recipes.delete': 'Elimina ricetta',
+  'recipes.deleteAsk': 'Eliminare questa ricetta? Non si può annullare.',
+  'recipes.deleteConfirm': 'Sì, elimina',
+  'recipes.deleteFailed': 'Impossibile eliminare la ricetta. Riprova.',
   'landing.footer.copy': '© Francesco Longo 2026',
 };
 

@@ -145,3 +145,30 @@ describe('addRecipe', () => {
     expect(deleted).toEqual(['https://storage.example/photo.webp']);
   });
 });
+
+describe('deleteRecipe', () => {
+  it('removes the recipe from the household', async () => {
+    const { backend, service } = setup();
+    const id = await service.addRecipe(HID, UID, draft());
+    await service.deleteRecipe(HID, id, '');
+    expect(recipesOf(backend)).toEqual([]);
+  });
+
+  it('removes the recipe photo as well', async () => {
+    const { backend, service } = setup();
+    const photo = new Blob([new Uint8Array(10)], { type: 'image/webp' });
+    const id = await service.addRecipe(HID, UID, draft(), photo);
+    const image = recipesOf(backend)[0].image;
+    await service.deleteRecipe(HID, id, image);
+    await expect(backend.photoUrl(image)).rejects.toThrow();
+  });
+
+  it('still removes the recipe when its photo cannot be deleted', async () => {
+    const { backend } = setup();
+    const failingPhotos = { ...backend, deletePhoto: async () => Promise.reject(new Error('storage down')) };
+    const service = createRecipeService(failingPhotos);
+    const id = await service.addRecipe(HID, UID, draft());
+    await expect(service.deleteRecipe(HID, id, 'households/hh-1/recipes/x.webp')).resolves.toBeUndefined();
+    expect(recipesOf(backend)).toEqual([]);
+  });
+});

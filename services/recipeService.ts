@@ -34,6 +34,7 @@ export interface RecipeBackend {
   // Returns a local URL for the photo, fetched through the database rules.
   photoUrl(path: string): Promise<string>;
   addRecipe(householdId: string, recipe: NewRecipe): Promise<string>;
+  deleteRecipe(householdId: string, id: string): Promise<void>;
   subscribeToRecipes(householdId: string, listener: (recipes: Recipe[]) => void): Unsubscribe;
 }
 
@@ -90,6 +91,12 @@ export function createRecipeService(backend: RecipeBackend) {
         await backend.deletePhoto(image).catch(() => undefined);
         throw error;
       }
+    },
+
+    // The recipe goes first: if its photo cannot be removed, the recipe is still gone and the photo is only an orphan.
+    async deleteRecipe(householdId: string, id: string, image: string): Promise<void> {
+      await backend.deleteRecipe(householdId, id);
+      if (image) await backend.deletePhoto(image).catch(() => undefined);
     },
 
     subscribeToRecipes(householdId: string, listener: (recipes: Recipe[]) => void): Unsubscribe {

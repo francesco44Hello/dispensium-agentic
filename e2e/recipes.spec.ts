@@ -165,7 +165,7 @@ test('the recipe page has no header, runs full width, and the cart adds an ingre
   await expect(page.locator('span:visible').filter({ hasText: /^garlic$/ })).toHaveCount(1);
 });
 
-test('the last step on the recipe page sits about 32px above the bottom bar', async ({ page }) => {
+test('the end of the recipe page sits about 32px above the bottom bar', async ({ page }) => {
   await signUp(page);
   await page.getByRole('link', { name: 'Recipes', exact: true }).click();
   await page.getByRole('button', { name: 'Add recipe' }).click();
@@ -182,10 +182,29 @@ test('the last step on the recipe page sits about 32px above the bottom bar', as
   await expect(page.getByRole('heading', { level: 1, name: 'Long toast' })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
-  const lastStep = await page.locator('ol li:visible').last().boundingBox();
+  const lastStep = await page.locator('article section:visible').last().boundingBox();
   const nav = await page.locator('nav[aria-label="Main"]:visible').boundingBox();
   expect(lastStep && nav).toBeTruthy();
   const gap = (nav?.y ?? 0) - ((lastStep?.y ?? 0) + (lastStep?.height ?? 0));
   expect(gap).toBeGreaterThanOrEqual(24);
   expect(gap).toBeLessThanOrEqual(40);
+});
+
+test('a recipe can be deleted from its page after a second confirmation', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill('Old pancakes');
+  await sheet.getByLabel('Ingredient 1').fill('flour');
+  await sheet.getByLabel('Step 1').fill('Fry them');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+
+  await page.getByRole('link', { name: 'Old pancakes' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Old pancakes' })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete recipe' }).click();
+  await page.getByRole('button', { name: 'Yes, delete' }).click();
+
+  await expect(page).toHaveURL(/\/recipes$/);
+  await expect(page.getByRole('link', { name: 'Old pancakes' })).toHaveCount(0);
 });
