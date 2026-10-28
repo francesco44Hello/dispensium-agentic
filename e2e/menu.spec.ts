@@ -117,7 +117,7 @@ test('the last day sits about 32px above the bottom bar, in both views', async (
 
 });
 
-test('breakfast can be planned on a phone and on the desktop layout', async ({ page }) => {
+test('breakfast planned on a phone is still shown after switching to the desktop layout', async ({ page }) => {
   await signUp(page);
   await page.getByRole('link', { name: 'Menu', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Breakfast', exact: true })).toBeVisible();
