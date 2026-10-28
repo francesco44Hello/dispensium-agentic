@@ -16,15 +16,17 @@ interface Props {
   bleed?: boolean;
   // Skips the room the shell reserves under the bar, for pages that space their own bottom edge.
   flushBottom?: boolean;
+  // Leaves out the navigation bar and the desktop footer, for a full page with its own way back (the desktop add recipe form).
+  hideNav?: boolean;
 }
 
-export function AppShell({ children, onAdd, hideHeader = false, bleed = false, flushBottom = false }: Props) {
+export function AppShell({ children, onAdd, hideHeader = false, bleed = false, flushBottom = false, hideNav = false }: Props) {
   return (
     <div className={`${styles.shell} ${bleed ? styles.bleed : ''}`}>
       {!hideHeader && <AppHeader />}
       <main className={`${styles.content} ${bleed ? styles.bleed : ''} ${flushBottom ? styles.flushBottom : ''}`}>{children}</main>
-      <BottomNav onAdd={onAdd} />
-      <AppFooter />
+      {!hideNav && <BottomNav onAdd={onAdd} />}
+      {!hideNav && <AppFooter />}
     </div>
   );
 }

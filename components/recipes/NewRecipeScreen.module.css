@@ -1,0 +1,18 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.back {
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: var(--font-weight-title);
+  color: var(--primary-color);
+}

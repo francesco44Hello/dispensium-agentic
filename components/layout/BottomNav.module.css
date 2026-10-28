@@ -138,8 +138,4 @@
     margin-left: auto;
     font-size: 26px;
   }
-
-  .profileCurrent {
-    background: var(--primary-button);
-  }
 }

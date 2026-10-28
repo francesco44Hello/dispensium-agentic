@@ -23,6 +23,7 @@
     display: inline-flex;
     align-items: center;
     align-self: flex-start;
+    text-decoration: none;
     height: 44px;
     padding: 0 22px;
     border: none;

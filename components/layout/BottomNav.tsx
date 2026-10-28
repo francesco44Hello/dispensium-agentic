@@ -43,7 +43,7 @@ export function BottomNav({ onAdd }: Props) {
       {/* Desktop only: the profile link sits at the far right, where the header used to show it. */}
       <Link
         href="/profile"
-        className={`${styles.tab} ${styles.profileTab} ${pathname === '/profile' ? styles.profileCurrent : ''}`}
+        className={`${styles.tab} ${styles.profileTab}`}
         aria-label={t('nav.profile')}
         aria-current={pathname === '/profile' ? 'page' : undefined}
       >

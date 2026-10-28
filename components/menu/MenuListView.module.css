@@ -12,6 +12,11 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
+
+  /* The previous-days button spans both columns, so it does not take the first card's place. */
+  .previous {
+    grid-column: 1 / -1;
+  }
 }
 
 .card {
