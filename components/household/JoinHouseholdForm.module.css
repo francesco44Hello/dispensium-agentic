@@ -4,6 +4,13 @@
   gap: 12px;
 }
 
+/* Desktop: the code field and button keep a regular width instead of filling the column. */
+@media (min-width: 1024px) {
+  .form {
+    max-width: 360px;
+  }
+}
+
 .heading {
   margin: 0;
   font-size: 1.25rem;
@@ -48,4 +55,11 @@
 
 .button:disabled {
   opacity: 0.6;
+}
+
+/* Desktop: the button sits at its own width. Placed after the base rule so it wins. */
+@media (min-width: 1024px) {
+  .button {
+    align-self: flex-start;
+  }
 }

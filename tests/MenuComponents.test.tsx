@@ -162,12 +162,13 @@ describe('MenuListView today', () => {
 
 describe('MenuListView', () => {
   const menu: Record<string, DayMenu> = {
-    '2026-10-22': { lunch: { ...EMPTY, main: 'Carbonara', mainRecipeId: 'r1' }, dinner: { ...EMPTY } },
+    '2026-10-22': { breakfast: { ...EMPTY }, lunch: { ...EMPTY, main: 'Carbonara', mainRecipeId: 'r1' }, dinner: { ...EMPTY } },
   };
 
-  it('lists each day with lunch and dinner, and links planned recipes', () => {
+  it('lists each day with breakfast, lunch and dinner, and links planned recipes', () => {
     render(<MenuListView days={['2026-10-22']} menu={menu} recipes={[recipe]} />);
     expect(screen.getByRole('link', { name: 'Carbonara' })).toHaveAttribute('href', '/recipes/r1');
-    expect(screen.getAllByText('Not planned yet')).toHaveLength(1);
+    // Breakfast and dinner are both empty in this fixture, so two rows say "Not planned yet".
+    expect(screen.getAllByText('Not planned yet')).toHaveLength(2);
   });
 });

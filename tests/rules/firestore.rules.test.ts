@@ -544,14 +544,29 @@ describe('weekly menu', () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', 'tomorrow'), { lunch: entry() }, { merge: true }));
   });
 
-  it('rejects fields other than lunch and dinner, and extra entry fields', async () => {
-    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry() }, { merge: true }));
+  it('accepts a breakfast entry alongside lunch and dinner', async () => {
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry() }, { merge: true }));
+  });
+
+  it('applies the same entry checks to breakfast as to lunch', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry({ extra: 'x' }) }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry({ main: '<b>x</b>' }) }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry({ mainRecipeId: '../secrets' }) }, { merge: true }));
+  });
+
+  it('rejects fields other than breakfast, lunch and dinner, and extra entry fields', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { brunch: entry() }, { merge: true }));
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ extra: 'x' }) }, { merge: true }));
   });
 
   it('rejects markup and over-long text in a meal', async () => {
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ main: '<b>x</b>' }) }, { merge: true }));
     await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ side: 'x'.repeat(101) }) }, { merge: true }));
+  });
+
+  it('rejects markup that follows a line break in a meal', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry({ main: 'soup\n<b>x</b>' }) }, { merge: true }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { breakfast: entry({ side: 'toast\n<i>x' }) }, { merge: true }));
   });
 
   it('rejects a recipe id that is not a plain id', async () => {

@@ -149,6 +149,7 @@ const en = {
   'recipes.label.winter': 'Cozy Winter ❄️',
   'recipes.label.quick': 'Quick & Easy ⚡',
   'recipes.label.comfort': 'Comfort Food 🥣',
+  'meal.breakfast': 'Breakfast',
   'meal.lunch': 'Lunch',
   'meal.dinner': 'Dinner',
   'meal.custom': 'Custom meal (Not in recipe book)',
@@ -322,6 +323,7 @@ const it: Record<MessageKey, string> = {
   'recipes.label.winter': 'Inverno accogliente ❄️',
   'recipes.label.quick': 'Veloce e facile ⚡',
   'recipes.label.comfort': 'Cucina comfort 🥣',
+  'meal.breakfast': 'Colazione',
   'meal.lunch': 'Pranzo',
   'meal.dinner': 'Cena',
   'meal.custom': 'Pasto personalizzato (non nel ricettario)',
@@ -382,7 +384,11 @@ export const CATEGORY_KEYS: Record<string, MessageKey> = {
 };
 
 // Meal keys: lunch and dinner are stored as these ids.
-export const MEAL_KEYS: Record<MealType, MessageKey> = { lunch: 'meal.lunch', dinner: 'meal.dinner' };
+export const MEAL_KEYS: Record<MealType, MessageKey> = {
+  breakfast: 'meal.breakfast',
+  lunch: 'meal.lunch',
+  dinner: 'meal.dinner',
+};
 
 // Shows the translation of a stored value (a category, label or grocery category). Values without a translation show as stored.
 export function translateStored<K extends string>(

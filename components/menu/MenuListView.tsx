@@ -29,10 +29,10 @@ function Item({ label, text, recipeId, recipes }: { label: string; text: string;
   );
 }
 
-function MealBlock({ label, entry, recipes }: { label: string; entry: MealEntry; recipes: Recipe[] }) {
+function MealBlock({ label, entry, recipes, desktopOnly }: { label: string; entry: MealEntry; recipes: Recipe[]; desktopOnly: boolean }) {
   const { t } = useLocale();
   return (
-    <div className={styles.mealBlock}>
+    <div className={`${styles.mealBlock} ${desktopOnly ? styles.desktopOnly : ''}`}>
       <h4>{label}</h4>
       {entry.main || entry.side ? (
         <ul className={styles.items}>
@@ -69,7 +69,13 @@ export function MenuListView({ days, menu, recipes, previous, onPrevious }: Prop
             </h3>
             <div className={styles.meals}>
               {MEALS.map((meal) => (
-                <MealBlock key={meal} label={t(MEAL_KEYS[meal])} entry={day?.[meal] ?? emptyDay()[meal]} recipes={recipes} />
+                <MealBlock
+                  key={meal}
+                  label={t(MEAL_KEYS[meal])}
+                  entry={day?.[meal] ?? emptyDay()[meal]}
+                  recipes={recipes}
+                  desktopOnly={meal === 'breakfast'}
+                />
               ))}
             </div>
           </section>

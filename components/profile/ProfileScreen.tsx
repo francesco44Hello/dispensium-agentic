@@ -95,7 +95,7 @@ export function ProfileScreen() {
         </form>
       </section>
 
-      <section className={styles.section}>
+      <section className={`${styles.section} ${styles.wide}`}>
         <h2 className={styles.heading}>{t('profile.pictureTitle')}</h2>
         <div className={styles.avatars}>
           {AVATAR_PHOTOS.map((photo, index) => (

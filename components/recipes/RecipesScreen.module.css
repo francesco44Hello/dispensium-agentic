@@ -12,3 +12,26 @@
   font-weight: var(--font-weight-title);
   color: var(--primary-color);
 }
+
+/* Hidden on mobile, where the floating button in the bottom bar adds recipes. */
+.addDesktop {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .addDesktop {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    text-decoration: none;
+    height: 44px;
+    padding: 0 22px;
+    border: none;
+    border-radius: 22px;
+    background: var(--add-button);
+    color: var(--surface);
+    font: inherit;
+    font-weight: var(--font-weight-brand);
+    cursor: pointer;
+  }
+}

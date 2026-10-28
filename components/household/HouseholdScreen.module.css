@@ -4,6 +4,22 @@
   gap: 28px;
 }
 
+/* Mobile stacks the members above the join form; desktop places them side by side. */
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+@media (min-width: 1024px) {
+  .groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: 32px;
+  }
+}
+
 .back {
   color: var(--primary-color);
   font-weight: var(--font-weight-brand);
