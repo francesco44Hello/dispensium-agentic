@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '../AppShell';
 import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
@@ -14,6 +15,7 @@ import { useLocale } from '../i18n/LocaleProvider';
 export function RecipeDetailScreen({ id }: { id: string }) {
   const { t } = useLocale();
   const { user } = useAuth();
+  const router = useRouter();
   const { status, householdId, error } = useHousehold();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
 
@@ -30,6 +32,13 @@ export function RecipeDetailScreen({ id }: { id: string }) {
     await groceryService.addItem(householdId, user.uid, ingredient);
   };
 
+  // Left only after the delete succeeds; a failure is shown inside RecipeDetail and the recipe stays open.
+  const deleteRecipe = async () => {
+    if (!householdId || !recipe) throw new Error('recipe not loaded');
+    await recipeService.deleteRecipe(householdId, recipe.id, recipe.image);
+    router.replace('/recipes');
+  };
+
   let content;
   if (status === 'error') {
     content = <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>;
@@ -38,7 +47,9 @@ export function RecipeDetailScreen({ id }: { id: string }) {
   } else if (!recipe) {
     content = <p role="alert">{t('recipes.notFound')}</p>;
   } else {
-    content = <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} />;
+    content = (
+      <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} onDelete={deleteRecipe} />
+    );
   }
 
   return (
