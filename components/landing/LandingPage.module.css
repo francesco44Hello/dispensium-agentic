@@ -1,0 +1,598 @@
+/* The landing page borrows the app's 2px navy outlines and hard offset shadows: a printed sticker and a shop receipt, not a soft SaaS card. */
+.page {
+  min-height: 100vh;
+  padding-block: 16px 32px;
+  padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  color: var(--primary-color);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.wordmark {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-brand);
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Same 40px height as the language switch beside it, so the two sit on one line. */
+.login {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 0 16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  text-decoration: none;
+}
+
+.hero,
+.section,
+.closing,
+.footer {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.hero {
+  display: grid;
+  gap: 40px;
+  align-items: center;
+  padding-block: 32px 56px;
+}
+
+/* A rubber stamp: navy ink, a dashed inner rule, and a slight tilt, like a shop has stamped the sheet. */
+.tagline {
+  display: inline-block;
+  margin: 0;
+  padding: 6px 14px;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  outline: 1px dashed var(--secondary-color);
+  outline-offset: -6px;
+  background: var(--primary-color);
+  color: var(--secondary-color);
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-brand);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: rotate(-2deg);
+  box-shadow: 3px 3px 0 var(--surface);
+}
+
+.quote {
+  display: inline-block;
+  margin: 0 0 24px;
+  padding: 12px 16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 6px;
+  background: var(--secondary-color);
+  box-shadow: 4px 4px 0 var(--primary-color);
+  font-size: 1.0625rem;
+  font-weight: var(--font-weight-brand);
+  transform: rotate(-1deg);
+}
+
+.heroTitle {
+  margin: 16px 0;
+  font-size: clamp(2.25rem, 7vw, 3.75rem);
+  font-weight: var(--font-weight-title);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.heading {
+  margin: 0 0 24px;
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  font-weight: var(--font-weight-title);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 34ch;
+  margin: 0 0 24px;
+  font-size: 1.125rem;
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.primary,
+.secondary,
+.secondaryOnDark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 24px;
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  font-weight: var(--font-weight-brand);
+  text-decoration: none;
+  box-shadow: 4px 4px 0 var(--primary-color);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.primary {
+  background: var(--primary-button);
+  color: var(--primary-color);
+}
+
+.secondary {
+  background: var(--surface);
+  color: var(--primary-color);
+}
+
+.secondaryOnDark {
+  background: transparent;
+  color: var(--surface);
+  border-color: var(--surface);
+  box-shadow: none;
+}
+
+.primary:hover,
+.secondary:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--primary-color);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible,
+.secondaryOnDark:focus-visible,
+.login:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 3px;
+}
+
+/* The receipt is the product in one glance. Its zigzag foot is a mask, so the hard shadow follows the cut edge. */
+.receipt {
+  width: 100%;
+  max-width: 340px;
+  margin-inline: auto;
+  transform: rotate(-1.5deg);
+  filter: drop-shadow(6px 6px 0 var(--primary-color));
+}
+
+.paper {
+  padding: 24px 24px 28px;
+  background: var(--surface);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
+    linear-gradient(-45deg, transparent 6px, #000 0) bottom / 12px 12px repeat-x,
+    linear-gradient(45deg, transparent 6px, #000 0) bottom / 12px 12px repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 12px) no-repeat,
+    linear-gradient(-45deg, transparent 6px, #000 0) bottom / 12px 12px repeat-x,
+    linear-gradient(45deg, transparent 6px, #000 0) bottom / 12px 12px repeat-x;
+}
+
+.receiptBrand {
+  margin: 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-brand);
+}
+
+.receiptTitle {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.dashed {
+  margin: 14px 0;
+  border-top: 2px dashed var(--primary-color);
+  opacity: 0.35;
+}
+
+.rows {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.125rem;
+}
+
+.box {
+  position: relative;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--primary-color);
+  border-radius: 6px;
+}
+
+.done .box {
+  background: var(--primary-button);
+}
+
+.done .box::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 1px;
+  width: 6px;
+  height: 12px;
+  border: solid var(--primary-color);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.done span:last-child {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+/* One row ticks itself after the page settles; with reduced motion it stays unticked. */
+.later .box {
+  animation: fillBox 0.4s ease 1.4s both;
+}
+
+.later .box::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 1px;
+  width: 6px;
+  height: 12px;
+  border: solid var(--primary-color);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  animation: markIn 0.3s ease 1.8s both;
+  opacity: 0;
+}
+
+@keyframes fillBox {
+  from {
+    background: transparent;
+  }
+  to {
+    background: var(--primary-button);
+  }
+}
+
+@keyframes markIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.menuRow {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--muted);
+  font-size: 1rem;
+  font-weight: var(--font-weight-brand);
+}
+
+.receiptFooter {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
+
+.section {
+  padding-block: 48px;
+}
+
+.cards {
+  display: grid;
+  gap: 24px;
+}
+
+.card,
+.step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 6px 6px 0 var(--primary-color);
+}
+
+.shotFrame {
+  overflow: hidden;
+  border: 2px solid var(--primary-color);
+  border-radius: 14px;
+  max-height: 460px;
+}
+
+.shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: top;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-title);
+}
+
+.cardBody {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.split {
+  display: grid;
+  gap: 32px;
+  align-items: center;
+}
+
+.phone {
+  max-width: 300px;
+  width: 100%;
+  margin-inline: auto;
+  padding: 10px;
+  border: 2px solid var(--primary-color);
+  border-radius: 36px;
+  background: var(--primary-color);
+  box-shadow: 8px 8px 0 var(--primary-color);
+}
+
+.video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 26px;
+  background: var(--primary-color);
+}
+
+.steps {
+  display: grid;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  margin-top: 14px;
+  padding-top: 28px;
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+/* A pantry label: a punched hole at the top, and a dashed inner rule. */
+.step::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.step::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px dashed var(--muted);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  background: var(--secondary-color);
+  font-size: 1.25rem;
+  font-weight: var(--font-weight-brand);
+}
+
+.codeLabel {
+  margin: 24px 0 8px;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.code {
+  display: inline-block;
+  margin: 0;
+  padding: 10px 16px;
+  border: 2px dashed var(--primary-color);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 1.5rem;
+  font-weight: var(--font-weight-brand);
+  letter-spacing: 0.2em;
+}
+
+.avatars {
+  display: flex;
+  justify-content: center;
+  padding-block: 24px;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin-left: -16px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  background: var(--secondary-color);
+  font-size: 2rem;
+  font-weight: var(--font-weight-brand);
+}
+
+.avatar:first-child {
+  margin-left: 0;
+}
+
+.avatar:nth-child(2) {
+  background: var(--muted);
+  transform: translateY(-14px);
+}
+
+.avatar:nth-child(3) {
+  background: var(--primary-button);
+}
+
+.closing {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  margin-block: 24px;
+  padding: 40px 24px;
+  border: 2px solid var(--primary-color);
+  border-radius: 28px;
+  background: var(--primary-color);
+  color: var(--surface);
+  box-shadow: 8px 8px 0 var(--surface);
+}
+
+.closingTitle {
+  margin: 0;
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
+  font-weight: var(--font-weight-title);
+  color: var(--secondary-color);
+  text-wrap: balance;
+}
+
+.closingBody {
+  margin: 0 0 16px;
+  font-size: 1.0625rem;
+}
+
+.footer {
+  padding-block: 32px 16px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.footer p {
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    padding-block: 56px 80px;
+  }
+
+  .receipt {
+    max-width: 360px;
+  }
+
+  .split {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .secondary {
+    transition: none;
+  }
+
+  .later .box,
+  .later .box::after {
+    animation: none;
+  }
+
+  .later .box::after {
+    opacity: 0;
+  }
+}
+
+/* The auto-ticked row greys out in step with its box: the same delay, fading the text and drawing the strike. */
+.later span:last-child {
+  position: relative;
+  animation: greyOut 0.4s ease 1.4s both;
+}
+
+.later span:last-child::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 52%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: strikeIn 0.4s ease 1.4s forwards;
+}
+
+@keyframes greyOut {
+  to {
+    opacity: 0.6;
+  }
+}
+
+@keyframes strikeIn {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .later span:last-child,
+  .later span:last-child::after {
+    animation: none;
+  }
+}
