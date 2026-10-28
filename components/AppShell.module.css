@@ -30,7 +30,8 @@
   padding-bottom: var(--content-bottom);
 }
 
-/* Desktop: a centred 960px column, with the tab bar placed above the page content. */
+/* Desktop: a centred 960px column, with the tab bar placed above the page content.
+   The order rules below need the header and nav to stay direct children of .shell (see AppShell.tsx). */
 @media (min-width: 1024px) {
   .shell {
     max-width: 960px;

@@ -28,7 +28,7 @@
     border: none;
     border-radius: 22px;
     background: var(--add-button);
-    color: #ffffff;
+    color: var(--surface);
     font: inherit;
     font-weight: var(--font-weight-brand);
     cursor: pointer;
