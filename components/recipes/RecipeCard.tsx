@@ -19,9 +19,14 @@ export function RecipeCard({ recipe }: { recipe: Recipe }) {
     <Link href={`/recipes/${recipe.id}`} className={styles.link} aria-label={recipe.title}>
       <article className={styles.card}>
         <div className={styles.imageBox}>
-          {/* Photos are local object URLs, so a plain img is right here. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={photoUrl || PLACEHOLDER_IMAGE} alt={recipe.title} className={styles.image} />
+          {/* While a stored photo loads, show a skeleton instead of a broken image. */}
+          {recipe.image && !photoUrl ? (
+            <div className={styles.skeleton} data-testid="photo-skeleton" aria-hidden="true" />
+          ) : (
+            /* Photos are local object URLs, so a plain img is right here. */
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={photoUrl || PLACEHOLDER_IMAGE} alt={recipe.title} className={styles.image} />
+          )}
         </div>
 
         <div className={styles.content}>
