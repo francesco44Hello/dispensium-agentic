@@ -2,6 +2,7 @@ import type { CategoryMap } from '../types/category';
 
 // Ported from the legacy shopping-list app (lib/categories.js).
 // Order matters: the first category with a matching keyword wins.
+// A keyword ending in '$' matches only the whole word, so 'limón$' does not catch 'limonada'.
 export const defaultCategoryMap: CategoryMap = {
   fruits: [
     'apple', 'banana', 'melon', 'orange', 'grape', 'strawberry', 'blueberry',
@@ -11,20 +12,22 @@ export const defaultCategoryMap: CategoryMap = {
     'mela', 'arancia', 'uva', 'fragola', 'mirtillo', 'lampone', 'mora', 'pesca',
     'prugna', 'pera', 'ciliegia', 'ananas', 'anguria', 'cocomero', 'limone',
     'pompelmo', 'melograno', 'albicocca', 'fico', 'pesca noce', 'nettarina', 'cocco',
+    'limón$', 'naranja', 'manzana', 'platano', 'fresa',
   ],
   vegetables: [
     'carrot', 'broccoli', 'spinach', 'onion', 'garlic', 'potato', 'tomato',
     'pepper', 'cucumber', 'lettuce', 'celery', 'zucchini', 'eggplant',
     'cauliflower', 'asparagus', 'mushroom', 'cabbage', 'sweet potato', 'peas',
-    'green bean', 'corn', 'kale', 'brussels sprout', 'radish', 'turnip',
+    'green bean', 'sweetcorn', 'corn cob', 'kale', 'brussels sprout', 'radish', 'turnip',
     'artichoke', 'leek', 'pumpkin', 'squash', 'arugula', 'beet',
     'carota', 'spinaci', 'cipolla', 'aglio', 'patata', 'pomodoro', 'peperone',
     'cetriolo', 'lattuga', 'sedano', 'zucchina', 'melanzana', 'cavolfiore',
     'asparago', 'fungo', 'cavolo', 'patata dolce', 'piselli', 'fagiolino',
     'mais', 'cavolo nero', 'cavoletto', 'ravanello', 'rapa', 'carciofo',
     'porro', 'zucca', 'rucola', 'barbabietola',
-    'scalogno', 'shallot', 'coriander', 'coriandolo', 'basil', 'basilico', 'parsley', 'prezzemolo',
-    'rosemary', 'rosmarino', 'thyme', 'timo',
+    'scalogno', 'dill', 'chive', 'sage', 'salvia', 'cebolla', 'ajo', 'tomate', 'pimiento', 'zanahoria',
+    'shallot', 'coriander', 'coriandolo', 'basil', 'basilico', 'parsley', 'prezzemolo',
+    'rosemary', 'rosmarino', 'thyme', 'timo', 'jalapeño',
   ],
   dairy: [
     'milk', 'cheese', 'yogurt', 'butter', 'cream', 'sour cream',
@@ -33,6 +36,8 @@ export const defaultCategoryMap: CategoryMap = {
     'margarina', 'fiocchi di latte', 'stracchino', 'mozzarella', 'parmigiano',
     'cheddar', 'parmesan', 'grana padano', 'pecorino', 'gorgonzola', 'feta', 'brie', 'camembert',
     'emmental', 'provolone', 'mascarpone', 'halloumi', 'scamorza', 'taleggio', 'asiago', 'fontina',
+    'ricotta', 'gouda', 'manchego', 'roquefort', 'queso', 'crème fraîche', 'yogur',
+    'leche', 'mantequilla', 'huevo',
   ],
   meat: [
     'chicken', 'beef', 'pork', 'bacon', 'sausage', 'turkey', 'lamb', 'duck',
@@ -41,22 +46,25 @@ export const defaultCategoryMap: CategoryMap = {
     'pollo', 'manzo', 'maiale', 'pancetta', 'guanciale', 'salsiccia', 'tacchino',
     'agnello', 'anatra', 'vitello', 'prosciutto cotto', 'prosciutto crudo',
     'salame', 'bistecca', 'costine', 'macinato', 'hamburger', 'polpetta', 'affettati',
+    'mortadella', 'bresaola', 'speck', 'hot dog', 'ternera', 'cerdo',
   ],
   fish: [
     'gueldes', 'pesce spada', 'pez espada', 'calamari', 'calamar', 'chipirones',
-    'gambas', 'langostinos', 'cherne', 'vieja', 'dorada', 'lubina', 'choco',
+    'gambas', 'langostinos', 'cherne', 'vieja', 'dorada', 'lubina', 'chocos',
     'pulpo', 'sardina', 'mero', 'bacalao',
     'salmon', 'tuna', 'cod', 'tilapia', 'trout', 'shrimp', 'crab', 'lobster',
     'mussel', 'oyster', 'clam', 'scallop', 'squid', 'octopus', 'anchovy', 'haddock',
     'salmone', 'tonno', 'merluzzo', 'trota', 'gamberi', 'gamberetti', 'granchio',
     'aragosta', 'astice', 'cozze', 'ostriche', 'vongole', 'capesante', 'polpo', 'acciughe',
+    'prawn', 'sardine', 'atún', 'baccalà', 'salmón',
   ],
   bakery: [
     'bread', 'bagel', 'croissant', 'muffin', 'baguette', 'pita', 'tortilla',
-    'bun', 'roll', 'cake', 'pie', 'pastry', 'donut', 'cookie', 'brownie',
+    'bun', 'bread roll', 'cake', 'pie', 'pastry', 'donut', 'cookie', 'brownie',
     'sourdough', 'focaccia', 'pretzel', 'tart',
     'pane', 'cornetto', 'brioche', 'panino', 'torta', 'crostata', 'pasticcino',
     'ciambella', 'biscotto', 'lievito', 'lievito madre', 'piadina',
+    'naan', 'grissini', 'panettone', 'dinner roll',
   ],
   pantry: [
     'pasta', 'rice', 'cereal', 'flour', 'sugar', 'salt', 'pepper', 'oil',
@@ -68,11 +76,15 @@ export const defaultCategoryMap: CategoryMap = {
     'lenticchia', 'cece', 'fagiolo', 'brodo', 'zuppa', 'minestra', 'caffè',
     'tè', 'spezia', 'erba aromatica', 'sciroppo', 'sugo', 'salsa', 'passata',
     'stock', 'cumin', 'cumino',
+    'spaghetti', 'penne', 'fusilli', 'lasagne', 'lenticchie', 'ceci', 'bean',
+    'baking powder', 'yeast', 'cornflour', 'pesto', 'tahini', 'paprika', 'cinnamon',
+    'oregano', 'origano', 'curry', 'chilli', 'nutmeg', 'turmeric', 'aceite', 'azúcar',
+    'arroz', 'harina', 'cannella', 'peperoncino',
   ],
   snacks: [
     'chips', 'crisps', 'popcorn', 'nuts', 'almond', 'walnut', 'cashew',
     'chocolate', 'candy', 'cracker', 'gum', 'mint',
-    'patatine', 'frutta secca', 'mandorla', 'noce', 'anacardo', 'nocciola',
+    'patatine', 'frutta secca', 'mandorla', 'noce', 'biscuit', 'pistachio', 'peanut', 'anacardo', 'nocciola',
     'cioccolato', 'caramella', 'gomma', 'cicca', 'mentina', 'salatini',
   ],
   drinks: [
@@ -80,6 +92,7 @@ export const defaultCategoryMap: CategoryMap = {
     'cider', 'champagne', 'liquor', 'vodka', 'rum', 'gin', 'whiskey',
     'acqua', 'bibita', 'succo', 'birra', 'vino', 'limonata', 'sidro',
     'liquore', 'spumante', 'prosecco', 'amaro',
+    'coca-cola', 'limonada',
   ],
   household: [
     'toilet paper', 'paper towel', 'soap', 'shampoo', 'conditioner',
@@ -89,6 +102,7 @@ export const defaultCategoryMap: CategoryMap = {
     'dentifricio', 'spazzolino', 'deodorante', 'detersivo', 'spugna',
     'sacchetto', 'spazzatura', 'stagnola', 'alluminio', 'candeggina',
     'detergente', 'tovagliolo', 'fazzoletto',
+    'bin bag', 'kitchen roll', 'cling film', 'baking paper', 'pellicola', 'carta da forno', 'washing-up',
   ],
 };
 

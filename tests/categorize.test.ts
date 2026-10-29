@@ -98,3 +98,149 @@ describe('matching at the start of a word', () => {
     expect(getCategory(item, defaultCategoryMap)).toBe(category);
   });
 });
+
+describe('common grocery corpus', () => {
+  it.each([
+    // dairy and eggs
+    ['Ricotta', 'dairy'],
+    ['Gouda', 'dairy'],
+    ['Manchego', 'dairy'],
+    ['Roquefort', 'dairy'],
+    ['Queso fresco', 'dairy'],
+    ['Crème fraîche', 'dairy'],
+    ['Yogur griego', 'dairy'],
+    ['Leche entera', 'dairy'],
+    ['Mantequilla', 'dairy'],
+    ['Huevos', 'dairy'],
+    ['Whipping cream', 'dairy'],
+    // fish
+    ['Smoked salmon', 'fish'],
+    ['Salmón', 'fish'],
+    ['Prawns', 'fish'],
+    ['Cod fillets', 'fish'],
+    ['Tuna in oil', 'fish'],
+    ['Sardines', 'fish'],
+    ['Atún', 'fish'],
+    ['Baccalà', 'fish'],
+    // meat
+    ['Chicken breast', 'meat'],
+    ['Minced beef', 'meat'],
+    ['Mortadella', 'meat'],
+    ['Bresaola', 'meat'],
+    ['Speck', 'meat'],
+    ['Hot dogs', 'meat'],
+    ['Ternera', 'meat'],
+    ['Cerdo', 'meat'],
+    // bakery
+    ['Sliced bread', 'bakery'],
+    ['Naan', 'bakery'],
+    ['Pitta breads', 'bakery'],
+    ['Grissini', 'bakery'],
+    ['Panettone', 'bakery'],
+    ['Bagels', 'bakery'],
+    // snacks
+    ['Dark chocolate', 'snacks'],
+    ['Digestive biscuits', 'snacks'],
+    ['Pistachios', 'snacks'],
+    ['Crackers', 'snacks'],
+    ['Peanuts', 'snacks'],
+    // pantry: pasta, legumes, oils, baking, spices, Spanish basics
+    ['Spaghetti', 'pantry'],
+    ['Penne rigate', 'pantry'],
+    ['Fusilli', 'pantry'],
+    ['Lasagne', 'pantry'],
+    ['Basmati rice', 'pantry'],
+    ['Red lentils', 'pantry'],
+    ['Lenticchie rosse', 'pantry'],
+    ['Canned chickpeas', 'pantry'],
+    ['Ceci', 'pantry'],
+    ['Kidney beans', 'pantry'],
+    ['Sunflower oil', 'pantry'],
+    ['Balsamic vinegar', 'pantry'],
+    ['Baking powder', 'pantry'],
+    ['Yeast', 'pantry'],
+    ['Cornflour', 'pantry'],
+    ['Pesto', 'pantry'],
+    ['Tahini', 'pantry'],
+    ['Paprika', 'pantry'],
+    ['Cinnamon', 'pantry'],
+    ['Dried oregano', 'pantry'],
+    ['Curry powder', 'pantry'],
+    ['Chilli flakes', 'pantry'],
+    ['Nutmeg', 'pantry'],
+    ['Turmeric', 'pantry'],
+    ['Aceite de oliva', 'pantry'],
+    ['Azúcar', 'pantry'],
+    ['Arroz', 'pantry'],
+    ['Harina', 'pantry'],
+    ['Origano', 'pantry'],
+    // vegetables and fresh herbs
+    ['Tinned tomatoes', 'vegetables'],
+    ['Fresh dill', 'vegetables'],
+    ['Chives', 'vegetables'],
+    ['Sage', 'vegetables'],
+    ['Salvia', 'vegetables'],
+    ['Cebolla', 'vegetables'],
+    ['Ajo', 'vegetables'],
+    ['Tomate', 'vegetables'],
+    ['Pimiento', 'vegetables'],
+    ['Zanahoria', 'vegetables'],
+    // fruit
+    ['Limón', 'fruits'],
+    ['Naranja', 'fruits'],
+    ['Manzana', 'fruits'],
+    ['Plátano', 'fruits'],
+    ['Fresas', 'fruits'],
+    // household
+    ['Dish soap', 'household'],
+    ['Bin bags', 'household'],
+    ['Kitchen roll', 'household'],
+    ['Cling film', 'household'],
+    ['Baking paper', 'household'],
+    ['Pellicola trasparente', 'household'],
+    ['Carta da forno', 'household'],
+    ['Washing-up liquid', 'household'],
+    // drinks
+    ['Sparkling water', 'drinks'],
+    ['Tonic water', 'drinks'],
+    ['Coca-Cola', 'drinks'],
+    ['Limonata', 'drinks'],
+    ['Limonada', 'drinks'],
+  ])('files %j under %s', (item, category) => {
+    expect(getCategory(item, defaultCategoryMap)).toBe(category);
+  });
+});
+
+describe('tolerant matching', () => {
+  it.each([
+    // accents on either side
+    ['Crème fraîche', 'dairy'],
+    ['creme fraiche', 'dairy'],
+    ['Jalapeño', 'vegetables'],
+    ['Limón', 'fruits'],
+    // Italian and Spanish endings
+    ['Pomodori pelati', 'vegetables'],
+    ['Mozzarelle', 'dairy'],
+    // a single typo in a long keyword
+    ['gorgonzolla', 'dairy'],
+    ['mozarella', 'dairy'],
+    ['zuchini', 'vegetables'],
+  ])('files %j under %s', (item, category) => {
+    expect(getCategory(item, defaultCategoryMap)).toBe(category);
+  });
+
+  it.each([
+    // the first letter must match, so a typo cannot change the fruit
+    ['beach', 'other'],
+    // short words are never corrected, so one letter cannot change the category
+    ['appel', 'other'],
+    // an unknown food stays in other
+    ['unobtainium', 'other'],
+    // a stem must be the whole word plus a plural vowel, not the start of another word
+    ['Lechuga', 'other'],
+    ['Tortellini', 'other'],
+    ['Burrito', 'other'],
+  ])('keeps %j under %s', (item, category) => {
+    expect(getCategory(item, defaultCategoryMap)).toBe(category);
+  });
+});

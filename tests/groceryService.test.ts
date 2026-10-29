@@ -147,4 +147,11 @@ describe('categories for an older household', () => {
     await service.addItem(HID, 'alice', 'Mozzarella');
     expect(itemsOf(backend)[0].category).toBe('dairy');
   });
+
+  it('files a misspelt or accented item under its category, not other', async () => {
+    const { backend, service } = setup();
+    await service.addItem(HID, 'alice', 'Gorgonzolla');
+    await service.addItem(HID, 'alice', 'Limón');
+    expect(itemsOf(backend).map((item) => item.category)).toEqual(['dairy', 'fruits']);
+  });
 });
