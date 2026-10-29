@@ -13,30 +13,32 @@ import {
 // Turns a recipe line such as "60g/2¼oz mature cheddar, grated" into a shopping name: "mature cheddar".
 // Never throws; when nothing sensible is left, the original text is returned.
 
-interface Quantity {
-  // The unit glued to the number, such as 'g' in "60g". Empty for a bare number.
-  unit: string;
-}
-
-// A number, a fraction or a range, with an optional glued unit. "7up" is not a quantity because "up" is no unit.
+// A number, a fraction or a range, with an optional glued unit. Returns that unit ('g' in "60g"), or '' for a bare
+// number, or null when the token is not a quantity. "7up" is not one, because "up" is no unit.
 const QUANTITY = /^(\d+(?:[.,]\d+)?(?:\/\d+)?(?:[-–]\d+(?:[.,]\d+)?(?:\/\d+)?)?)(\p{L}*)\.?$/u;
 // A bare trailing number is only stripped when it cannot be part of a name, such as "Pasta 00".
 const PLAIN_AMOUNT = /^[1-9]\d{0,2}$/;
 
-function parseQuantity(token: string): Quantity | null {
+function parseQuantity(token: string): string | null {
   const match = QUANTITY.exec(token);
   if (!match) return null;
   const unit = match[2].toLowerCase();
   if (unit && !UNIT_WORDS.has(unit)) return null;
-  return { unit };
+  // A bare number with a leading zero is part of a name ("00 flour"), not an amount. "0.5" is still an amount.
+  if (!unit && /^0\d/.test(match[1])) return null;
+  return unit;
 }
 
-function isUnit(token: string): boolean {
-  return UNIT_WORDS.has(token.toLowerCase().replace(/\.$/, ''));
+function isQuantity(token: string): boolean {
+  return parseQuantity(token) !== null;
 }
 
 function word(token: string): string {
   return token.toLowerCase().replace(/\.$/, '');
+}
+
+function isUnit(token: string): boolean {
+  return UNIT_WORDS.has(word(token));
 }
 
 function normalise(raw: string): string {
@@ -72,12 +74,12 @@ function stripLeading(tokens: string[]): string[] {
       last = 'qty';
       continue;
     }
-    if (parseQuantity(token)) {
+    if (isQuantity(token)) {
       words.shift();
       last = 'qty';
       continue;
     }
-    if (last !== 'start' && SEPARATOR_WORDS.has(lower) && parseQuantity(next)) {
+    if (last !== 'start' && SEPARATOR_WORDS.has(lower) && isQuantity(next)) {
       words.shift();
       continue;
     }
@@ -113,13 +115,12 @@ function stripTrailing(tokens: string[]): string[] {
     const token = words[words.length - 1];
     const before = words[words.length - 2];
 
-    if (!unitStripped && isUnit(token) && parseQuantity(before)) {
+    if (!unitStripped && isUnit(token) && isQuantity(before)) {
       words.pop();
       unitStripped = true;
       continue;
     }
-    const quantity = parseQuantity(token);
-    if (quantity && (quantity.unit !== '' || unitStripped || PLAIN_AMOUNT.test(token))) {
+    if (isQuantity(token) && (parseQuantity(token) !== '' || unitStripped || PLAIN_AMOUNT.test(token))) {
       words.pop();
       unitStripped = true;
       continue;
@@ -132,6 +133,7 @@ function stripTrailing(tokens: string[]): string[] {
 // Keeps the original text when the cleaned name would be empty or a single letter.
 export function cleanIngredientName(raw: string): string {
   const original = raw.replace(/\s+/gu, ' ').trim();
+  // The steps are plain string work and should never throw. This guard keeps a bad line from breaking the cart button.
   try {
     const text = cutClauses(normalise(raw)).replace(TRAILING_PHRASE, '$1').trim();
     if (!text) return original;

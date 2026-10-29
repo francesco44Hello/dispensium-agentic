@@ -18,6 +18,7 @@ describe('cleanIngredientName', () => {
     ['Salt to taste', 'Salt'],
     ['3 to 4 apples', 'apples'],
     ['½ tsp ground cumin', 'ground cumin'],
+    ['Cheese 500', 'Cheese'],
     ['1 bunch fresh coriander', 'fresh coriander'],
   ])('cleans the English line %j to %j', (raw, expected) => {
     expect(cleanIngredientName(raw)).toBe(expected);
@@ -52,6 +53,7 @@ describe('cleanIngredientName', () => {
     ["Olio d'oliva"],
     ['350'],
     ['(optional)'],
+    ['00 flour'],
   ])('keeps %j as it is', (raw) => {
     expect(cleanIngredientName(raw)).toBe(raw);
   });
@@ -65,8 +67,8 @@ describe('cleanIngredientName', () => {
     expect(cleanIngredientName('   ')).toBe('');
   });
 
-  it('does not throw on a long line', () => {
-    const long = `${'word '.repeat(30)}`.trim();
-    expect(() => cleanIngredientName(long)).not.toThrow();
+  it('leaves a long line of words as it is', () => {
+    const long = 'word '.repeat(30).trim();
+    expect(cleanIngredientName(long)).toBe(long);
   });
 });
