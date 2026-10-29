@@ -4,7 +4,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import type { Recipe } from '../types/recipe';
 
-const { replace, deleteRecipe } = vi.hoisted(() => ({ replace: vi.fn(), deleteRecipe: vi.fn() }));
+const { replace, deleteRecipe, addItem } = vi.hoisted(() => ({ replace: vi.fn(), deleteRecipe: vi.fn(), addItem: vi.fn() }));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 vi.mock('../components/AppShell', () => ({ AppShell: ({ children }: { children: unknown }) => children }));
@@ -18,7 +18,7 @@ const recipe: Recipe = {
   time: '25 min',
   category: 'Dinner',
   label: 'Quick & Easy ⚡',
-  ingredients: ['spaghetti'],
+  ingredients: ['spaghetti', '60g/2¼oz mature cheddar, grated'],
   steps: ['Boil the pasta'],
   image: 'households/hh-1/recipes/p1.webp',
   createdAt: new Date(0),
@@ -33,7 +33,7 @@ vi.mock('../services/dataClient', () => ({
     },
     deleteRecipe,
   },
-  groceryService: { addItem: vi.fn(async () => undefined) },
+  groceryService: { addItem },
 }));
 
 import { RecipeDetailScreen } from '../components/recipes/RecipeDetailScreen';
@@ -42,6 +42,7 @@ afterEach(() => {
   cleanup();
   replace.mockReset();
   deleteRecipe.mockReset();
+  addItem.mockReset();
 });
 
 function deleteFromPage() {
@@ -65,5 +66,19 @@ describe('RecipeDetailScreen delete', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not delete the recipe. Try again.');
     expect(replace).not.toHaveBeenCalled();
     expect(screen.getByRole('heading', { level: 1, name: 'Carbonara' })).toBeInTheDocument();
+  });
+});
+
+describe('RecipeDetailScreen shopping list', () => {
+  it('adds the cleaned ingredient name, and the cart button still tracks the raw line', async () => {
+    addItem.mockResolvedValue(undefined);
+    render(<RecipeDetailScreen id="r1" />);
+    const cart = screen
+      .getAllByRole('button')
+      .find((button) => button.getAttribute('aria-label')?.includes('mature cheddar'));
+    expect(cart).toBeDefined();
+    fireEvent.click(cart as HTMLElement);
+    await waitFor(() => expect(addItem).toHaveBeenCalledWith('hh-1', 'alice', 'mature cheddar'));
+    await waitFor(() => expect(cart).toBeDisabled());
   });
 });

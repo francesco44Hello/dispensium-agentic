@@ -209,3 +209,20 @@ test('a recipe can be deleted from its page after a second confirmation', async 
   await expect(page).toHaveURL(/\/recipes$/);
   await expect(page.getByRole('link', { name: 'Old pancakes' })).toHaveCount(0);
 });
+
+test('a recipe ingredient is added to the shopping list as a clean name', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill('Cheesy toast');
+  await sheet.getByLabel('Ingredient 1').fill('60g/2¼oz mature cheddar, grated');
+  await sheet.getByLabel('Step 1').fill('Grill it');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+
+  await page.getByRole('link', { name: 'Cheesy toast' }).click();
+  await page.locator('button[aria-label*="mature cheddar"]').click();
+  await page.getByRole('link', { name: 'Shopping' }).click();
+  await expect(page.getByRole('checkbox', { name: 'mature cheddar' })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: /60g/ })).toHaveCount(0);
+});
