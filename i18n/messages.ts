@@ -15,6 +15,7 @@ const en = {
 
   'auth.login': 'Log in',
   'auth.signup': 'Create account',
+  'auth.tagline': 'Plan. Shop. Cook.',
   'auth.email': 'Email',
   'auth.name': 'Name',
   'auth.password': 'Password',
@@ -242,6 +243,7 @@ const it: Record<MessageKey, string> = {
 
   'auth.login': 'Accedi',
   'auth.signup': 'Crea account',
+  'auth.tagline': 'Pianifica. Compra. Cucina.',
   'auth.email': 'Email',
   'auth.name': 'Nome',
   'auth.password': 'Password',
