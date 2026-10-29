@@ -7,6 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
 import { useRecipePhoto } from '../../hooks/useRecipePhoto';
 import { groceryService, recipeService } from '../../services/dataClient';
+import { cleanIngredientName } from '../../utils/ingredientName';
 import type { Recipe } from '../../types/recipe';
 import { RecipeDetail } from './RecipeDetail';
 import { useLocale } from '../i18n/LocaleProvider';
@@ -29,7 +30,8 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 
   const addToShoppingList = async (ingredient: string) => {
     if (!householdId || !user) throw new Error('not signed in');
-    await groceryService.addItem(householdId, user.uid, ingredient);
+    // The list gets the shopping name ("mature cheddar"), not the recipe line ("60g/2¼oz mature cheddar, grated").
+    await groceryService.addItem(householdId, user.uid, cleanIngredientName(ingredient));
   };
 
   // Left only after the delete succeeds; a failure is shown inside RecipeDetail and the recipe stays open.

@@ -23,12 +23,16 @@ export const defaultCategoryMap: CategoryMap = {
     'asparago', 'fungo', 'cavolo', 'patata dolce', 'piselli', 'fagiolino',
     'mais', 'cavolo nero', 'cavoletto', 'ravanello', 'rapa', 'carciofo',
     'porro', 'zucca', 'rucola', 'barbabietola',
+    'scalogno', 'shallot', 'coriander', 'coriandolo', 'basil', 'basilico', 'parsley', 'prezzemolo',
+    'rosemary', 'rosmarino', 'thyme', 'timo',
   ],
   dairy: [
     'milk', 'cheese', 'yogurt', 'butter', 'cream', 'sour cream',
     'cream cheese', 'cottage cheese', 'egg', 'margarine', 'kefir', 'ghee',
     'latte', 'formaggio', 'burro', 'panna', 'panna acida', 'uovo', 'uova',
     'margarina', 'fiocchi di latte', 'stracchino', 'mozzarella', 'parmigiano',
+    'cheddar', 'parmesan', 'grana padano', 'pecorino', 'gorgonzola', 'feta', 'brie', 'camembert',
+    'emmental', 'provolone', 'mascarpone', 'halloumi', 'scamorza', 'taleggio', 'asiago', 'fontina',
   ],
   meat: [
     'chicken', 'beef', 'pork', 'bacon', 'sausage', 'turkey', 'lamb', 'duck',
@@ -63,6 +67,7 @@ export const defaultCategoryMap: CategoryMap = {
     'salsa di soia', 'senape', 'maionese', 'marmellata', 'miele', 'avena',
     'lenticchia', 'cece', 'fagiolo', 'brodo', 'zuppa', 'minestra', 'caffè',
     'tè', 'spezia', 'erba aromatica', 'sciroppo', 'sugo', 'salsa', 'passata',
+    'stock', 'cumin', 'cumino',
   ],
   snacks: [
     'chips', 'crisps', 'popcorn', 'nuts', 'almond', 'walnut', 'cashew',
