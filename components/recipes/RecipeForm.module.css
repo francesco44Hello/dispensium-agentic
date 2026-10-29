@@ -190,3 +190,50 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.itemRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.itemRow .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.removeRow {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-top: 6px;
+  padding: 0;
+  color: var(--primary-color);
+  background: var(--surface-tint);
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.actions .submit {
+  flex: 1;
+}
+
+.cancel {
+  padding: 14px 20px;
+  font: inherit;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+  background: var(--surface-tint);
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  cursor: pointer;
+}

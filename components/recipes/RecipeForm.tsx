@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react';
-import { MdAdd, MdAddAPhoto } from 'react-icons/md';
+import { MdAdd, MdAddAPhoto, MdClose } from 'react-icons/md';
 import { compressImage } from '../../utils/compressImage';
 import { RECIPE_CATEGORIES, RECIPE_LABELS, type RecipeDraft } from '../../types/recipe';
 import styles from './RecipeForm.module.css';
@@ -21,10 +21,12 @@ interface Props {
   initial?: Partial<Omit<RecipeDraft, 'image'>>;
   saving?: boolean;
   error?: string;
+  // When given, a cancel button is shown next to save. Used when editing an existing recipe.
+  onCancel?: () => void;
 }
 
 // Blank rows are kept here so the user can fill them in; the service drops empty rows on save.
-export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = false, error }: Props) {
+export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = false, error, onCancel }: Props) {
   const { t } = useLocale();
   const [title, setTitle] = useState(initial?.title ?? '');
   const [time, setTime] = useState(initial?.time ?? '');
@@ -42,6 +44,11 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
 
   const updateRow = (rows: string[], setRows: (next: string[]) => void, index: number, value: string) => {
     setRows(rows.map((row, i) => (i === index ? value : row)));
+  };
+
+  // A list always keeps at least one row, so the form never has nothing to type into.
+  const removeRow = (rows: string[], setRows: (next: string[]) => void, index: number) => {
+    if (rows.length > 1) setRows(rows.filter((_, i) => i !== index));
   };
 
   const handlePhoto = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +91,11 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
           onChange={handlePhoto}
         />
       </div>
+      {preview && (
+        <button type="button" className={styles.addRow} onClick={() => onPhotoChange(null)}>
+          <MdClose aria-hidden="true" /> {t('recipes.photo.remove')}
+        </button>
+      )}
       {photoError && <p role="alert" className={styles.error}>{photoError}</p>}
 
       <div className={styles.section}>
@@ -138,43 +150,62 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>{t('recipes.ingredients')}</h3>
         {ingredients.map((ingredient, i) => (
-          <input
-            key={`ingredient-${i}`}
-            type="text"
-            placeholder={t('recipes.ingredientPlaceholder', { n: String(i + 1) })}
-            aria-label={`Ingredient ${i + 1}`}
-            className={styles.input}
-            value={ingredient}
-            onChange={(e) => updateRow(ingredients, setIngredients, i, e.target.value)}
-          />
+          <div key={`ingredient-${i}`} className={styles.itemRow}>
+            <input
+              type="text"
+              placeholder={t('recipes.ingredientPlaceholder', { n: String(i + 1) })}
+              aria-label={`Ingredient ${i + 1}`}
+              className={styles.input}
+              value={ingredient}
+              onChange={(e) => updateRow(ingredients, setIngredients, i, e.target.value)}
+            />
+            {ingredients.length > 1 && (
+              <button type="button" className={styles.removeRow} aria-label={t('recipes.removeIngredientRow', { n: String(i + 1) })} onClick={() => removeRow(ingredients, setIngredients, i)}>
+                <MdClose aria-hidden="true" />
+              </button>
+            )}
+          </div>
         ))}
         <button type="button" className={styles.addRow} onClick={() => setIngredients([...ingredients, ''])}>
-          <MdAdd aria-hidden="true" /> Add ingredient
+          <MdAdd aria-hidden="true" /> {t('recipes.addIngredient')}
         </button>
       </div>
 
       <div className={styles.section}>
         <h3 className={styles.sectionTitle}>{t('recipes.steps')}</h3>
         {steps.map((step, i) => (
-          <textarea
-            key={`step-${i}`}
-            placeholder={t('recipes.stepPlaceholder', { n: String(i + 1) })}
-            aria-label={`Step ${i + 1}`}
-            className={`${styles.input} ${styles.textarea}`}
-            value={step}
-            onChange={(e) => updateRow(steps, setSteps, i, e.target.value)}
-          />
+          <div key={`step-${i}`} className={styles.itemRow}>
+            <textarea
+              placeholder={t('recipes.stepPlaceholder', { n: String(i + 1) })}
+              aria-label={`Step ${i + 1}`}
+              className={`${styles.input} ${styles.textarea}`}
+              value={step}
+              onChange={(e) => updateRow(steps, setSteps, i, e.target.value)}
+            />
+            {steps.length > 1 && (
+              <button type="button" className={styles.removeRow} aria-label={t('recipes.removeStepRow', { n: String(i + 1) })} onClick={() => removeRow(steps, setSteps, i)}>
+                <MdClose aria-hidden="true" />
+              </button>
+            )}
+          </div>
         ))}
         <button type="button" className={styles.addRow} onClick={() => setSteps([...steps, ''])}>
-          <MdAdd aria-hidden="true" /> Add step
+          <MdAdd aria-hidden="true" /> {t('recipes.addStep')}
         </button>
       </div>
 
       {error && <p role="alert" className={styles.error}>{error}</p>}
 
-      <button type="submit" className={`${styles.submit} ${styles.wide}`} disabled={saving}>
-        {saving ? t('recipes.saving') : t('recipes.save')}
-      </button>
+      <div className={`${styles.actions} ${styles.wide}`}>
+        {onCancel && (
+          <button type="button" className={styles.cancel} disabled={saving} onClick={onCancel}>
+            {t('common.cancel')}
+          </button>
+        )}
+        <button type="submit" className={styles.submit} disabled={saving}>
+          {saving ? t('recipes.saving') : t('recipes.save')}
+        </button>
+      </div>
     </form>
   );
 }

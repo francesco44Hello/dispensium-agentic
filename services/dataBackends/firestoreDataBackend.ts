@@ -25,7 +25,7 @@ import { getFirebaseApp } from '../firebaseApp';
 import { deleteObject, getBytes, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { HouseholdError, type HouseholdBackend } from '../householdService';
 import { GroceryError, type GroceryBackend } from '../groceryService';
-import type { NewRecipe, RecipeBackend } from '../recipeService';
+import type { NewRecipe, RecipeBackend, RecipeChanges } from '../recipeService';
 import { defaultCategoryMap } from '../../constants/categories';
 import { isCategoryMap, isPartialDayMenu } from '../../utils/dataGuards';
 import { hasCode } from '../../utils/hasCode';
@@ -278,6 +278,11 @@ export function createFirestoreDataBackend(): DataBackend {
         createdAt: new Date(),
       });
       return docRef.id;
+    },
+
+    // Only the recipe fields are sent: the author and the creation date are not in the update, so they stay as they are.
+    async updateRecipe(householdId: string, id: string, changes: RecipeChanges): Promise<void> {
+      await updateDoc(doc(db(), 'households', householdId, 'recipes', id), { ...changes });
     },
 
     async deleteRecipe(householdId: string, id: string): Promise<void> {
