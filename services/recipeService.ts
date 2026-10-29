@@ -28,6 +28,12 @@ export interface NewRecipe extends RecipeDraft {
   createdBy: string;
 }
 
+// The fields an edit may change. The author and the creation date are fixed when the recipe is first saved.
+export type RecipeChanges = Omit<NewRecipe, 'createdBy'>;
+
+// What happens to the photo when a recipe is edited.
+export type PhotoChange = { kind: 'keep' } | { kind: 'remove' } | { kind: 'replace'; photo: Blob };
+
 export interface RecipeBackend {
   // Returns the storage path of the new photo.
   uploadPhoto(householdId: string, photo: Blob): Promise<string>;
@@ -35,6 +41,7 @@ export interface RecipeBackend {
   // Returns a local URL for the photo, fetched through the database rules.
   photoUrl(path: string): Promise<string>;
   addRecipe(householdId: string, recipe: NewRecipe): Promise<string>;
+  updateRecipe(householdId: string, id: string, changes: RecipeChanges): Promise<void>;
   deleteRecipe(householdId: string, id: string): Promise<void>;
   subscribeToRecipes(householdId: string, listener: (recipes: Recipe[]) => void): Unsubscribe;
 }
@@ -92,6 +99,36 @@ export function createRecipeService(backend: RecipeBackend) {
         await backend.deletePhoto(image).catch(() => undefined);
         throw error;
       }
+    },
+
+    // Edits the text and the photo of a recipe. The photo cleanup runs only after the recipe is saved, so a failed save
+    // never removes a photo the recipe still uses.
+    async updateRecipe(householdId: string, id: string, currentImage: string, draft: RecipeDraft, change: PhotoChange): Promise<void> {
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new RecipeError('invalid-id');
+      if (currentImage && !/^households\/[^/]+\/recipes\/[A-Za-z0-9-]+\.webp$/.test(currentImage)) throw new RecipeError('invalid-image');
+      if (currentImage && !currentImage.startsWith(`households/${householdId}/recipes/`)) throw new RecipeError('invalid-image');
+      const valid = validate(draft);
+
+      if (change.kind === 'keep') {
+        await backend.updateRecipe(householdId, id, { ...valid, image: currentImage });
+        return;
+      }
+      if (change.kind === 'remove') {
+        await backend.updateRecipe(householdId, id, { ...valid, image: '' });
+        if (currentImage) await backend.deletePhoto(currentImage).catch(() => undefined);
+        return;
+      }
+
+      if (!isAllowedImageType(change.photo.type) || change.photo.size > MAX_PHOTO_BYTES) throw new RecipeError('invalid-photo');
+      const image = await backend.uploadPhoto(householdId, change.photo);
+      try {
+        await backend.updateRecipe(householdId, id, { ...valid, image });
+      } catch (error) {
+        // The recipe still points at its old photo, so the new file is the orphan. Remove it, then report the failure.
+        await backend.deletePhoto(image).catch(() => undefined);
+        throw error;
+      }
+      if (currentImage) await backend.deletePhoto(currentImage).catch(() => undefined);
     },
 
     // The recipe goes first: if its photo cannot be removed, the recipe is still gone and the photo is only an orphan.

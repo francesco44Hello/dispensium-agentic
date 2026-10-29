@@ -44,6 +44,12 @@ describe('AppHeader profile link', () => {
     window.localStorage.clear();
   });
 
+  it('puts the shelf mark beside the title, where the desktop layout shows it and mobile hides it', () => {
+    renderHeader(alice);
+    const title = screen.getByRole('heading', { level: 1, name: 'Dispensium' });
+    expect(title.parentElement).toContainElement(screen.getByTestId('brand-mark'));
+  });
+
   it('links the profile picture to the profile page', () => {
     renderHeader(alice);
     expect(screen.getByRole('link', { name: 'Profile' })).toHaveAttribute('href', '/profile');
@@ -52,7 +58,7 @@ describe('AppHeader profile link', () => {
   it('shows the Google profile picture in the header', () => {
     const { container } = renderHeader(alice);
     expect(screen.getByRole('link', { name: 'Profile' }).querySelector('img')).toHaveAttribute('src', GOOGLE_PHOTO);
-    expect(container.querySelectorAll('img')).toHaveLength(1);
+    expect(container.querySelectorAll('a[aria-label="Profile"] img')).toHaveLength(1);
   });
 
   it('shows the picture chosen on the profile page, from the household member record', () => {

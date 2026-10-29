@@ -25,6 +25,13 @@ describe('LandingPage', () => {
     expect(screen.getByText('Plan. Shop. Cook.')).toBeInTheDocument();
   });
 
+  it('shows the shelf mark beside the wordmark in the top bar', () => {
+    renderLanding();
+    const mark = screen.getByTestId('brand-mark');
+    expect(mark).toHaveAttribute('src', '/brand/mark.svg');
+    expect(mark.parentElement).toHaveTextContent('Dispensium');
+  });
+
   it('sends every sign-up and log-in entry point to the existing auth pages', () => {
     renderLanding();
     const signUp = screen.getAllByRole('link', { name: 'Create account' });

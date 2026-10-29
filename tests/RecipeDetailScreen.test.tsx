@@ -4,7 +4,12 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import type { Recipe } from '../types/recipe';
 
-const { replace, deleteRecipe, addItem } = vi.hoisted(() => ({ replace: vi.fn(), deleteRecipe: vi.fn(), addItem: vi.fn() }));
+const { replace, deleteRecipe, addItem, updateRecipe } = vi.hoisted(() => ({
+  replace: vi.fn(),
+  deleteRecipe: vi.fn(),
+  addItem: vi.fn(),
+  updateRecipe: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 vi.mock('../components/AppShell', () => ({ AppShell: ({ children }: { children: unknown }) => children }));
@@ -32,6 +37,7 @@ vi.mock('../services/dataClient', () => ({
       return () => undefined;
     },
     deleteRecipe,
+    updateRecipe,
   },
   groceryService: { addItem },
 }));
@@ -43,6 +49,7 @@ afterEach(() => {
   replace.mockReset();
   deleteRecipe.mockReset();
   addItem.mockReset();
+  updateRecipe.mockReset();
 });
 
 function deleteFromPage() {
@@ -82,3 +89,19 @@ describe('RecipeDetailScreen shopping list', () => {
     await waitFor(() => expect(cart).toBeDisabled());
   });
 });
+
+describe('RecipeDetailScreen edit', () => {
+  it('saves an edit with the recipe photo path it already has, and the edited text', async () => {
+    updateRecipe.mockResolvedValue(undefined);
+    render(<RecipeDetailScreen id="r1" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit recipe' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Recipe title' }), { target: { value: 'Carbonara 2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save recipe' }));
+    await waitFor(() => expect(updateRecipe).toHaveBeenCalledOnce());
+    const [householdId, id, currentImage, draft, change] = updateRecipe.mock.calls[0];
+    expect([householdId, id, currentImage]).toEqual(['hh-1', 'r1', 'households/hh-1/recipes/p1.webp']);
+    expect(draft.title).toBe('Carbonara 2');
+    expect(change).toEqual({ kind: 'keep' });
+  });
+});
+

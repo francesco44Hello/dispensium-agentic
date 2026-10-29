@@ -108,26 +108,36 @@ service cloud.firestore {
       // Rules cannot loop over list items, so per-item lengths and blocked characters in ingredients and steps
       // are checked only in services/recipeService.ts. Titles are checked here.
       match /recipes/{id} {
+        // The same field checks apply to a new recipe and to an edit of one.
+        function validRecipe() {
+          return request.resource.data.keys().hasOnly(['title', 'time', 'category', 'label', 'ingredients', 'steps', 'image', 'createdAt', 'createdBy'])
+            && validText(request.resource.data.title)
+            && request.resource.data.time is string
+            && request.resource.data.time.size() <= 50
+            && !request.resource.data.time.matches('.*[<>{}"].*')
+            && request.resource.data.category in ['Breakfast', 'Lunch', 'Dinner', 'Drinks', 'Snacks', 'Desserts']
+            && request.resource.data.label in ['Summer Fresh ☀️', 'Cozy Winter ❄️', 'Quick & Easy ⚡', 'Comfort Food 🥣']
+            && request.resource.data.ingredients is list
+            && request.resource.data.ingredients.size() <= 50
+            && request.resource.data.steps is list
+            && request.resource.data.steps.size() <= 50
+            && request.resource.data.image is string
+            && request.resource.data.image.size() <= 2048
+            && (request.resource.data.image == '' || request.resource.data.image.matches('households/' + hid + '/recipes/[A-Za-z0-9-]+[.]webp'));
+        }
+
         allow read, delete: if signedIn() && isMember(hid);
         allow create: if signedIn()
           && isMember(hid)
           && request.resource.data.createdBy == request.auth.uid
           && request.resource.data.createdAt is timestamp
-          && request.resource.data.keys().hasOnly(['title', 'time', 'category', 'label', 'ingredients', 'steps', 'image', 'createdAt', 'createdBy'])
-          && validText(request.resource.data.title)
-          && request.resource.data.time is string
-          && request.resource.data.time.size() <= 50
-          && !request.resource.data.time.matches('.*[<>{}"].*')
-          && request.resource.data.category in ['Breakfast', 'Lunch', 'Dinner', 'Drinks', 'Snacks', 'Desserts']
-          && request.resource.data.label in ['Summer Fresh ☀️', 'Cozy Winter ❄️', 'Quick & Easy ⚡', 'Comfort Food 🥣']
-          && request.resource.data.ingredients is list
-          && request.resource.data.ingredients.size() <= 50
-          && request.resource.data.steps is list
-          && request.resource.data.steps.size() <= 50
-          && request.resource.data.image is string
-          && request.resource.data.image.size() <= 2048
-          && (request.resource.data.image == '' || request.resource.data.image.matches('households/' + hid + '/recipes/[A-Za-z0-9-]+[.]webp'));
-        allow update: if false;
+          && validRecipe();
+        // Any member can edit a recipe, but the author and the creation date cannot change.
+        allow update: if signedIn()
+          && isMember(hid)
+          && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
+          && validRecipe();
       }
 
       // Weekly menu: one document per day (YYYY-MM-DD) with a breakfast, lunch and dinner entry.

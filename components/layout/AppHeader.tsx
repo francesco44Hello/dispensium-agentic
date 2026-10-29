@@ -8,6 +8,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useLocale } from '../i18n/LocaleProvider';
 import { useProfilePhoto } from '../../hooks/useProfilePhoto';
 import { ProfileAvatar } from '../profile/ProfileAvatar';
+import { Logo } from '../brand/Logo';
 import { SideMenu } from './SideMenu';
 import styles from './AppHeader.module.css';
 
@@ -31,7 +32,11 @@ export function AppHeader() {
         <MdMenu aria-hidden="true" />
       </button>
       <div className={styles.titleGroup}>
-        <h1 className={styles.title}>Dispensium</h1>
+        <div className={styles.brandRow}>
+          {/* Desktop only: on mobile the title is centred, so the mark stays out of the app. */}
+          <Logo size={40} className={styles.mark} />
+          <h1 className={styles.title}>Dispensium</h1>
+        </div>
         {/* Desktop only: the tagline sits under the title, and the profile link moves to the navigation bar. */}
         <p className={styles.tagline} data-testid="header-tagline">{t('menu.tagline')}</p>
       </div>

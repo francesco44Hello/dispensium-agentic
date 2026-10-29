@@ -507,8 +507,31 @@ describe('recipes', () => {
     await assertFails(addDoc(recipes, validRecipe({ createdAt: 'yesterday' })));
   });
 
-  it('does not allow recipes to be edited', async () => {
-    await assertFails(updateDoc(doc(as('alice'), 'households', HID, 'recipes', 'r1'), { title: 'Changed' }));
+  it('lets a member edit a household recipe while its author and date stay the same', async () => {
+    const ref = doc(as('alice'), 'households', HID, 'recipes', 'r1');
+    await assertSucceeds(updateDoc(ref, { title: 'Changed', ingredients: ['water', 'salt'], label: 'Comfort Food 🥣' }));
+  });
+
+  it('blocks an edit that changes who made the recipe or when', async () => {
+    const ref = doc(as('alice'), 'households', HID, 'recipes', 'r1');
+    await assertFails(updateDoc(ref, { createdBy: 'bob' }));
+    await assertFails(updateDoc(ref, { createdAt: new Date(0) }));
+  });
+
+  it('applies the same field checks to an edit as to a new recipe', async () => {
+    const ref = doc(as('alice'), 'households', HID, 'recipes', 'r1');
+    await assertFails(updateDoc(ref, { category: 'Brunch' }));
+    await assertFails(updateDoc(ref, { label: 'Spicy' }));
+    await assertFails(updateDoc(ref, { time: '<b>20</b>' }));
+    await assertFails(updateDoc(ref, { title: '' }));
+    await assertFails(updateDoc(ref, { isAdmin: true }));
+    await assertFails(updateDoc(ref, { image: 'https://example.com/photo.webp' }));
+    await assertFails(updateDoc(ref, { image: `households/${OTHER_HID}/recipes/x.webp` }));
+  });
+
+  it('blocks non-members from editing a recipe, in any household', async () => {
+    await assertFails(updateDoc(doc(as('bob'), 'households', HID, 'recipes', 'r1'), { title: 'Changed' }));
+    await assertFails(updateDoc(doc(as('alice'), 'households', OTHER_HID, 'recipes', 'x1'), { title: 'Changed' }));
   });
 });
 
