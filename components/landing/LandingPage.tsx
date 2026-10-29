@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { LanguageSwitch } from '../i18n/LanguageSwitch';
+import { Logo } from '../brand/Logo';
 import { SharedListDemo } from './SharedListDemo';
 import { useLocale } from '../i18n/LocaleProvider';
 import type { MessageKey } from '../../i18n/messages';
@@ -65,7 +66,10 @@ export function LandingPage() {
   return (
     <div className={styles.page}>
       <header className={styles.topbar}>
-        <p className={styles.wordmark}>Dispensium</p>
+        <p className={styles.wordmark}>
+          <Logo size={36} className={styles.mark} />
+          Dispensium
+        </p>
         <div className={styles.topActions}>
           <LanguageSwitch />
           <Link href="/login" className={styles.login}>
