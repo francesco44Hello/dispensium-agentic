@@ -14,6 +14,9 @@ const balsamiq = Balsamiq_Sans({
 export const metadata: Metadata = {
   title: "Dispensium",
   description: "Household dispensary management",
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

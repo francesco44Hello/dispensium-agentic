@@ -50,6 +50,15 @@
   min-width: 0;
 }
 
+/* Mobile: the title is centred, so the mark stays out of the app. */
+.brandRow {
+  min-width: 0;
+}
+
+.mark {
+  display: none;
+}
+
 .tagline,
 .logout {
   display: none;
@@ -71,6 +80,17 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .brandRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mark {
+    display: block;
+    flex-shrink: 0;
   }
 
   .tagline {

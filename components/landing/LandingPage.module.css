@@ -16,9 +16,18 @@
 }
 
 .wordmark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font-size: 1.75rem;
   font-weight: var(--font-weight-brand);
+}
+
+/* Phone: the top bar is tight, so the mark waits for the desktop layout (see the 900px query). */
+.mark {
+  display: none;
+  flex-shrink: 0;
 }
 
 .topActions {
@@ -533,6 +542,10 @@
 }
 
 @media (min-width: 900px) {
+  .mark {
+    display: block;
+  }
+
   .hero {
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     padding-block: 56px 80px;
