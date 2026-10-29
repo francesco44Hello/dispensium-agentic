@@ -18,7 +18,7 @@ export function MealTabs({ selected, onSelect }: Props) {
         type="button"
         aria-pressed={selected === 'breakfast'}
         aria-label={t(MEAL_KEYS.breakfast)}
-        className={`${styles.tab} ${styles.desktopOnly} ${selected === 'breakfast' ? styles.active : ''}`}
+        className={`${styles.tab} ${selected === 'breakfast' ? styles.active : ''}`}
         onClick={() => onSelect('breakfast')}
       >
         <span>{t(MEAL_KEYS.breakfast)}</span>

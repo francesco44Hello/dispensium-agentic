@@ -20,18 +20,26 @@ describe('LanguageSelect', () => {
     window.localStorage.clear();
   });
 
-  it('offers English and Italian under a Language label', () => {
+  it('offers English and Italian as radio buttons in a Language group', () => {
     renderSelect();
-    const select = screen.getByRole('combobox', { name: 'Language' });
-    expect(select).toHaveValue('en');
-    expect(screen.getByRole('option', { name: 'English' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'Italiano' })).toBeInTheDocument();
+    const group = screen.getByRole('radiogroup', { name: 'Language' });
+    expect(group).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'English' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Italiano' })).not.toBeChecked();
   });
 
-  it('switches the app language when a different language is picked', async () => {
+  it('draws each flag as a round picture that screen readers skip', () => {
+    const { container } = renderSelect();
+    const flags = container.querySelectorAll('svg');
+    expect(flags).toHaveLength(2);
+    for (const flag of flags) expect(flag).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('switches the app language when a different flag is chosen', async () => {
     renderSelect();
-    fireEvent.change(screen.getByRole('combobox', { name: 'Language' }), { target: { value: 'it' } });
-    expect(await screen.findByRole('combobox', { name: 'Lingua' })).toHaveValue('it');
+    fireEvent.click(screen.getByRole('radio', { name: 'Italiano' }));
+    expect(await screen.findByRole('radiogroup', { name: 'Lingua' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Italiano' })).toBeChecked();
     expect(window.localStorage.getItem('dispensium-locale')).toBe('it');
   });
 });

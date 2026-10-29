@@ -1,5 +1,5 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
-import { getCategory } from '../utils/categorize';
+import { getCategory, mergeCategoryMaps } from '../utils/categorize';
 import { defaultCategoryMap } from '../constants/categories';
 import type { CategoryMap } from '../types/category';
 import type { GroceryItem } from '../types/grocery';
@@ -49,7 +49,7 @@ function cleanName(raw: string): string {
 
 export function createGroceryService(backend: GroceryBackend) {
   async function categoryFor(householdId: string, name: string): Promise<string> {
-    const map = (await backend.getCategoryMap(householdId)) ?? defaultCategoryMap;
+    const map = mergeCategoryMaps(defaultCategoryMap, await backend.getCategoryMap(householdId));
     return getCategory(name, map);
   }
 

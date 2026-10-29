@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { signUp } from './helpers';
 
@@ -165,7 +166,7 @@ test('the recipe page has no header, runs full width, and the cart adds an ingre
   await expect(page.locator('span:visible').filter({ hasText: /^garlic$/ })).toHaveCount(1);
 });
 
-test('the last step on the recipe page sits about 32px above the bottom bar', async ({ page }) => {
+test('the end of the recipe page sits about 32px above the bottom bar', async ({ page }) => {
   await signUp(page);
   await page.getByRole('link', { name: 'Recipes', exact: true }).click();
   await page.getByRole('button', { name: 'Add recipe' }).click();
@@ -182,10 +183,74 @@ test('the last step on the recipe page sits about 32px above the bottom bar', as
   await expect(page.getByRole('heading', { level: 1, name: 'Long toast' })).toBeVisible();
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
 
-  const lastStep = await page.locator('ol li:visible').last().boundingBox();
+  // The bottom-most section is the delete block, which now sits under the steps, so it is the element that must clear the bar.
+  const lastStep = await page.locator('article section:visible').last().boundingBox();
   const nav = await page.locator('nav[aria-label="Main"]:visible').boundingBox();
   expect(lastStep && nav).toBeTruthy();
   const gap = (nav?.y ?? 0) - ((lastStep?.y ?? 0) + (lastStep?.height ?? 0));
   expect(gap).toBeGreaterThanOrEqual(24);
   expect(gap).toBeLessThanOrEqual(40);
+});
+
+test('a recipe can be deleted from its page after a second confirmation', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill('Old pancakes');
+  await sheet.getByLabel('Ingredient 1').fill('flour');
+  await sheet.getByLabel('Step 1').fill('Fry them');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+
+  await page.getByRole('link', { name: 'Old pancakes' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Old pancakes' })).toBeVisible();
+  await page.getByRole('button', { name: 'Delete recipe' }).click();
+  await page.getByRole('button', { name: 'Yes, delete' }).click();
+
+  await expect(page).toHaveURL(/\/recipes$/);
+  await expect(page.getByRole('link', { name: 'Old pancakes' })).toHaveCount(0);
+});
+
+test('a recipe ingredient is added to the shopping list as a clean name', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill('Cheesy toast');
+  await sheet.getByLabel('Ingredient 1').fill('60g/2¼oz mature cheddar, grated');
+  await sheet.getByLabel('Step 1').fill('Grill it');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+
+  await page.getByRole('link', { name: 'Cheesy toast' }).click();
+  await page.locator('button[aria-label*="mature cheddar"]').click();
+  await page.getByRole('link', { name: 'Shopping' }).click();
+  await expect(page.getByRole('checkbox', { name: 'mature cheddar' })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: /60g/ })).toHaveCount(0);
+});
+
+async function saveRecipeWithLabel(page: Page, title: string, label: string) {
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill(title);
+  await sheet.getByLabel('Category').selectOption('Lunch');
+  await sheet.getByRole('button', { name: label, exact: true }).click();
+  await sheet.getByLabel('Ingredient 1').fill('pasta');
+  await sheet.getByLabel('Step 1').fill('Boil the pasta');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: title })).toBeVisible();
+}
+
+test('recipes can be filtered by label, and All brings them back', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await saveRecipeWithLabel(page, 'Quick pasta', 'Quick & Easy ⚡');
+  await saveRecipeWithLabel(page, 'Winter stew', 'Cozy Winter ❄️');
+
+  const filter = page.getByRole('group', { name: 'Filter by label' });
+  await filter.getByRole('button', { name: 'Quick & Easy ⚡' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Quick pasta' })).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Winter stew' })).toHaveCount(0);
+
+  await filter.getByRole('button', { name: 'All' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Winter stew' })).toBeVisible();
 });

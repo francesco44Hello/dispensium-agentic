@@ -6,6 +6,8 @@ import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
 import { recipeService } from '../../services/dataClient';
 import type { Recipe, RecipeDraft } from '../../types/recipe';
+import { filterRecipesByLabel } from '../../utils/recipeFilter';
+import { RecipeFilter } from './RecipeFilter';
 import { RecipeList } from './RecipeList';
 import { RecipeSheet } from './RecipeSheet';
 import { useLocale } from '../i18n/LocaleProvider';
@@ -19,6 +21,8 @@ export function RecipesScreen() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  // Null means All. The choice is not saved, so every visit starts on All.
+  const [label, setLabel] = useState<string | null>(null);
 
   useEffect(() => {
     if (!householdId) return;
@@ -39,6 +43,9 @@ export function RecipesScreen() {
     }
   };
 
+  const visible = filterRecipesByLabel(recipes, label);
+  // Recipes exist but the chosen label has none: say so, rather than the "no recipes yet" message.
+  const noneMatch = recipes.length > 0 && visible.length === 0;
   const ready = status === 'ready' && householdId && user;
   const openSheet = () => setSheetOpen(true);
 
@@ -54,7 +61,13 @@ export function RecipesScreen() {
           <p role="alert">{t('household.loadErrorDetail', { error: error ?? t('error.unknownDetail') })}</p>
         )}
         {status !== 'error' && !ready && <p role="status">{t('recipes.loading')}</p>}
-        {ready && <RecipeList recipes={recipes} />}
+        {ready && recipes.length > 0 && <RecipeFilter selected={label} onSelect={setLabel} />}
+        {ready && noneMatch && (
+          <p role="status" className={styles.none}>
+            {t('recipes.filter.none')}
+          </p>
+        )}
+        {ready && !noneMatch && <RecipeList recipes={visible} />}
       </div>
       <RecipeSheet
         open={sheetOpen}

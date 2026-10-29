@@ -280,6 +280,10 @@ export function createFirestoreDataBackend(): DataBackend {
       return docRef.id;
     },
 
+    async deleteRecipe(householdId: string, id: string): Promise<void> {
+      await deleteDoc(doc(db(), 'households', householdId, 'recipes', id));
+    },
+
     subscribeToRecipes(householdId, listener): Unsubscribe {
       const q = query(collection(db(), 'households', householdId, 'recipes'), orderBy('createdAt', 'desc'));
       return onSnapshot(

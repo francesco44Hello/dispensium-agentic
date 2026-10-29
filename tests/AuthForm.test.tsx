@@ -112,9 +112,37 @@ describe('AuthForm submit button colour', () => {
 describe('AuthForm language selector', () => {
   it('lets a signed-out person choose the language on the login and signup pages', () => {
     renderForm('login');
-    expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: 'Language' })).toBeTruthy();
     cleanup();
     renderForm('signup');
-    expect(screen.getByRole('combobox', { name: 'Language' })).toBeTruthy();
+    expect(screen.getByRole('radiogroup', { name: 'Language' })).toBeTruthy();
+  });
+});
+
+describe('AuthForm sticker card', () => {
+  const css = readFileSync(join(process.cwd(), 'components/auth/AuthForm.module.css'), 'utf8');
+  const ruleFor = (selector: string) => new RegExp(`\\.${selector}\\s*\\{([^}]*)\\}`).exec(css)?.[1] ?? '';
+
+  it('shows the Plan. Shop. Cook. sticker above the form', () => {
+    renderForm('login');
+    expect(screen.getByText('Plan. Shop. Cook.')).toBeTruthy();
+  });
+
+  it('shows the Italian sticker when Italian is the chosen language', () => {
+    window.localStorage.setItem('dispensium-locale', 'it');
+    const service = createAuthService(createMockAuthBackend());
+    render(
+      <LocaleProvider>
+        <AuthProvider service={service}>
+          <AuthForm mode="login" />
+        </AuthProvider>
+      </LocaleProvider>,
+    );
+    expect(screen.getByText('Pianifica. Compra. Cucina.')).toBeTruthy();
+    window.localStorage.removeItem('dispensium-locale');
+  });
+
+  it('gives the card the tinted surface, not plain white', () => {
+    expect(ruleFor('form')).toMatch(/background:\s*var\(--surface-tint\);/);
   });
 });
