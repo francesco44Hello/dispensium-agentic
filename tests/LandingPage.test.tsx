@@ -48,8 +48,13 @@ describe('LandingPage', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Una lista per tutta la settimana.' })).toBeInTheDocument();
   });
 
-  it('does not embed a video until the recorded file exists', () => {
+  it('plays the recorded walkthrough, with the still as its poster', () => {
     const { container } = renderLanding();
-    expect(container.querySelector('video')).toBeNull();
+    const video = container.querySelector('video');
+    expect(video).not.toBeNull();
+    expect(video).toHaveAttribute('src', '/landing/demo.webm');
+    expect(video).toHaveAttribute('poster', '/landing/demo-poster.png');
+    expect(video).toHaveAttribute('controls');
+    expect(video).toHaveAccessibleName('Demo video of the app');
   });
 });
