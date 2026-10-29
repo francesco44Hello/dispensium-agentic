@@ -6,6 +6,8 @@
   --error-color: #9b1c1c;
   --add-button: #6b7fe0;
   --surface: #ffffff;
+  /* Soft lilac for cards that sit on the brand gradient, so they do not read as plain white. */
+  --surface-tint: #eeebfd;
   --font-sans: var(--font-balsamiq), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --nav-height: 88px;
   /* Space the bottom bar and its floating button need, reserved at the end of every page's content. */
