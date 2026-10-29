@@ -361,6 +361,18 @@
   align-items: center;
 }
 
+/* The walkthrough copy sits beside the phone, so it gets a larger size than the shared lead text. */
+.videoCopy .lead {
+  max-width: 36ch;
+  margin-bottom: 0;
+  font-size: 1.25rem;
+}
+
+/* On phones the copy and the phone stack, so the gap between them is kept small. */
+.videoSplit {
+  gap: 20px;
+}
+
 .phone {
   max-width: 300px;
   width: 100%;
@@ -532,6 +544,13 @@
 
   .split {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr);
+  }
+
+  /* Copy and phone sit together in a compact block, instead of spreading across the 1120px column. */
+  .videoSplit {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 64px;
+    max-width: 780px;
   }
 
   .steps {

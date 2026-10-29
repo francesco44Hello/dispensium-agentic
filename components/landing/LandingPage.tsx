@@ -112,17 +112,25 @@ export function LandingPage() {
           </div>
         </section>
 
-        <section className={`${styles.section} ${styles.split}`} aria-labelledby="landing-video">
-          <div>
+        <section className={`${styles.section} ${styles.split} ${styles.videoSplit}`} aria-labelledby="landing-video">
+          <div className={styles.videoCopy}>
             <h2 id="landing-video" className={styles.heading}>
               {t('landing.video.title')}
             </h2>
             <p className={styles.lead}>{t('landing.video.body')}</p>
           </div>
           <div className={styles.phone}>
-            {/* Still until the walkthrough is recorded: the video file is not in public/ yet, so no player is rendered. */}
-            {/* eslint-disable-next-line @next/next/no-img-element -- static capture, as in the feature cards */}
-            <img className={styles.video} src="/landing/demo-poster.png" alt={t('landing.video.label')} width={390} height={844} />
+            <video
+              className={styles.video}
+              src="/landing/demo.webm"
+              poster="/landing/demo-poster.png"
+              controls
+              playsInline
+              preload="metadata"
+              width={390}
+              height={844}
+              aria-label={t('landing.video.label')}
+            />
           </div>
         </section>
 
