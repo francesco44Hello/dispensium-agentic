@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dispensium">
 <rect x="4" y="4" width="56" height="56" rx="16" fill="#2D3C59"/>
-<rect x="12" y="17" width="11" height="4" rx="1.5" fill="#B7B1F2"/>
-<rect x="10.5" y="21" width="14" height="23" rx="5" fill="#FDB7EA"/>
-<path d="M14 32.5 L16.8 35.3 L21 30.5" stroke="#2D3C59" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="27.5" y="11" width="11" height="4" rx="1.5" fill="#B7B1F2"/>
-<rect x="26" y="15" width="14" height="29" rx="5" fill="#A3DC9A"/>
-<path d="M29.5 29.5 L32.3 32.3 L36.5 27.5" stroke="#2D3C59" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="43" y="21" width="11" height="4" rx="1.5" fill="#B7B1F2"/>
-<rect x="41.5" y="25" width="14" height="19" rx="5" fill="#6B7FE0"/>
-<path d="M45 34.5 L47.8 37.3 L52 32.5" stroke="#2D3C59" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-<rect x="8" y="46" width="48" height="4" rx="2" fill="#B7B1F2"/>
+<ellipse cx="23" cy="39" rx="10" ry="13" fill="#EF4B3F"/>
+<ellipse cx="41" cy="39" rx="10" ry="13" fill="#EF4B3F"/>
+<ellipse cx="32" cy="37" rx="11" ry="16" fill="#EF4B3F"/>
+<path d="M27.5 27 Q32 25.5 36.5 27 M23 30 Q21 39 24 47 M41 30 Q43 39 40 47" stroke="#C9302A" stroke-width="1.4" fill="none" stroke-linecap="round" opacity="0.7"/>
+<path d="M17 34 Q18 29 21.5 28" stroke="#FFC2B8" stroke-width="2.2" fill="none" stroke-linecap="round" opacity="0.9"/>
+<ellipse cx="25.5" cy="22" rx="5" ry="2.4" transform="rotate(-18 25.5 22)" fill="#A3DC9A"/>
+<ellipse cx="38.5" cy="22" rx="5" ry="2.4" transform="rotate(18 38.5 22)" fill="#A3DC9A"/>
+<path d="M27 15.5 L31.5 20 L40 9.5" stroke="#A3DC9A" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
