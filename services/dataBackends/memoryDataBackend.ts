@@ -216,6 +216,15 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       return id;
     },
 
+    async updateRecipe(householdId, id, changes) {
+      const bucket = recipes.get(householdId);
+      const current = bucket?.get(id);
+      if (!bucket || !current) throw new Error('Recipe not found');
+      // Keeps the author and the creation date, which the edit cannot change.
+      bucket.set(id, { ...current, ...changes });
+      notifyAll();
+    },
+
     async deleteRecipe(householdId, id) {
       recipes.get(householdId)?.delete(id);
       notifyAll();

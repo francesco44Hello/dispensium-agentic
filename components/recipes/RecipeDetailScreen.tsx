@@ -8,7 +8,8 @@ import { useHousehold } from '../../hooks/useHousehold';
 import { useRecipePhoto } from '../../hooks/useRecipePhoto';
 import { groceryService, recipeService } from '../../services/dataClient';
 import { cleanIngredientName } from '../../utils/ingredientName';
-import type { Recipe } from '../../types/recipe';
+import type { Recipe, RecipeDraft } from '../../types/recipe';
+import type { PhotoChange } from '../../services/recipeService';
 import { RecipeDetail } from './RecipeDetail';
 import { useLocale } from '../i18n/LocaleProvider';
 
@@ -34,6 +35,12 @@ export function RecipeDetailScreen({ id }: { id: string }) {
     await groceryService.addItem(householdId, user.uid, cleanIngredientName(ingredient));
   };
 
+  // The current photo path is passed along, so a text-only edit keeps the photo and a photo change can clean up the old file.
+  const saveEdit = async (draft: RecipeDraft, change: PhotoChange) => {
+    if (!householdId || !recipe) throw new Error('recipe not loaded');
+    await recipeService.updateRecipe(householdId, recipe.id, recipe.image, draft, change);
+  };
+
   // Left only after the delete succeeds; a failure is shown inside RecipeDetail and the recipe stays open.
   const deleteRecipe = async () => {
     if (!householdId || !recipe) throw new Error('recipe not loaded');
@@ -50,7 +57,7 @@ export function RecipeDetailScreen({ id }: { id: string }) {
     content = <p role="alert">{t('recipes.notFound')}</p>;
   } else {
     content = (
-      <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} onDelete={deleteRecipe} />
+      <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} onDelete={deleteRecipe} onSave={saveEdit} />
     );
   }
 

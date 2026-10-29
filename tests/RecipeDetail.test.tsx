@@ -3,7 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { RecipeDetail } from '../components/recipes/RecipeDetail';
-import type { Recipe } from '../types/recipe';
+import type { Recipe, RecipeDraft } from '../types/recipe';
+import type { PhotoChange } from '../services/recipeService';
 
 afterEach(cleanup);
 
@@ -22,7 +23,7 @@ const recipe: Recipe = {
 
 describe('RecipeDetail', () => {
   it('shows the title, label, time and category', () => {
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByRole('heading', { level: 1, name: 'Carbonara' })).toBeInTheDocument();
     expect(screen.getByText('Quick & Easy ⚡')).toBeInTheDocument();
     expect(screen.getByText('25 min')).toBeInTheDocument();
@@ -30,34 +31,34 @@ describe('RecipeDetail', () => {
   });
 
   it('lists ingredients and numbers the steps', () => {
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByRole('list', { name: 'Ingredients' })).toHaveTextContent('spaghetti');
     expect(screen.getByText('Boil the pasta').previousSibling).toHaveTextContent('1');
     expect(screen.getByText('Mix the eggs').previousSibling).toHaveTextContent('2');
   });
 
   it('uses the resolved cover image, or the legacy placeholder when there is none', () => {
-    const { unmount } = render(<RecipeDetail recipe={recipe} imageUrl="blob:cover" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    const { unmount } = render(<RecipeDetail recipe={recipe} imageUrl="blob:cover" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByAltText('Carbonara')).toHaveAttribute('src', 'blob:cover');
     unmount();
 
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByAltText('Carbonara')).toHaveAttribute('src', '/fruit-login.jpg');
   });
 
   it('shows dashes for missing time and category', () => {
-    render(<RecipeDetail recipe={{ ...recipe, time: '', category: '' }} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={{ ...recipe, time: '', category: '' }} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getAllByText('--')).toHaveLength(2);
   });
 
   it('links back to the recipes list', () => {
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
     expect(screen.getByRole('link', { name: 'Back to recipes' })).toHaveAttribute('href', '/recipes');
   });
 
   it('adds an ingredient to the shopping list from its cart button', async () => {
     const onAddIngredient = vi.fn(async () => undefined);
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={onAddIngredient} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={onAddIngredient} onDelete={vi.fn()} onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add spaghetti to shopping list' }));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Added spaghetti to shopping list' })).toBeDisabled());
     expect(onAddIngredient).toHaveBeenCalledWith('spaghetti');
@@ -67,7 +68,7 @@ describe('RecipeDetail', () => {
     const onAddIngredient = vi.fn(async () => {
       throw new Error('offline');
     });
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={onAddIngredient} onDelete={vi.fn()} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={onAddIngredient} onDelete={vi.fn()} onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add eggs to shopping list' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not add eggs');
     expect(screen.getByRole('button', { name: 'Add eggs to shopping list' })).toBeEnabled();
@@ -77,7 +78,7 @@ describe('RecipeDetail', () => {
 describe('RecipeDetail delete', () => {
   it('deletes only after a second, explicit confirmation', async () => {
     const onDelete = vi.fn(async () => undefined);
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete recipe' }));
     expect(onDelete).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
@@ -86,7 +87,7 @@ describe('RecipeDetail delete', () => {
 
   it('keeps the recipe when the person cancels', () => {
     const onDelete = vi.fn(async () => undefined);
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete recipe' }));
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     expect(onDelete).not.toHaveBeenCalled();
@@ -97,10 +98,46 @@ describe('RecipeDetail delete', () => {
     const onDelete = vi.fn(async () => {
       throw new Error('denied');
     });
-    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} />);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={onDelete} onSave={vi.fn()} />);
     fireEvent.click(screen.getByRole('button', { name: 'Delete recipe' }));
     fireEvent.click(screen.getByRole('button', { name: 'Yes, delete' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Could not delete the recipe. Try again.');
     expect(screen.getByRole('heading', { level: 1, name: 'Carbonara' })).toBeInTheDocument();
+  });
+
+  it('opens the recipe in editable fields from the edit button', () => {
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit recipe' }));
+    expect(screen.getByRole('textbox', { name: 'Recipe title' })).toHaveValue('Carbonara');
+    expect(screen.getByLabelText('Ingredient 1')).toHaveValue('spaghetti');
+    expect(screen.getByLabelText('Step 2')).toHaveValue('Mix the eggs');
+  });
+
+  it('goes back to the read-only recipe when editing is cancelled', () => {
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={vi.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit recipe' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.getByRole('heading', { level: 1, name: 'Carbonara' })).toBeInTheDocument();
+  });
+
+  it('saves the edit and returns to the read-only recipe', async () => {
+    const onSave = vi.fn<(draft: RecipeDraft, change: PhotoChange) => Promise<void>>(async () => undefined);
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={onSave} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit recipe' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Recipe title' }), { target: { value: 'Carbonara 2' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save recipe' }));
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Carbonara' })).toBeInTheDocument());
+    expect(onSave.mock.calls[0][0].title).toBe('Carbonara 2');
+  });
+
+  it('stays in edit mode and says so when the save fails', async () => {
+    const onSave = vi.fn<(draft: RecipeDraft, change: PhotoChange) => Promise<void>>(async () => {
+      throw new Error('offline');
+    });
+    render(<RecipeDetail recipe={recipe} imageUrl="" onAddIngredient={vi.fn()} onDelete={vi.fn()} onSave={onSave} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit recipe' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save recipe' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not save the recipe');
+    expect(screen.getByRole('textbox', { name: 'Recipe title' })).toBeInTheDocument();
   });
 });

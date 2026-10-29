@@ -182,3 +182,104 @@ describe('deleteRecipe', () => {
     expect(recipesOf(backend)).toEqual([]);
   });
 });
+
+describe('updateRecipe', () => {
+  const webp = () => new Blob(['x'], { type: 'image/webp' });
+
+  // Saves a recipe first, so there is something to edit. Returns its id and the backend it lives in.
+  async function saved(
+    withPhoto = false,
+  ): Promise<{ id: string; backend: ReturnType<typeof setup>['backend']; service: ReturnType<typeof setup>['service'] }> {
+    const { backend, service } = setup();
+    const id = await service.addRecipe(HID, UID, draft(), withPhoto ? webp() : undefined);
+    return { id, backend, service };
+  }
+
+  // Records the photo paths that get deleted, so tests can check the cleanup.
+  function withDeletes(backend: ReturnType<typeof setup>['backend']) {
+    const deleted: string[] = [];
+    return {
+      deleted,
+      backend: { ...backend, deletePhoto: async (path: string) => void deleted.push(path) },
+    };
+  }
+
+  it('saves the new text and keeps the author and the creation date', async () => {
+    const { id, backend, service } = await saved();
+    const before = recipesOf(backend)[0];
+    await service.updateRecipe(HID, id, '', draft({ title: 'Better pasta', ingredients: ['pasta', 'garlic'] }), { kind: 'keep' });
+    const [after] = recipesOf(backend);
+    expect(after.title).toBe('Better pasta');
+    expect(after.ingredients).toEqual(['pasta', 'garlic']);
+    expect(after.createdBy).toBe(before.createdBy);
+    expect(after.createdAt).toEqual(before.createdAt);
+  });
+
+  it('keeps the current photo when the photo is not changed', async () => {
+    const { id, backend, service } = await saved(true);
+    const [before] = recipesOf(backend);
+    await service.updateRecipe(HID, id, before.image, draft({ title: 'Renamed' }), { kind: 'keep' });
+    expect(recipesOf(backend)[0].image).toBe(before.image);
+  });
+
+  it('removes the photo and deletes its file when the photo is removed', async () => {
+    const { id, backend: plain } = await saved(true);
+    const [before] = recipesOf(plain);
+    const { backend, deleted } = withDeletes(plain);
+    const service = createRecipeService(backend);
+    await service.updateRecipe(HID, id, before.image, draft(), { kind: 'remove' });
+    expect(recipesOf(plain)[0].image).toBe('');
+    expect(deleted).toEqual([before.image]);
+  });
+
+  it('replaces the photo and deletes the old file once the new one is saved', async () => {
+    const { id, backend: plain } = await saved(true);
+    const [before] = recipesOf(plain);
+    const { backend, deleted } = withDeletes(plain);
+    const service = createRecipeService(backend);
+    await service.updateRecipe(HID, id, before.image, draft(), { kind: 'replace', photo: webp() });
+    const [after] = recipesOf(plain);
+    expect(after.image).not.toBe('');
+    expect(after.image).not.toBe(before.image);
+    expect(deleted).toEqual([before.image]);
+  });
+
+  it('rejects an invalid field and leaves the recipe as it was', async () => {
+    const { id, backend, service } = await saved();
+    const [before] = recipesOf(backend);
+    await expectInvalid(service.updateRecipe(HID, id, '', draft({ category: 'Brunch' }), { kind: 'keep' }), 'invalid-category');
+    expect(recipesOf(backend)[0].title).toBe(before.title);
+  });
+
+  it('rejects an id that is not one this app creates', async () => {
+    const { service } = await saved();
+    await expectInvalid(service.updateRecipe(HID, '../x', '', draft(), { kind: 'keep' }), 'invalid-id');
+  });
+
+  it('rejects a current photo path outside this household', async () => {
+    const { id, service } = await saved();
+    await expectInvalid(
+      service.updateRecipe(HID, id, 'households/hh-2/recipes/x.webp', draft(), { kind: 'keep' }),
+      'invalid-image',
+    );
+  });
+
+  it('rejects a photo that is not an image before anything is saved', async () => {
+    const { id, backend, service } = await saved();
+    await expectInvalid(
+      service.updateRecipe(HID, id, '', draft(), { kind: 'replace', photo: new Blob(['x'], { type: 'text/html' }) }),
+      'invalid-photo',
+    );
+    expect(recipesOf(backend)[0].image).toBe('');
+  });
+
+  it('removes the new photo again when the recipe cannot be saved', async () => {
+    const { id, backend: plain } = await saved();
+    const { backend, deleted } = withDeletes(plain);
+    const failing = { ...backend, updateRecipe: async () => { throw new Error('offline'); } };
+    const service = createRecipeService(failing);
+    await expect(service.updateRecipe(HID, id, '', draft(), { kind: 'replace', photo: webp() })).rejects.toThrow('offline');
+    expect(deleted).toHaveLength(1);
+    expect(deleted[0]).toMatch(new RegExp(`^households/${HID}/recipes/`));
+  });
+});

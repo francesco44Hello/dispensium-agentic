@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { MdAccessTime, MdAddShoppingCart, MdArrowBack, MdCategory, MdCheck } from 'react-icons/md';
-import type { Recipe } from '../../types/recipe';
+import { MdAccessTime, MdAddShoppingCart, MdArrowBack, MdCategory, MdCheck, MdEdit } from 'react-icons/md';
+import type { PhotoChange } from '../../services/recipeService';
+import type { Recipe, RecipeDraft } from '../../types/recipe';
 import { RECIPE_CATEGORY_KEYS, RECIPE_LABEL_KEYS, translateStored } from '../../i18n/messages';
+import { RecipeEdit } from './RecipeEdit';
 import styles from './RecipeDetail.module.css';
 import { useLocale } from '../i18n/LocaleProvider';
 
@@ -14,15 +16,38 @@ interface Props {
   imageUrl: string;
   onAddIngredient: (ingredient: string) => Promise<void>;
   onDelete: () => Promise<void>;
+  onSave: (draft: RecipeDraft, change: PhotoChange) => Promise<void>;
 }
 
-export function RecipeDetail({ recipe, imageUrl, onAddIngredient, onDelete }: Props) {
+export function RecipeDetail({ recipe, imageUrl, onAddIngredient, onDelete, onSave }: Props) {
   const { t } = useLocale();
   const [added, setAdded] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  // The edit is kept on screen when it fails, so nothing typed is lost. Success returns to the read-only recipe.
+  const saveEdit = async (draft: RecipeDraft, change: PhotoChange) => {
+    setSaveError('');
+    setSaving(true);
+    try {
+      await onSave(draft, change);
+      setEditing(false);
+    } catch {
+      setSaveError(t('recipes.saveFailed'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelEdit = () => {
+    setSaveError('');
+    setEditing(false);
+  };
 
   // Deleting is a second step: the first press only asks, so a stray tap cannot remove a recipe.
   const remove = async () => {
@@ -48,20 +73,38 @@ export function RecipeDetail({ recipe, imageUrl, onAddIngredient, onDelete }: Pr
     }
   };
 
+  const hero = (
+    <div className={styles.hero}>
+      <Link href="/recipes" className={styles.back} aria-label={t('recipes.back')}>
+        <MdArrowBack aria-hidden="true" />
+      </Link>
+      {/* Cover images come from other sites, so a plain img keeps the markup simple. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={imageUrl || PLACEHOLDER_IMAGE} alt={recipe.title} className={styles.image} />
+    </div>
+  );
+
+  if (editing) {
+    return (
+      <article className={styles.page}>
+        {hero}
+        <div className={styles.card}>
+          <RecipeEdit recipe={recipe} imageUrl={imageUrl} saving={saving} error={saveError} onSave={saveEdit} onCancel={cancelEdit} />
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article className={styles.page}>
-      <div className={styles.hero}>
-        <Link href="/recipes" className={styles.back} aria-label={t('recipes.back')}>
-          <MdArrowBack aria-hidden="true" />
-        </Link>
-        {/* Cover images come from other sites, so a plain img keeps the markup simple. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageUrl || PLACEHOLDER_IMAGE} alt={recipe.title} className={styles.image} />
-      </div>
+      {hero}
 
       <div className={styles.card}>
         <div className={styles.labelRow}>
           <span className={styles.label}>{recipe.label ? translateStored(recipe.label, RECIPE_LABEL_KEYS, t) : t('recipes.delicious')}</span>
+          <button type="button" className={styles.editButton} onClick={() => setEditing(true)}>
+            <MdEdit aria-hidden="true" /> {t('recipes.edit')}
+          </button>
         </div>
 
         <h1 className={styles.title}>{recipe.title}</h1>
