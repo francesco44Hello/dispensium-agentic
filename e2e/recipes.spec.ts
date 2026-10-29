@@ -254,3 +254,21 @@ test('recipes can be filtered by label, and All brings them back', async ({ page
   await filter.getByRole('button', { name: 'All' }).click();
   await expect(page.getByRole('listitem').filter({ hasText: 'Winter stew' })).toBeVisible();
 });
+
+test('a recipe can be edited on its page, and the changes show after saving', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await saveRecipeWithLabel(page, 'Plain pasta', 'Quick & Easy ⚡');
+
+  await page.getByRole('link', { name: 'Plain pasta' }).click();
+  await page.getByRole('button', { name: 'Edit recipe' }).click();
+  await page.getByRole('textbox', { name: 'Recipe title' }).fill('Pasta with garlic');
+  await page.getByRole('textbox', { name: 'Ingredient 1', exact: true }).fill('pasta and garlic');
+  await page.getByRole('button', { name: 'Add step' }).click();
+  await page.getByRole('textbox', { name: 'Step 2', exact: true }).fill('Add the garlic');
+  await page.getByRole('button', { name: 'Save recipe' }).click();
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Pasta with garlic' })).toBeVisible();
+  await expect(page.getByText('pasta and garlic')).toBeVisible();
+  await expect(page.getByText('Add the garlic')).toBeVisible();
+});
