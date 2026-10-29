@@ -29,17 +29,6 @@
   width: 48px;
 }
 
-/* Breakfast is only on the desktop layout; mobile keeps its lunch and dinner tabs. */
-.desktopOnly {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .desktopOnly {
-    display: flex;
-  }
-}
-
 .active {
   background-color: var(--primary-color);
   color: var(--secondary-color);

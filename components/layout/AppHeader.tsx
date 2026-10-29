@@ -22,7 +22,7 @@ export function AppHeader() {
   async function handleSignOut() {
     setSigningOut(true);
     await service.signOut();
-    router.replace('/login');
+    router.replace('/welcome');
   }
 
   return (

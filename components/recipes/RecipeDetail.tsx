@@ -13,12 +13,30 @@ interface Props {
   recipe: Recipe;
   imageUrl: string;
   onAddIngredient: (ingredient: string) => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
-export function RecipeDetail({ recipe, imageUrl, onAddIngredient }: Props) {
+export function RecipeDetail({ recipe, imageUrl, onAddIngredient, onDelete }: Props) {
   const { t } = useLocale();
   const [added, setAdded] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  // Deleting is a second step: the first press only asks, so a stray tap cannot remove a recipe.
+  const remove = async () => {
+    setDeleteError('');
+    setDeleting(true);
+    try {
+      await onDelete();
+    } catch {
+      setDeleteError(t('recipes.deleteFailed'));
+      setConfirming(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const addToList = async (ingredient: string) => {
     setError('');
@@ -98,6 +116,27 @@ export function RecipeDetail({ recipe, imageUrl, onAddIngredient }: Props) {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section className={styles.danger}>
+          {confirming ? (
+            <div className={styles.confirm}>
+              <p className={styles.confirmText}>{t('recipes.deleteAsk')}</p>
+              <div className={styles.confirmActions}>
+                <button type="button" className={styles.cancelButton} disabled={deleting} onClick={() => setConfirming(false)}>
+                  {t('common.cancel')}
+                </button>
+                <button type="button" className={styles.deleteButton} disabled={deleting} onClick={() => void remove()}>
+                  {t('recipes.deleteConfirm')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className={styles.deleteButton} onClick={() => setConfirming(true)}>
+              {t('recipes.delete')}
+            </button>
+          )}
+          {deleteError && <p role="alert" className={styles.error}>{deleteError}</p>}
         </section>
       </div>
     </article>

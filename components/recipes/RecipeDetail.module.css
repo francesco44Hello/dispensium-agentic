@@ -205,3 +205,55 @@
   line-height: 1.5;
   color: #444;
 }
+
+/* Delete sits at the very bottom of the recipe, away from the ingredient carts, and needs a second press to confirm. */
+.danger {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px dashed var(--muted);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.confirmText {
+  margin: 0;
+  font-weight: var(--font-weight-brand);
+}
+
+.confirmActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.deleteButton,
+.cancelButton {
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.deleteButton {
+  color: var(--error-color);
+}
+
+.cancelButton {
+  color: var(--primary-color);
+}
+
+.deleteButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

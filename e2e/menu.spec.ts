@@ -116,3 +116,30 @@ test('the last day sits about 32px above the bottom bar, in both views', async (
   expect(listGap).toBeLessThanOrEqual(40);
 
 });
+
+test('breakfast planned on a phone is still shown after switching to the desktop layout', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Menu', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Breakfast', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Breakfast', exact: true }).click();
+  await page.getByRole('button', { name: 'Add breakfast' }).click();
+  const form = page.locator('form:visible');
+  await form.getByLabel('Main').fill('Porridge');
+  await form.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Porridge')).toBeVisible();
+
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect(page.getByText('Porridge')).toBeVisible();
+});
+
+test('breakfast can be planned on the desktop layout', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await signUp(page);
+  await page.getByRole('link', { name: 'Menu', exact: true }).click();
+  await page.getByRole('button', { name: 'Breakfast', exact: true }).click();
+  await page.getByRole('button', { name: 'Add breakfast' }).click();
+  const form = page.locator('form:visible');
+  await form.getByLabel('Main').fill('Porridge');
+  await form.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Porridge')).toBeVisible();
+});

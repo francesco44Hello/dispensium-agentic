@@ -1,0 +1,28 @@
+.filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-brand);
+  color: var(--primary-color);
+  background: var(--surface-tint);
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--primary-button);
+  box-shadow: 3px 3px 0 var(--primary-color);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}

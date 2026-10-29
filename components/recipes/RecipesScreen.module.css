@@ -35,3 +35,9 @@
     cursor: pointer;
   }
 }
+
+.none {
+  margin: 0;
+  text-align: center;
+  color: var(--primary-color);
+}

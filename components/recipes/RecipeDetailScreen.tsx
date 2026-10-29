@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { AppShell } from '../AppShell';
 import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
 import { useRecipePhoto } from '../../hooks/useRecipePhoto';
 import { groceryService, recipeService } from '../../services/dataClient';
+import { cleanIngredientName } from '../../utils/ingredientName';
 import type { Recipe } from '../../types/recipe';
 import { RecipeDetail } from './RecipeDetail';
 import { useLocale } from '../i18n/LocaleProvider';
@@ -14,6 +16,7 @@ import { useLocale } from '../i18n/LocaleProvider';
 export function RecipeDetailScreen({ id }: { id: string }) {
   const { t } = useLocale();
   const { user } = useAuth();
+  const router = useRouter();
   const { status, householdId, error } = useHousehold();
   const [recipes, setRecipes] = useState<Recipe[] | null>(null);
 
@@ -27,7 +30,15 @@ export function RecipeDetailScreen({ id }: { id: string }) {
 
   const addToShoppingList = async (ingredient: string) => {
     if (!householdId || !user) throw new Error('not signed in');
-    await groceryService.addItem(householdId, user.uid, ingredient);
+    // The list gets the shopping name ("mature cheddar"), not the recipe line ("60g/2¼oz mature cheddar, grated").
+    await groceryService.addItem(householdId, user.uid, cleanIngredientName(ingredient));
+  };
+
+  // Left only after the delete succeeds; a failure is shown inside RecipeDetail and the recipe stays open.
+  const deleteRecipe = async () => {
+    if (!householdId || !recipe) throw new Error('recipe not loaded');
+    await recipeService.deleteRecipe(householdId, recipe.id, recipe.image);
+    router.replace('/recipes');
   };
 
   let content;
@@ -38,7 +49,9 @@ export function RecipeDetailScreen({ id }: { id: string }) {
   } else if (!recipe) {
     content = <p role="alert">{t('recipes.notFound')}</p>;
   } else {
-    content = <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} />;
+    content = (
+      <RecipeDetail recipe={recipe} imageUrl={imageUrl} onAddIngredient={addToShoppingList} onDelete={deleteRecipe} />
+    );
   }
 
   return (

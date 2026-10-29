@@ -83,94 +83,97 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit} noValidate>
-      <h1 className={styles.title}>{isSignup ? t('auth.signup') : t('auth.login')}</h1>
+    <div className={styles.stage}>
+      <p className={styles.sticker}>{t('auth.tagline')}</p>
+      <form className={styles.form} onSubmit={handleSubmit} noValidate>
+        <h1 className={styles.title}>{isSignup ? t('auth.signup') : t('auth.login')}</h1>
 
-      {isSignup && (
+        {isSignup && (
+          <label className={styles.field}>
+            <span>{t('auth.name')}</span>
+            <input
+              type="text"
+              name="name"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+        )}
+
         <label className={styles.field}>
-          <span>{t('auth.name')}</span>
+          <span>{t('auth.email')}</span>
           <input
-            type="text"
-            name="name"
-            autoComplete="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
           />
         </label>
-      )}
 
-      <label className={styles.field}>
-        <span>{t('auth.email')}</span>
-        <input
-          type="email"
-          name="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-      </label>
-
-      <label className={styles.field}>
-        <span>{t('auth.password')}</span>
-        <input
-          type="password"
-          name="password"
-          autoComplete={isSignup ? 'new-password' : 'current-password'}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </label>
-
-      {isSignup && (
         <label className={styles.field}>
-          <span>{t('auth.confirmPassword')}</span>
+          <span>{t('auth.password')}</span>
           <input
             type="password"
-            name="confirmPassword"
-            autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            name="password"
+            autoComplete={isSignup ? 'new-password' : 'current-password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </label>
-      )}
 
-      {error && (
-        <p role="alert" className={styles.error}>
-          {t(error)}
-        </p>
-      )}
-
-      <button type="submit" className={styles.submit} disabled={submitting}>
-        {submitting ? t('auth.submit.wait') : isSignup ? t('auth.submit.signup') : t('auth.login')}
-      </button>
-
-      <div className={styles.divider} role="separator">
-        <span>{t('auth.or')}</span>
-      </div>
-
-      <button type="button" className={styles.google} onClick={handleGoogleSignIn} disabled={submitting}>
-        {t('auth.google')}
-      </button>
-
-      <p className={styles.switch}>
-        {isSignup ? (
-          <>
-            {t('auth.haveAccount')} <Link href="/login">{t('auth.login')}</Link>
-          </>
-        ) : (
-          <>
-            {t('auth.newHere')} <Link href="/signup">{t('auth.createAccountLink')}</Link>
-          </>
+        {isSignup && (
+          <label className={styles.field}>
+            <span>{t('auth.confirmPassword')}</span>
+            <input
+              type="password"
+              name="confirmPassword"
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+            />
+          </label>
         )}
-      </p>
 
-      <div className={styles.language}>
-        <LanguageSelect />
-      </div>
-    </form>
+        {error && (
+          <p role="alert" className={styles.error}>
+            {t(error)}
+          </p>
+        )}
+
+        <button type="submit" className={styles.submit} disabled={submitting}>
+          {submitting ? t('auth.submit.wait') : isSignup ? t('auth.submit.signup') : t('auth.login')}
+        </button>
+
+        <div className={styles.divider} role="separator">
+          <span>{t('auth.or')}</span>
+        </div>
+
+        <button type="button" className={styles.google} onClick={handleGoogleSignIn} disabled={submitting}>
+          {t('auth.google')}
+        </button>
+
+        <p className={styles.switch}>
+          {isSignup ? (
+            <>
+              {t('auth.haveAccount')} <Link href="/login">{t('auth.login')}</Link>
+            </>
+          ) : (
+            <>
+              {t('auth.newHere')} <Link href="/signup">{t('auth.createAccountLink')}</Link>
+            </>
+          )}
+        </p>
+
+        <div className={styles.language}>
+          <LanguageSelect />
+        </div>
+      </form>
+    </div>
   );
 }

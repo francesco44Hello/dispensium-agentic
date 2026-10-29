@@ -12,7 +12,7 @@ type ProtectedRouteProps = {
   redirectTo?: string;
 };
 
-export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, redirectTo = '/welcome' }: ProtectedRouteProps) {
   const { t } = useLocale();
   const { status } = useAuth();
   const router = useRouter();

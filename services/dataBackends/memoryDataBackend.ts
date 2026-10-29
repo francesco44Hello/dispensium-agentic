@@ -216,6 +216,11 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       return id;
     },
 
+    async deleteRecipe(householdId, id) {
+      recipes.get(householdId)?.delete(id);
+      notifyAll();
+    },
+
     subscribeToRecipes(householdId, listener) {
       return subscribe(
         // Insertion order is chronological, so reversing gives newest first even when timestamps tie.

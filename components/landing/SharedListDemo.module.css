@@ -1,0 +1,96 @@
+.demo {
+  display: grid;
+  gap: 20px;
+}
+
+.phones {
+  display: grid;
+  gap: 16px;
+}
+
+.phone {
+  padding: 14px;
+  border: 2px solid var(--primary-color);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 6px 6px 0 var(--primary-color);
+}
+
+.phoneName {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 1.0625rem;
+  cursor: pointer;
+}
+
+/* The native checkbox is kept for keyboard and screen readers; the colour is the brand's. */
+.box {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--primary-button);
+  cursor: pointer;
+}
+
+.done {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 2px solid var(--primary-color);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-color);
+  font-weight: var(--font-weight-brand);
+  cursor: pointer;
+}
+
+.chip:disabled {
+  background: var(--muted);
+  cursor: default;
+}
+
+.chip:focus-visible,
+.row input:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.9375rem;
+  opacity: 0.85;
+}
+
+@media (min-width: 900px) {
+  .phones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

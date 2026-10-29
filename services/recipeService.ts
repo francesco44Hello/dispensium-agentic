@@ -11,7 +11,8 @@ export type RecipeErrorCode =
   | 'invalid-ingredients'
   | 'invalid-steps'
   | 'invalid-image'
-  | 'invalid-photo';
+  | 'invalid-photo'
+  | 'invalid-id';
 
 export class RecipeError extends Error {
   code: RecipeErrorCode;
@@ -34,6 +35,7 @@ export interface RecipeBackend {
   // Returns a local URL for the photo, fetched through the database rules.
   photoUrl(path: string): Promise<string>;
   addRecipe(householdId: string, recipe: NewRecipe): Promise<string>;
+  deleteRecipe(householdId: string, id: string): Promise<void>;
   subscribeToRecipes(householdId: string, listener: (recipes: Recipe[]) => void): Unsubscribe;
 }
 
@@ -90,6 +92,16 @@ export function createRecipeService(backend: RecipeBackend) {
         await backend.deletePhoto(image).catch(() => undefined);
         throw error;
       }
+    },
+
+    // The recipe goes first: if its photo cannot be removed, the recipe is still gone and the photo is only an orphan.
+    async deleteRecipe(householdId: string, id: string, image: string): Promise<void> {
+      // Only ids and photo paths this app creates can be deleted: a path must stay inside this household's recipe folder.
+      if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new RecipeError('invalid-id');
+      if (image && !image.startsWith(`households/${householdId}/recipes/`)) throw new RecipeError('invalid-image');
+      if (image && !/^households\/[^/]+\/recipes\/[A-Za-z0-9-]+\.webp$/.test(image)) throw new RecipeError('invalid-image');
+      await backend.deleteRecipe(householdId, id);
+      if (image) await backend.deletePhoto(image).catch(() => undefined);
     },
 
     subscribeToRecipes(householdId: string, listener: (recipes: Recipe[]) => void): Unsubscribe {

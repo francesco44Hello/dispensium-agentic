@@ -34,7 +34,7 @@ export async function addItem(page: Page, name: string) {
 export async function logOut(page: Page) {
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('button', { name: 'Log out' }).click();
-  await expect(page).toHaveURL(/\/login$/);
+  await expect(page).toHaveURL(/\/welcome$/);
 }
 
 // Next.js renders a hidden route announcer with role="alert"; skip it.
@@ -43,6 +43,6 @@ export const alertOf = (page: Page) => page.locator('[role="alert"]:not(#__next-
 // Client-side hop from /login to /signup. Wait for the sign-up form to be the visible one, otherwise
 // a visible-form locator can resolve to the outgoing login form halfway through the transition.
 export async function goToSignUp(page: Page) {
-  await page.getByRole('link', { name: 'Create an account' }).click();
+  await page.getByRole('link', { name: /^Create (an )?account$/ }).first().click();
   await expect(page.getByRole('heading', { name: 'Create account' })).toBeVisible();
 }

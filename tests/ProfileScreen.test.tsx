@@ -103,12 +103,11 @@ describe('ProfileScreen', () => {
 
   it('lets the user pick the app language from the profile', async () => {
     renderProfile(alice);
-    const select = screen.getByRole('combobox', { name: 'Language' });
-    expect(select).toHaveValue('en');
-    fireEvent.change(select, { target: { value: 'it' } });
+    expect(screen.getByRole('radio', { name: 'English' })).toBeChecked();
+    fireEvent.click(screen.getByRole('radio', { name: 'Italiano' }));
 
     expect(window.localStorage.getItem('dispensium-locale')).toBe('it');
     expect(await screen.findByRole('heading', { level: 1, name: 'Profilo' })).toBeInTheDocument();
-    expect(screen.getByRole('combobox', { name: 'Lingua' })).toHaveValue('it');
+    expect(screen.getByRole('radio', { name: 'Italiano' })).toBeChecked();
   });
 });

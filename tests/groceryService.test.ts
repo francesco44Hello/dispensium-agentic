@@ -138,3 +138,20 @@ describe('category map', () => {
     await expect(service.addItem(HID, 'alice', '')).rejects.toBeInstanceOf(GroceryError);
   });
 });
+
+describe('categories for an older household', () => {
+  it('files an item by the current keywords even when the stored map is old', async () => {
+    const { backend } = setup();
+    const staleBackend = { ...backend, getCategoryMap: async () => ({ dairy: ['milk'] }) };
+    const service = createGroceryService(staleBackend);
+    await service.addItem(HID, 'alice', 'Mozzarella');
+    expect(itemsOf(backend)[0].category).toBe('dairy');
+  });
+
+  it('files a misspelt or accented item under its category, not other', async () => {
+    const { backend, service } = setup();
+    await service.addItem(HID, 'alice', 'Gorgonzolla');
+    await service.addItem(HID, 'alice', 'Limón');
+    expect(itemsOf(backend).map((item) => item.category)).toEqual(['dairy', 'fruits']);
+  });
+});

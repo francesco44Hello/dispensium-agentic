@@ -47,17 +47,6 @@
   margin: 0 0 8px;
 }
 
-/* Breakfast is only on the desktop layout; mobile keeps its lunch and dinner blocks. */
-.desktopOnly {
-  display: none;
-}
-
-@media (min-width: 1024px) {
-  .desktopOnly {
-    display: block;
-  }
-}
-
 .items {
   list-style: none;
   padding: 0;
