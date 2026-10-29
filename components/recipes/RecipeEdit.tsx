@@ -16,7 +16,7 @@ interface Props {
 }
 
 // An untouched photo is kept, a picked one replaces it, and a removed one leaves the recipe without a photo.
-function photoChange(touched: boolean, photo: Blob | null): PhotoChange {
+export function photoChange(touched: boolean, photo: Blob | null): PhotoChange {
   if (!touched) return { kind: 'keep' };
   if (photo) return { kind: 'replace', photo };
   return { kind: 'remove' };
