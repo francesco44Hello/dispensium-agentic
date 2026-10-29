@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: "Household dispensary management",
   icons: {
     icon: [{ url: "/brand/mark.svg", type: "image/svg+xml" }],
-    apple: "/icons/apple-touch-icon.png",
+    apple: "/icons/apple-touch-icon-v2.png",
   },
 };
 
