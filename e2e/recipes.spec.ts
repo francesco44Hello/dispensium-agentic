@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
+import type { Page } from '@playwright/test';
 import { test, expect } from './fixtures';
 import { signUp } from './helpers';
 
@@ -225,4 +226,31 @@ test('a recipe ingredient is added to the shopping list as a clean name', async 
   await page.getByRole('link', { name: 'Shopping' }).click();
   await expect(page.getByRole('checkbox', { name: 'mature cheddar' })).toBeVisible();
   await expect(page.getByRole('checkbox', { name: /60g/ })).toHaveCount(0);
+});
+
+async function saveRecipeWithLabel(page: Page, title: string, label: string) {
+  await page.getByRole('button', { name: 'Add recipe' }).click();
+  const sheet = page.getByRole('dialog');
+  await sheet.getByLabel('Recipe title').fill(title);
+  await sheet.getByLabel('Category').selectOption('Lunch');
+  await sheet.getByRole('button', { name: label, exact: true }).click();
+  await sheet.getByLabel('Ingredient 1').fill('pasta');
+  await sheet.getByLabel('Step 1').fill('Boil the pasta');
+  await sheet.getByRole('button', { name: 'Save recipe' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: title })).toBeVisible();
+}
+
+test('recipes can be filtered by label, and All brings them back', async ({ page }) => {
+  await signUp(page);
+  await page.getByRole('link', { name: 'Recipes', exact: true }).click();
+  await saveRecipeWithLabel(page, 'Quick pasta', 'Quick & Easy ⚡');
+  await saveRecipeWithLabel(page, 'Winter stew', 'Cozy Winter ❄️');
+
+  const filter = page.getByRole('group', { name: 'Filter by label' });
+  await filter.getByRole('button', { name: 'Quick & Easy ⚡' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Quick pasta' })).toBeVisible();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Winter stew' })).toHaveCount(0);
+
+  await filter.getByRole('button', { name: 'All' }).click();
+  await expect(page.getByRole('listitem').filter({ hasText: 'Winter stew' })).toBeVisible();
 });
