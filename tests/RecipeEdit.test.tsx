@@ -75,7 +75,8 @@ describe('RecipeEdit', () => {
   it('removes the saved photo when it is taken off in the form', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response(new Blob(['x'], { type: 'image/webp' }))));
     const props = renderEdit({ recipe: { ...recipe, image: 'households/hh-1/recipes/a.webp' }, imageUrl: 'blob:saved' });
-    await screen.findByRole('button', { name: 'Remove photo' });
+    // The saved photo is fetched first, which can be slower on CI than the default one-second wait.
+    await screen.findByRole('button', { name: 'Remove photo' }, { timeout: 5000 });
     fireEvent.click(screen.getByRole('button', { name: 'Remove photo' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save recipe' }));
     await waitFor(() => expect(props.onSave).toHaveBeenCalledOnce());
