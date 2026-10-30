@@ -87,13 +87,28 @@ describe('keyword coverage for common unlisted foods', () => {
   });
 });
 
-describe('matching at the start of a word', () => {
+describe('matching whole words', () => {
   it.each([
     ['champagne', 'drinks'],
     ['goat', 'other'],
     ['apples', 'fruits'],
     ["d'oliva", 'other'],
     ['whole milk', 'dairy'],
+    // a keyword is a whole word: 'mela' (apple) is not the start of 'melanzane' (aubergine)
+    ['melanzane', 'vegetables'],
+    ['melanzana', 'vegetables'],
+    ['mela', 'fruits'],
+    ['manzana', 'fruits'],
+    // 'pesce' (fish) is not 'pesca' (peach), and 'pescatore' is not 'pesce'
+    ['pesce', 'fish'],
+    ['pesci', 'fish'],
+    ['pesca', 'fruits'],
+    ['pesche', 'fruits'],
+    ['pescatore', 'other'],
+    ['pesce spada', 'fish'],
+    ['pesca noce', 'fruits'],
+    // a whole word listed in the map: fresh pasta is pantry, not 'other'
+    ['Tortellini', 'pantry'],
   ])('files %j under %s', (item, category) => {
     expect(getCategory(item, defaultCategoryMap)).toBe(category);
   });
@@ -211,7 +226,7 @@ describe('common grocery corpus', () => {
   });
 });
 
-describe('tolerant matching', () => {
+describe('exact matching', () => {
   it.each([
     // accents on either side
     ['Crème fraîche', 'dairy'],
@@ -221,10 +236,6 @@ describe('tolerant matching', () => {
     // Italian and Spanish endings
     ['Pomodori pelati', 'vegetables'],
     ['Mozzarelle', 'dairy'],
-    // a single typo in a long keyword
-    ['gorgonzolla', 'dairy'],
-    ['mozarella', 'dairy'],
-    ['zuchini', 'vegetables'],
   ])('files %j under %s', (item, category) => {
     expect(getCategory(item, defaultCategoryMap)).toBe(category);
   });
@@ -236,11 +247,90 @@ describe('tolerant matching', () => {
     ['appel', 'other'],
     // an unknown food stays in other
     ['unobtainium', 'other'],
-    // a stem must be the whole word plus a plural vowel, not the start of another word
+    // unlisted Spanish and Mexican foods stay in other
     ['Lechuga', 'other'],
-    ['Tortellini', 'other'],
     ['Burrito', 'other'],
+    // no fuzzy matching: a misspelt word is not guessed, so it stays in other rather than a wrong category
+    ['gorgonzolla', 'other'],
+    ['mozarella', 'other'],
+    ['zuchini', 'other'],
   ])('keeps %j under %s', (item, category) => {
+    expect(getCategory(item, defaultCategoryMap)).toBe(category);
+  });
+});
+
+describe('English and Italian grocery dictionary', () => {
+  it.each([
+    // the reported mix-ups
+    ['pesce', 'fish'],
+    ['melanzane', 'vegetables'],
+    ['mela', 'fruits'],
+    ['pesca', 'fruits'],
+    // Italian fish, meat and dairy
+    ['pesce fresco', 'fish'],
+    ['filetti di salmone', 'fish'],
+    ['branzino', 'fish'],
+    ['gamberi', 'fish'],
+    ['pollo', 'meat'],
+    ['petto di pollo', 'meat'],
+    ['salsiccia', 'meat'],
+    ['mozzarella di bufala', 'dairy'],
+    ['burrata', 'dairy'],
+    ['latte', 'dairy'],
+    ['uova', 'dairy'],
+    // Italian vegetables and fruit
+    ['zucchine', 'vegetables'],
+    ['carciofi', 'vegetables'],
+    ['finocchi', 'vegetables'],
+    ['peperoni rossi', 'vegetables'],
+    ['pomodorini', 'vegetables'],
+    ['mele rosse', 'fruits'],
+    ['fragole', 'fruits'],
+    ['limoni', 'fruits'],
+    // English items, singular and plural
+    ['tomatoes', 'vegetables'],
+    ['bell peppers', 'vegetables'],
+    ['black pepper', 'pantry'],
+    ['cherry tomatoes', 'vegetables'],
+    ['aubergine', 'vegetables'],
+    ['courgettes', 'vegetables'],
+    ['rocket', 'vegetables'],
+    ['chicken breast', 'meat'],
+    ['minced beef', 'meat'],
+    ['smoked salmon', 'fish'],
+    ['prawns', 'fish'],
+    ['oat milk', 'dairy'],
+    ['coconut milk', 'dairy'],
+    ['orange juice', 'drinks'],
+    ['apple cider', 'drinks'],
+    ['coconut water', 'drinks'],
+    ['sparkling water', 'drinks'],
+    ['olive oil', 'pantry'],
+    ['balsamic vinegar', 'pantry'],
+    ['tomato puree', 'pantry'],
+    ['chickpeas', 'pantry'],
+    ['penne', 'pantry'],
+    ['gnocchi', 'pantry'],
+    ['ciabatta', 'bakery'],
+    ['wholemeal bread', 'bakery'],
+    ['crackers', 'snacks'],
+    ['dark chocolate', 'snacks'],
+    ['sunflower seeds', 'snacks'],
+    ['dishwasher tablets', 'household'],
+    ['washing powder', 'household'],
+    ['cotton wool', 'household'],
+    // multi-word items beat a single word that also means another category
+    ['burger buns', 'bakery'],
+    ['chicken stock', 'pantry'],
+    ['beef stock', 'pantry'],
+    ['egg noodles', 'pantry'],
+    ['cream soda', 'drinks'],
+    ['gift wrap', 'household'],
+    ['butternut squash', 'vegetables'],
+    ['orange squash', 'drinks'],
+    // 'more' is an English word, not a fruit
+    ['more', 'other'],
+  ])('files %j under %s', (item, category) => {
     expect(getCategory(item, defaultCategoryMap)).toBe(category);
   });
 });
