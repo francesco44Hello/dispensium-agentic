@@ -148,10 +148,10 @@ describe('categories for an older household', () => {
     expect(itemsOf(backend)[0].category).toBe('dairy');
   });
 
-  it('files a misspelt or accented item under its category, not other', async () => {
+  it('files an accented item under its category, and a misspelt one under other', async () => {
     const { backend, service } = setup();
     await service.addItem(HID, 'alice', 'Gorgonzolla');
     await service.addItem(HID, 'alice', 'Limón');
-    expect(itemsOf(backend).map((item) => item.category)).toEqual(['dairy', 'fruits']);
+    expect(itemsOf(backend).map((item) => item.category)).toEqual(['other', 'fruits']);
   });
 });

@@ -1,82 +1,58 @@
 import type { CategoryMap } from '../types/category';
 import { FALLBACK_CATEGORY } from '../constants/categories';
-import { editDistance } from './editDistance';
 
 // Lowercase with accents removed, so 'Limón' matches 'limon' and 'crème fraîche' matches 'creme fraiche'.
 function fold(text: string): string {
   return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase().trim();
 }
 
-// A keyword must start a word: 'ham' is not in 'champagne' and 'oat' is not in 'goat'. Any ending is allowed,
-// so plurals such as 'apples' still match 'apple'. Apostrophes count as word breaks, so "d'oliva" matches 'oliva'.
-// A keyword ending in '$' must be the whole word, so 'limón$' matches 'limón' but not 'limonada'.
-const keywordPatterns = new Map<string, RegExp>();
-
-function patternFor(keyword: string): RegExp {
-  let pattern = keywordPatterns.get(keyword);
-  if (!pattern) {
-    const wholeWord = keyword.endsWith('$');
-    const body = keyword.replace(/\$$/u, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    pattern = new RegExp(`(?:^|[^\\p{L}\\p{N}])${body}${wholeWord ? '(?![\\p{L}\\p{N}])' : ''}`, 'u');
-    keywordPatterns.set(keyword, pattern);
-  }
-  return pattern;
+// Words are runs of letters and digits. Apostrophes and hyphens break words: "d'oliva" is 'd' and 'oliva',
+// and 'coca-cola' is 'coca' and 'cola'.
+function wordsOf(text: string): string[] {
+  return text.split(/[^\p{L}\p{N}]+/u).filter((word) => word.length > 0);
 }
 
-// Italian and Spanish plurals change the last vowel: 'pomodoro' is 'pomodori', 'mozzarella' is 'mozzarelle'.
-// The keyword without its last vowel, followed by one vowel and the end of the word, covers both. The end
-// check stops 'pesca' from reaching 'pescado' and 'leche' from reaching 'lechuga'. Stems under four letters are too loose.
-const stemPatterns = new Map<string, RegExp>();
-
-function stemPatternFor(keyword: string): RegExp | null {
-  if (keyword.length < 5 || !/[aeio]$/u.test(keyword)) return null;
-  const stem = keyword.slice(0, -1);
-  if (stem.length < 4) return null;
-  let pattern = stemPatterns.get(stem);
-  if (!pattern) {
-    pattern = new RegExp(`${patternFor(stem).source}[aeio](?![\\p{L}\\p{N}])`, 'u');
-    stemPatterns.set(stem, pattern);
-  }
-  return pattern;
+// An English plural adds 's' or 'es' to a whole word, so 'apples' and 'peaches' match 'apple' and 'peach'.
+// Italian and Spanish plurals change the word, so they are listed as keywords of their own.
+function sameWord(itemWord: string, keywordWord: string): boolean {
+  return itemWord === keywordWord || itemWord === `${keywordWord}s` || itemWord === `${keywordWord}es`;
 }
 
-function firstCategory(map: CategoryMap, matches: (keyword: string) => boolean): string | null {
+// True when the keyword's words appear in the item as a run of whole words, in order.
+function containsPhrase(itemWords: string[], keywordWords: string[]): boolean {
+  for (let start = 0; start + keywordWords.length <= itemWords.length; start++) {
+    if (keywordWords.every((word, offset) => sameWord(itemWords[start + offset] ?? '', word))) return true;
+  }
+  return false;
+}
+
+const keywordWordCache = new Map<string, string[]>();
+
+function keywordWordsOf(keyword: string): string[] {
+  let words = keywordWordCache.get(keyword);
+  if (!words) {
+    words = wordsOf(fold(keyword));
+    keywordWordCache.set(keyword, words);
+  }
+  return words;
+}
+
+// Only whole words match, so 'pesce' (fish) never files 'pesca' (peach), and 'mela' (apple) never files 'melanzane'.
+// Typos and Italian stems are not guessed: a word that is not in the map is 'other', so it can be corrected by hand later.
+// The longest keyword phrase wins, so 'pesca noce' beats 'pesca'. Ties go to the first category in map order.
+export function getCategory(itemName: string, map: CategoryMap): string {
+  const itemWords = wordsOf(fold(itemName));
+  let best: { category: string; length: number } | null = null;
+
   for (const [category, keywords] of Object.entries(map)) {
-    if (keywords.some((keyword) => matches(fold(keyword)))) return category;
-  }
-  return null;
-}
-
-// Corrects one typo in a word of six letters or more. The first letter must match, because typos rarely hit it,
-// so 'beach' does not become 'peach'. Two typos are allowed only for words of nine letters or more.
-function categoryOfClosestTypo(item: string, map: CategoryMap): string | null {
-  let best: { category: string; distance: number } | null = null;
-  for (const word of item.split(/[^\p{L}]+/u)) {
-    if (word.length < 6) continue;
-    for (const [category, keywords] of Object.entries(map)) {
-      for (const keyword of keywords) {
-        const candidate = fold(keyword);
-        if (candidate.length < 6 || !/^\p{L}+$/u.test(candidate) || candidate[0] !== word[0]) continue;
-        const distance = editDistance(word, candidate);
-        const allowed = Math.min(word.length, candidate.length) >= 9 ? 2 : 1;
-        if (distance <= allowed && (!best || distance < best.distance)) best = { category, distance };
-      }
+    for (const keyword of keywords) {
+      const keywordWords = keywordWordsOf(keyword);
+      if (keywordWords.length === 0 || (best && keywordWords.length <= best.length)) continue;
+      if (containsPhrase(itemWords, keywordWords)) best = { category, length: keywordWords.length };
     }
   }
-  return best?.category ?? null;
-}
 
-// Each pass runs only when the one before it found nothing, so an exact keyword always wins over a looser guess.
-export function getCategory(itemName: string, map: CategoryMap): string {
-  const item = fold(itemName);
-  if (!item) return FALLBACK_CATEGORY;
-
-  return (
-    firstCategory(map, (keyword) => patternFor(keyword).test(item)) ??
-    firstCategory(map, (keyword) => stemPatternFor(keyword)?.test(item) ?? false) ??
-    categoryOfClosestTypo(item, map) ??
-    FALLBACK_CATEGORY
-  );
+  return best?.category ?? FALLBACK_CATEGORY;
 }
 
 // Households keep a copy of the keywords from when they were created, and rules forbid editing it.
