@@ -25,6 +25,34 @@
 }
 
 /* Phone: the top bar is tight, so the mark waits for the desktop layout (see the 900px query). */
+.homeTitleRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* The title keeps its own spacing inside the row, so the logo box can match the whole title block. */
+.homeTitleRow .heading {
+  margin: 0;
+}
+
+/* A square box as tall as the title block. The logo fills it, so the box never depends on the image size. */
+.homeMarkBox {
+  position: relative;
+  align-self: stretch;
+  justify-self: start;
+  aspect-ratio: 1;
+}
+
+.homeMark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .mark {
   display: none;
   flex-shrink: 0;
@@ -362,6 +390,64 @@
   margin: 0;
   font-size: 1rem;
   line-height: 1.5;
+}
+
+.deviceHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deviceBadge,
+.homeStepIcon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-tint);
+  color: var(--primary-color);
+}
+
+.deviceBadge {
+  width: 48px;
+  height: 48px;
+  font-size: 1.75rem;
+}
+
+.homeSteps {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  list-style: none;
+}
+
+.homeStep {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.homeStepIcon {
+  width: 32px;
+  height: 32px;
+  font-size: 1.125rem;
+}
+
+.otherDevices {
+  margin-top: 24px;
+}
+
+.otherDevices summary {
+  cursor: pointer;
+  font-weight: var(--font-weight-brand);
+}
+
+.otherDevices .cards {
+  margin-top: 16px;
 }
 
 .split {
