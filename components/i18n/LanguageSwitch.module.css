@@ -7,15 +7,37 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 2px solid var(--primary-color);
-  border-radius: 999px;
+  border-radius: 50%;
   background: var(--surface);
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
+}
+
+.flag {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
+}
+
+.flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* In the menu the flag sits beside its name, at the same round size the app's language selector uses. */
+.option .flag {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--primary-color);
 }
 
 .trigger:focus-visible,

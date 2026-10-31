@@ -1,6 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import { useSyncExternalStore } from 'react';
+import type { IconType } from 'react-icons';
+import { MdAddToHomeScreen, MdInstallMobile, MdIosShare, MdMoreVert, MdOpenInBrowser, MdPhoneAndroid, MdPhoneIphone } from 'react-icons/md';
+import { homeScreenPlatform, type HomeScreenPlatform } from '../../utils/homeScreenPlatform';
 import { LanguageSwitch } from '../i18n/LanguageSwitch';
 import { Logo } from '../brand/Logo';
 import { SharedListDemo } from './SharedListDemo';
@@ -28,6 +32,30 @@ const RECEIPT_ROWS: { key: MessageKey; checked: boolean; later?: boolean }[] = [
   { key: 'landing.receipt.basil', checked: false, later: true },
   { key: 'landing.receipt.parmigiano', checked: false },
   { key: 'landing.receipt.lemons', checked: false },
+];
+
+// Installing needs different steps on each phone system: iOS has no install button for web apps, and Chrome's menu is where Android keeps it.
+const HOME_SCREEN_DEVICES: { platform: Exclude<HomeScreenPlatform, 'other'>; title: MessageKey; icon: IconType; steps: { text: MessageKey; icon: IconType }[] }[] = [
+  {
+    platform: 'ios',
+    title: 'landing.home.ios.title',
+    icon: MdPhoneIphone,
+    steps: [
+      { text: 'landing.home.ios.step1', icon: MdOpenInBrowser },
+      { text: 'landing.home.ios.step2', icon: MdIosShare },
+      { text: 'landing.home.ios.step3', icon: MdAddToHomeScreen },
+    ],
+  },
+  {
+    platform: 'android',
+    title: 'landing.home.android.title',
+    icon: MdPhoneAndroid,
+    steps: [
+      { text: 'landing.home.android.step1', icon: MdOpenInBrowser },
+      { text: 'landing.home.android.step2', icon: MdMoreVert },
+      { text: 'landing.home.android.step3', icon: MdInstallMobile },
+    ],
+  },
 ];
 
 const STEPS: { title: MessageKey; body: MessageKey }[] = [
@@ -58,6 +86,82 @@ function Receipt() {
         <p className={styles.receiptFooter}>{t('landing.receipt.footer')}</p>
       </div>
     </div>
+  );
+}
+
+function DeviceCard({ device }: { device: (typeof HOME_SCREEN_DEVICES)[number] }) {
+  const { t } = useLocale();
+  const DeviceIcon = device.icon;
+  return (
+    <article className={styles.card}>
+      <div className={styles.deviceHeader}>
+        <span className={styles.deviceBadge} aria-hidden="true">
+          <DeviceIcon />
+        </span>
+        <h3 className={styles.cardTitle}>{t(device.title)}</h3>
+      </div>
+      <ol className={styles.homeSteps}>
+        {device.steps.map((step) => {
+          const StepIcon = step.icon;
+          return (
+            <li key={step.text} className={styles.homeStep}>
+              <span className={styles.homeStepIcon} aria-hidden="true">
+                <StepIcon />
+              </span>
+              <span>{t(step.text)}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </article>
+  );
+}
+
+// The server cannot see the visitor's phone, so it renders both phones (an empty user agent).
+// The browser then shows that phone's steps first, and the other phone behind a disclosure.
+const noSubscribe = () => () => undefined;
+const serverUserAgent = () => '';
+
+function HomeScreenSection() {
+  const { t } = useLocale();
+  const userAgent = useSyncExternalStore(noSubscribe, () => navigator.userAgent, serverUserAgent);
+  const platform = homeScreenPlatform(userAgent);
+  const own = HOME_SCREEN_DEVICES.find((device) => device.platform === platform);
+  const others = HOME_SCREEN_DEVICES.filter((device) => device !== own);
+
+  return (
+    <section className={styles.section} aria-labelledby="landing-home">
+      <div className={styles.homeTitleRow}>
+        <span className={styles.homeMarkBox}>
+          <Logo size={40} className={styles.homeMark} />
+        </span>
+        <h2 id="landing-home" className={styles.heading}>
+          {t('landing.home.title')}
+        </h2>
+      </div>
+      <p className={styles.lead}>{t('landing.home.body')}</p>
+      {own ? (
+        <>
+          <div className={styles.cards}>
+            <DeviceCard device={own} />
+          </div>
+          <details className={styles.otherDevices}>
+            <summary>{t('landing.home.otherDevice')}</summary>
+            <div className={styles.cards}>
+              {others.map((device) => (
+                <DeviceCard key={device.platform} device={device} />
+              ))}
+            </div>
+          </details>
+        </>
+      ) : (
+        <div className={styles.cards}>
+          {HOME_SCREEN_DEVICES.map((device) => (
+            <DeviceCard key={device.platform} device={device} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -179,6 +283,8 @@ export function LandingPage() {
             <span className={styles.avatar}>S</span>
           </div>
         </section>
+
+        <HomeScreenSection />
 
         <section className={styles.closing} aria-labelledby="landing-cta">
           <h2 id="landing-cta" className={styles.closingTitle}>
