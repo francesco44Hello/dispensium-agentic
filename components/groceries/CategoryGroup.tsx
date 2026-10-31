@@ -34,8 +34,8 @@ export function CategoryGroup({ category, items, onToggle }: CategoryGroupProps)
   return (
     <section className={styles.group}>
       <h2 className={styles.heading}>
-        {label}
         {icon && <AppIcon name={icon} className={styles.icon} />}
+        {label}
       </h2>
       <ul className={styles.items}>
         {items.map((item) => (
