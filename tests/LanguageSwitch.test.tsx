@@ -22,7 +22,7 @@ describe('LanguageSwitch', () => {
   it('shows the flag of the current language and opens a small menu on click', () => {
     renderSwitch();
     const trigger = screen.getByRole('button', { name: 'Change language' });
-    expect(trigger).toHaveTextContent('🇬🇧');
+    expect(trigger.querySelector('svg rect[fill="#012169"]')).not.toBeNull();
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
 
     fireEvent.click(trigger);
@@ -36,7 +36,7 @@ describe('LanguageSwitch', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Italiano' }));
 
     const trigger = screen.getByRole('button', { name: 'Cambia lingua' });
-    expect(trigger).toHaveTextContent('🇮🇹');
+    expect(trigger.querySelector('svg rect[fill="#009246"]')).not.toBeNull();
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(window.localStorage.getItem('dispensium-locale')).toBe('it');
   });

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Hand-drawn chef peep on lavender, toque over side locks, winking with a grin, pink neckerchief">
+<defs>
+<clipPath id="cC2"><circle cx="100" cy="100" r="100"></circle></clipPath>
+<filter id="wC2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="8" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+</defs>
+<circle cx="100" cy="100" r="100" fill="#B7B1F2"></circle>
+<g clip-path="url(#cC2)"><g filter="url(#wC2)" stroke="#1C1C1C" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M26 214 Q28 166 70 154 Q82 150 88 150 L112 150 Q118 150 130 154 Q172 166 174 214 Z" fill="#FFFFFF"></path>
+<g fill="#1C1C1C" stroke="none">
+<circle cx="90" cy="180" r="3.2"></circle><circle cx="110" cy="180" r="3.2"></circle>
+<circle cx="90" cy="198" r="3.2"></circle><circle cx="110" cy="198" r="3.2"></circle>
+</g>
+<path d="M88 124 L87 152 Q100 164 113 152 L112 124" fill="#FFFFFF"></path>
+<path d="M88 152 L112 152 L100 170 Z" fill="#FDB7EA"></path>
+<path d="M70 94 Q57 89 58 103 Q59 116 72 113" fill="#FFFFFF"></path>
+<path d="M130 94 Q143 89 142 103 Q141 116 128 113" fill="#FFFFFF"></path>
+<path d="M68 94 Q66 58 100 56 Q134 58 132 94 Q132 130 100 140 Q68 130 68 94 Z" fill="#FFFFFF"></path>
+<path d="M66 84 Q60 106 70 122 Q70 100 78 88 Z" fill="#1C1C1C"></path>
+<path d="M134 84 Q140 106 130 122 Q130 100 122 88 Z" fill="#1C1C1C"></path>
+<path d="M66 76 Q50 70 54 52 Q58 34 78 38 Q82 20 100 20 Q118 20 122 38 Q142 34 146 52 Q150 70 134 76 Z" fill="#FFFFFF"></path>
+<path d="M88 50 Q90 60 88 70" fill="none" stroke-width="2.4"></path>
+<path d="M112 50 Q110 60 112 70" fill="none" stroke-width="2.4"></path>
+<path d="M66 72 Q100 66 134 72 L134 88 Q100 82 66 88 Z" fill="#FFFFFF"></path>
+<path d="M83 100 Q88 95 93 100" fill="none" stroke-width="2.8"></path>
+<circle cx="112" cy="99" r="2.6" fill="#1C1C1C"></circle>
+<path d="M106 92 Q112 89 118 92" fill="none" stroke-width="2.6"></path>
+<path d="M101 103 Q95 112 103 113" fill="none" stroke-width="2.6"></path>
+<path d="M88 120 Q100 136 112 120 Z" fill="#1C1C1C"></path>
+<path d="M92 122.5 L108 122.5" stroke="#FFFFFF" stroke-width="2.4"></path>
+</g></g>
+</svg>

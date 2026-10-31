@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../../hooks/useAuth';
 import { useHousehold } from '../../hooks/useHousehold';
 import { useProfilePhoto } from '../../hooks/useProfilePhoto';
-import { AVATAR_PHOTOS } from '../../constants/avatars';
+import { AVATAR_CHOICES } from '../../constants/avatars';
 import { MAX_DISPLAY_NAME_LENGTH } from '../../utils/displayName';
 import { cleanPhotoUrl } from '../../utils/photoUrl';
 import { useLocale } from '../i18n/LocaleProvider';
@@ -98,7 +98,7 @@ export function ProfileScreen() {
       <section className={`${styles.section} ${styles.wide}`}>
         <h2 className={styles.heading}>{t('profile.pictureTitle')}</h2>
         <div className={styles.avatars}>
-          {AVATAR_PHOTOS.map((photo, index) => (
+          {AVATAR_CHOICES.map((photo, index) => (
             <button
               key={photo}
               type="button"

@@ -14,7 +14,7 @@ test('the shelf mark is hidden on a phone and shown beside the title on desktop'
 // The landing top bar is tight on a phone, so its mark shows from the landing page's desktop breakpoint up.
 test('the landing mark is hidden on a phone and shown on desktop', async ({ page }) => {
   await page.goto('/welcome');
-  const mark = page.getByTestId('brand-mark');
+  const mark = page.getByRole('banner').getByTestId('brand-mark');
   await page.setViewportSize({ width: 415, height: 900 });
   await expect(mark).toBeHidden();
   await page.setViewportSize({ width: 1280, height: 900 });
