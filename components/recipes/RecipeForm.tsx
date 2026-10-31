@@ -80,7 +80,7 @@ export function RecipeForm({ onSubmit, photo, onPhotoChange, initial, saving = f
           <img src={preview} alt={t('recipes.coverAlt')} className={styles.coverImage} />
         ) : (
           <span className={styles.photoPlaceholder}>
-            <MdAddAPhoto aria-hidden="true" /> Add a cover photo
+            <MdAddAPhoto aria-hidden="true" /> {t('recipes.photo.add')}
           </span>
         )}
         <input
