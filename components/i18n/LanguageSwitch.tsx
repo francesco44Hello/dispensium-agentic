@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { LOCALES, LOCALE_FLAGS, type Locale } from '../../i18n/locale';
+import { LOCALES, type Locale } from '../../i18n/locale';
 import type { MessageKey } from '../../i18n/messages';
 import { useLocale } from './LocaleProvider';
+import { LanguageFlag } from './LanguageFlag';
 import styles from './LanguageSwitch.module.css';
 
 const LABEL_KEYS: Record<Locale, MessageKey> = { en: 'language.english', it: 'language.italian' };
@@ -44,7 +45,9 @@ export function LanguageSwitch() {
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >
-        <span aria-hidden="true">{LOCALE_FLAGS[locale]}</span>
+        <span className={styles.flag}>
+          <LanguageFlag locale={locale} />
+        </span>
       </button>
       {open && (
         <div role="menu" className={styles.menu}>
@@ -57,7 +60,9 @@ export function LanguageSwitch() {
               aria-current={option === locale ? 'true' : undefined}
               onClick={() => choose(option)}
             >
-              <span aria-hidden="true">{LOCALE_FLAGS[option]}</span>
+              <span className={styles.flag}>
+                <LanguageFlag locale={option} />
+              </span>
               {t(LABEL_KEYS[option])}
             </button>
           ))}
