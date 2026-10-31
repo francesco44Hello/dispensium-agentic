@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Hand-drawn peep on pink, long side-swept hair, big grin, green shirt">
+<defs>
+<clipPath id="cA2"><circle cx="100" cy="100" r="100"></circle></clipPath>
+<filter id="wA2" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+</defs>
+<circle cx="100" cy="100" r="100" fill="#FDB7EA"></circle>
+<g clip-path="url(#cA2)"><g filter="url(#wA2)" stroke="#1C1C1C" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M62 94 Q58 50 100 46 Q142 50 138 94 Q140 126 150 154 Q128 162 116 150 L84 150 Q72 162 50 154 Q60 126 62 94 Z" fill="#1C1C1C"></path>
+<path d="M26 214 Q28 166 70 154 Q82 150 88 150 L112 150 Q118 150 130 154 Q172 166 174 214 Z" fill="#A3DC9A"></path>
+<path d="M88 124 L87 152 Q100 164 113 152 L112 124" fill="#FFFFFF"></path>
+<path d="M68 94 Q66 58 100 56 Q134 58 132 94 Q132 130 100 140 Q68 130 68 94 Z" fill="#FFFFFF"></path>
+<path d="M68 96 Q64 58 100 54 Q136 58 132 96 Q128 80 120 72 Q100 84 70 88 Z" fill="#1C1C1C"></path>
+<path d="M82 68 Q98 60 114 62" stroke="#FFFFFF" stroke-width="2.2" fill="none"></path>
+<path d="M82 89 Q88 87 94 89" fill="none" stroke-width="2.6"></path>
+<path d="M106 89 Q112 87 118 89" fill="none" stroke-width="2.6"></path>
+<circle cx="88" cy="99" r="2.6" fill="#1C1C1C"></circle>
+<circle cx="112" cy="99" r="2.6" fill="#1C1C1C"></circle>
+<path d="M101 102 Q95 112 103 113" fill="none" stroke-width="2.6"></path>
+<path d="M88 120 Q100 136 112 120 Z" fill="#1C1C1C"></path>
+<path d="M92 122.5 L108 122.5" stroke="#FFFFFF" stroke-width="2.4"></path>
+</g></g>
+</svg>
