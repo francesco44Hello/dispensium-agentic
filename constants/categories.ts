@@ -154,18 +154,4 @@ export const defaultCategoryMap: CategoryMap = {
   ],
 };
 
-export const categoryEmojis: Record<string, string> = {
-  fruits: '🍎',
-  vegetables: '🥦',
-  dairy: '🧀',
-  meat: '🥩',
-  fish: '🐟',
-  bakery: '🥯',
-  pantry: '🍝',
-  snacks: '🍟',
-  drinks: '🍾',
-  household: '🪠',
-  other: '🛒',
-};
-
 export const FALLBACK_CATEGORY = 'other';

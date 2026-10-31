@@ -27,5 +27,3 @@ export function resolveLocale({ saved, account, browser }: LocaleSources): Local
 // The browser locale used for dates and day names.
 export const INTL_LOCALE: Record<Locale, string> = { en: 'en-US', it: 'it-IT' };
 
-// Flags are shown next to each language. Only Italian and English exist for now.
-export const LOCALE_FLAGS: Record<Locale, string> = { en: '🇬🇧', it: '🇮🇹' };
