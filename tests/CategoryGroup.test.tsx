@@ -33,6 +33,13 @@ describe('CategoryGroup heading icon', () => {
     expect(container.querySelector('h2 use')).toHaveAttribute('href', `/icons/sprite.svg#${icon}`);
   });
 
+  it('puts the icon before the category name', () => {
+    const { container } = renderGroup('fruits');
+    const heading = container.querySelector('h2');
+    expect(heading?.firstElementChild?.tagName.toLowerCase()).toBe('svg');
+    expect(heading?.firstChild).toBe(heading?.firstElementChild);
+  });
+
   it('shows no icon for other, because the set has none for it', () => {
     const { container } = renderGroup('other');
     expect(container.querySelector('h2 use')).toBeNull();
