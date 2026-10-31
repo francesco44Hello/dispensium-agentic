@@ -27,6 +27,15 @@ describe('RecipeForm in Italian', () => {
     expect(screen.getByRole('button', { name: 'Salva ricetta' })).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Categoria' })).toBeTruthy();
     expect(screen.getByRole('option', { name: 'Cena' })).toHaveValue('Dinner');
-    expect(screen.getByRole('button', { name: 'Veloce e facile ⚡' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'facile e veloce ⚡' })).toBeTruthy();
+  });
+
+  it('translates the cover photo prompt', () => {
+    render(
+      <LocaleProvider>
+        <RecipeForm onSubmit={() => undefined} photo={null} onPhotoChange={() => undefined} />
+      </LocaleProvider>,
+    );
+    expect(screen.getByText('Aggiungi una foto di copertina')).toBeTruthy();
   });
 });
