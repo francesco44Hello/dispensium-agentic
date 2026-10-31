@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Hand-drawn peep on pink, long wavy hair, eyes softly closed, sparkles">
+<defs>
+<clipPath id="cD1"><circle cx="100" cy="100" r="100"></circle></clipPath>
+<filter id="wD1" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="6" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+</defs>
+<circle cx="100" cy="100" r="100" fill="#FDB7EA"></circle>
+<g clip-path="url(#cD1)"><g filter="url(#wD1)" stroke="#1C1C1C" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M62 92 Q56 52 100 46 Q144 52 138 92 Q146 112 138 126 Q148 140 140 156 L60 156 Q52 140 62 126 Q54 112 62 92 Z" fill="#1C1C1C"></path>
+<path d="M26 214 Q28 166 70 154 Q82 150 88 150 L112 150 Q118 150 130 154 Q172 166 174 214 Z" fill="#B7B1F2"></path>
+<path d="M88 124 L87 152 Q100 164 113 152 L112 124" fill="#FFFFFF"></path>
+<path d="M68 94 Q66 58 100 56 Q134 58 132 94 Q132 130 100 140 Q68 130 68 94 Z" fill="#FFFFFF"></path>
+<path d="M68 94 Q66 58 100 56 Q134 58 132 94 Q124 72 102 64 Q100 62 98 64 Q76 72 68 94 Z" fill="#1C1C1C"></path>
+<path d="M120 66 Q128 74 130 84" stroke="#FFFFFF" stroke-width="2.2" fill="none"></path>
+<path d="M82 99 Q88 104 94 99" fill="none" stroke-width="2.8"></path>
+<path d="M106 99 Q112 104 118 99" fill="none" stroke-width="2.8"></path>
+<path d="M82 99 L79 101" fill="none" stroke-width="2.2"></path>
+<path d="M118 99 L121 101" fill="none" stroke-width="2.2"></path>
+<path d="M101 103 Q95 112 103 113" fill="none" stroke-width="2.6"></path>
+<path d="M93 124 Q100 128 107 124" fill="none"></path>
+<path d="M160 52 Q162 62 172 64 Q162 66 160 76 Q158 66 148 64 Q158 62 160 52 Z" fill="#FFFFFF" stroke-width="2.4"></path>
+<path d="M40 50 Q41 56 48 58 Q41 60 40 66 Q39 60 32 58 Q39 56 40 50 Z" fill="#FFD166" stroke-width="2.4"></path>
+</g></g>
+</svg>

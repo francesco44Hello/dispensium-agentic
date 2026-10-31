@@ -51,6 +51,18 @@ describe('member photos: bundled avatars', () => {
     await assertFails(updateDoc(memberRef('bob', 'bob'), { photoUrl: '//evil.example/avatars/avatar-1.svg' }));
   });
 
+  it('lets a member pick any of the twelve peep pictures', async () => {
+    for (let n = 1; n <= 12; n += 1) {
+      await assertSucceeds(updateDoc(memberRef('bob', 'bob'), { photoUrl: `/avatars/peep-${String(n).padStart(2, '0')}.svg` }));
+    }
+  });
+
+  it('rejects peep numbers and suffixes outside the list', async () => {
+    for (const photoUrl of ['/avatars/peep-00.svg', '/avatars/peep-1.svg', '/avatars/peep-13.svg', '/avatars/peep-03.svg?x', '/avatars/peep-03.svg.html']) {
+      await assertFails(updateDoc(memberRef('bob', 'bob'), { photoUrl }));
+    }
+  });
+
   it('does not let a member change someone else’s photo', async () => {
     await assertFails(updateDoc(memberRef('alice', 'bob'), { photoUrl: '/avatars/avatar-1.svg' }));
   });

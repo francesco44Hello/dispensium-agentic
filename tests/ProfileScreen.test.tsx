@@ -88,8 +88,8 @@ describe('ProfileScreen', () => {
     const { container, household } = renderProfile(alice);
     fireEvent.click(screen.getByRole('button', { name: 'Avatar 2' }));
 
-    await waitFor(() => expect(household.saveMemberPhoto).toHaveBeenCalledWith('hh-1', 'alice', '/avatars/avatar-2.svg'));
-    expect(container.querySelector('img')).toHaveAttribute('src', '/avatars/avatar-2.svg');
+    await waitFor(() => expect(household.saveMemberPhoto).toHaveBeenCalledWith('hh-1', 'alice', '/avatars/peep-02.svg'));
+    expect(container.querySelector('img')).toHaveAttribute('src', '/avatars/peep-02.svg');
   });
 
   it('offers the Google picture again after a built-in avatar was picked', async () => {

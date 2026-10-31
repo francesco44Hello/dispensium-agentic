@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Hand-drawn peep on yellow, messy hair, round glasses, blue shirt">
+<defs>
+<clipPath id="cA1"><circle cx="100" cy="100" r="100"></circle></clipPath>
+<filter id="wA1" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="n"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap></filter>
+</defs>
+<circle cx="100" cy="100" r="100" fill="#FFD166"></circle>
+<g clip-path="url(#cA1)"><g filter="url(#wA1)" stroke="#1C1C1C" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+<path d="M26 214 Q28 166 70 154 Q82 150 88 150 L112 150 Q118 150 130 154 Q172 166 174 214 Z" fill="#6B7FE0"></path>
+<path d="M88 124 L87 152 Q100 164 113 152 L112 124" fill="#FFFFFF"></path>
+<path d="M70 94 Q57 89 58 103 Q59 116 72 113" fill="#FFFFFF"></path>
+<path d="M130 94 Q143 89 142 103 Q141 116 128 113" fill="#FFFFFF"></path>
+<path d="M68 94 Q66 58 100 56 Q134 58 132 94 Q132 130 100 140 Q68 130 68 94 Z" fill="#FFFFFF"></path>
+<path d="M66 96 Q58 66 74 52 Q86 40 104 42 Q124 40 134 54 Q144 68 136 96 Q132 80 126 74 Q118 80 106 72 Q96 80 84 74 Q74 80 70 96 Z" fill="#1C1C1C"></path>
+<path d="M96 50 Q110 50 120 60" stroke="#FFFFFF" stroke-width="2.2" fill="none"></path>
+<path d="M80 84 Q88 80 96 83" fill="none"></path>
+<path d="M104 83 Q112 80 120 84" fill="none"></path>
+<circle cx="88" cy="98" r="2.6" fill="#1C1C1C"></circle>
+<circle cx="112" cy="98" r="2.6" fill="#1C1C1C"></circle>
+<circle cx="88" cy="98" r="10" fill="none" stroke-width="2.6"></circle>
+<circle cx="112" cy="98" r="10" fill="none" stroke-width="2.6"></circle>
+<path d="M98 97 Q100 95 102 97" fill="none" stroke-width="2.6"></path>
+<path d="M78 96 L70 94" fill="none" stroke-width="2.6"></path>
+<path d="M122 96 L130 94" fill="none" stroke-width="2.6"></path>
+<path d="M101 104 Q95 114 103 115" fill="none" stroke-width="2.6"></path>
+<path d="M90 124 Q100 131 110 124" fill="none"></path>
+</g></g>
+</svg>

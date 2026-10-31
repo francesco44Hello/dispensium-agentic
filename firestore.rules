@@ -23,7 +23,7 @@ service cloud.firestore {
     function validPhoto(value) {
       return value == '' || (value is string && value.size() <= 300 && (
         value.matches('https://lh3[.]googleusercontent[.]com/[^ <>{}\"]+')
-        || value.matches('/avatars/avatar-[1-4][.]svg')
+        || value.matches('/avatars/(avatar-[1-4]|peep-(0[1-9]|1[0-2]))[.]svg')
       ));
     }
 
