@@ -32,7 +32,9 @@ Delegate to `code-reviewer`. REQUEST CHANGES: back to stage 3.
 New or changed user flow: delegate to `e2e-tester`, then run `npm run test:e2e` yourself. UI change: run the `visual-qa` skill.
 
 ## 8. PR and CI
-Branch `feat/<slug>`, commit (end the message with the Co-Authored-By line from the attribution reminder), `gh pr create` with a summary and an evidence table (commands and results). Then `gh pr checks --watch`. Red CI: back to stage 3.
+Branch `feat/<slug>`, commit with a plain message: no Co-Authored-By or generated-by trailer (CLAUDE.md rule 4).
+For T1 and T2, every PR carries a change report. Build it with the `change-report` skill after the reviews are green, and use its `e2e-artifacts/change-report/pr-body.md` as the PR body. Add the summary and the evidence table above it.
+Ask the user before `gh pr create` (CLAUDE.md approval gate 3), then `gh pr create --body-file <pr-body.md>`. Then `gh pr checks --watch`. Red CI: back to stage 3.
 If `gh` is missing or unauthenticated, stop and give the user the exact commands (`brew install gh`, `gh auth login`).
 
 ## 9. Preview
@@ -43,6 +45,7 @@ Never merge or deploy here. Send:
 ```
 Ready for manual test: <one-line summary>
 Tier: T? | Preview: <url or "not set up"> | PR: <url>
+Change report: <absolute path of e2e-artifacts/change-report/index.html>
 Evidence: verify OK | unit N passed | e2e N passed | security PASS | review APPROVE | rules tests: run/NOT run
 Manual test checklist: <5-10 concrete steps with expected result>
 Known gaps / risks: <list, or "none">

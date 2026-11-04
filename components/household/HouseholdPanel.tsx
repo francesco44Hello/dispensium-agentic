@@ -4,18 +4,11 @@ import { useState } from 'react';
 import { useMembers } from '../../hooks/useMembers';
 import { householdService as defaultService } from '../../services/dataClient';
 import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
-import type { HouseholdService, InviteCode } from '../../types/household';
+import { HOUSEHOLD_ERROR_KEYS } from './householdErrors';
+import type { HouseholdMember, HouseholdService, InviteCode } from '../../types/household';
+import { buildInviteLink } from '../../utils/inviteLink';
 import { useLocale } from '../i18n/LocaleProvider';
-import type { MessageKey } from '../../i18n/messages';
 import styles from './HouseholdPanel.module.css';
-
-const ERROR_KEYS: Record<HouseholdErrorCode, MessageKey> = {
-  'invalid-invite': 'household.error.invalidInvite',
-  'expired-invite': 'household.error.expiredInvite',
-  'already-member': 'household.error.alreadyMember',
-  'not-a-member': 'household.error.notMember',
-  unknown: 'error.unknown',
-};
 
 type HouseholdPanelProps = {
   householdId: string;
@@ -27,22 +20,43 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
   const members = useMembers(householdId, service);
   const { t } = useLocale();
   const [invite, setInvite] = useState<InviteCode | null>(null);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState<HouseholdErrorCode | null>(null);
+
+  const self = members?.find((member) => member.uid === uid);
+  const isOwner = self?.role === 'owner';
+  const inviteLink = invite ? buildInviteLink(window.location.origin, invite.code) : '';
 
   async function handleCreateInvite() {
     setError(null);
+    setCopied(false);
     try {
-      setInvite(await service.createInvite(householdId, uid));
+      // The inviter's name is shown to the person on the join card.
+      const created = await service.createInvite(householdId, uid, self?.displayName ?? '');
+      setInvite(created);
+      await handleCopy(buildInviteLink(window.location.origin, created.code));
     } catch (err) {
       setError(err instanceof HouseholdError ? err.code : 'unknown');
     }
   }
 
-  async function handleCopy(code: string) {
+  async function handleCopy(link: string) {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
     } catch {
-      // Clipboard access can be refused. The code stays on screen, so the user can still select it.
+      // Clipboard access can be refused. The link stays on screen, so the owner can still select and copy it.
+      setCopied(false);
+    }
+  }
+
+  async function handleRemove(member: HouseholdMember, name: string) {
+    if (!window.confirm(t('household.removeConfirm', { name }))) return;
+    setError(null);
+    try {
+      await service.removeMember(householdId, uid, member.uid);
+    } catch (err) {
+      setError(err instanceof HouseholdError ? err.code : 'unknown');
     }
   }
 
@@ -54,45 +68,69 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
           <p role="status">{t('household.loadingMembers')}</p>
         ) : (
           <ul className={styles.members}>
-            {members.map((member) => (
-              <li key={member.uid} className={styles.member}>
-                {member.photoUrl && (
-                  // Plain img: the picture is Google's own link, shown as is.
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img className={styles.avatar} src={member.photoUrl} alt="" referrerPolicy="no-referrer" />
-                )}
-                <span className={styles.name}>
-                  {member.uid === uid ? t('household.you') : member.displayName || t('household.housemate')}
-                </span>
-                <span className={styles.role}>{member.role}</span>
-              </li>
-            ))}
+            {members.map((member) => {
+              const name = member.uid === uid ? t('household.you') : member.displayName || t('household.housemate');
+              const canRemove = isOwner && member.uid !== uid && member.role !== 'owner';
+              return (
+                <li key={member.uid} className={styles.member}>
+                  {member.photoUrl && (
+                    // Plain img: the picture is Google's own link, shown as is.
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className={styles.avatar} src={member.photoUrl} alt="" referrerPolicy="no-referrer" />
+                  )}
+                  <span className={styles.name}>{name}</span>
+                  <span className={styles.role}>{member.role}</span>
+                  {canRemove && (
+                    <button
+                      type="button"
+                      className={styles.removeButton}
+                      aria-label={t('household.removeMember', { name })}
+                      onClick={() => handleRemove(member, name)}
+                    >
+                      {t('household.remove')}
+                    </button>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
 
-      <section className={styles.section}>
-        <h2 className={styles.heading}>{t('household.inviteTitle')}</h2>
-        <button type="button" className={styles.addButton} onClick={handleCreateInvite}>
-          {t('household.createInvite')}
-        </button>
-        {invite && (
-          <>
-            <div className={styles.code}>
-              <code className={styles.codeText}>{invite.code}</code>
-              <button type="button" className={styles.copyButton} onClick={() => handleCopy(invite.code)}>
-                {t('household.copyCode')}
-              </button>
-            </div>
-            <p className={styles.note}>{t('household.shareAfter')}</p>
-          </>
-        )}
-        {error && (
-          <p role="alert" className={styles.error}>
-            {t(ERROR_KEYS[error])}
-          </p>
-        )}
-      </section>
+      {isOwner && (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>{t('household.inviteTitle')}</h2>
+          <button type="button" className={styles.addButton} onClick={handleCreateInvite}>
+            {t('household.createInvite')}
+          </button>
+          {invite && (
+            <>
+              <div className={styles.code}>
+                <code className={styles.codeText}>{inviteLink}</code>
+                <button
+                  type="button"
+                  className={styles.copyButton}
+                  onClick={() => handleCopy(inviteLink)}
+                >
+                  {t('household.copyLink')}
+                </button>
+              </div>
+              <p className={styles.note}>{copied ? t('household.linkCopied') : t('household.linkValid')}</p>
+            </>
+          )}
+          {error && (
+            <p role="alert" className={styles.error}>
+              {t(HOUSEHOLD_ERROR_KEYS[error])}
+            </p>
+          )}
+        </section>
+      )}
+
+      {!isOwner && error && (
+        <p role="alert" className={styles.error}>
+          {t(HOUSEHOLD_ERROR_KEYS[error])}
+        </p>
+      )}
     </>
   );
 }

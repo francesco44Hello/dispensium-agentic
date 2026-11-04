@@ -23,15 +23,32 @@ export interface InviteCode {
   code: string;
   householdId: string;
   createdBy: string;
+  // Shown on the join card as "<name> invited you". Empty when the owner has no name saved.
+  inviterName: string;
   createdAt: Date;
   expiresAt: Date;
+}
+
+// The signed-in person who accepts an invite. Taken from the auth user.
+export interface InviteUser {
+  uid: string;
+  displayName: string | null;
+  photoUrl: string | null;
+}
+
+// What the join card shows before the person accepts.
+export interface InvitePreview {
+  code: string;
+  inviterName: string;
 }
 
 // The household operations the UI uses. services/householdService.ts implements it.
 export interface HouseholdService {
   ensureDefaultHousehold(uid: string, displayName?: string, photoUrl?: string): Promise<string>;
-  createInvite(householdId: string, uid: string): Promise<InviteCode>;
+  createInvite(householdId: string, uid: string, inviterName: string): Promise<InviteCode>;
+  previewInvite(rawCode: string): Promise<InvitePreview>;
   joinWithCode(uid: string, rawCode: string, displayName?: string, photoUrl?: string): Promise<string>;
+  removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
   saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
   saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;

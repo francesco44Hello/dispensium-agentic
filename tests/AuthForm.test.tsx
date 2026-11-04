@@ -146,3 +146,16 @@ describe('AuthForm sticker card', () => {
     expect(ruleFor('form')).toMatch(/background:\s*var\(--surface-tint\);/);
   });
 });
+
+describe('AuthForm after an invite link', () => {
+  afterEach(() => window.history.replaceState({}, '', '/'));
+
+  it('sends a person who came from an invite link back to the join card after signing in', async () => {
+    window.history.replaceState({}, '', '/login?invite=ABCD2345');
+    renderForm('login');
+    fireEvent.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    await waitFor(() => expect(replace).toHaveBeenCalled());
+    expect(replace.mock.calls.every(([path]) => path === '/join/ABCD2345')).toBe(true);
+  });
+});

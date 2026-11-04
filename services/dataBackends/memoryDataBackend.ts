@@ -29,6 +29,8 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
 
   const households = new Map<string, HouseholdRecord>();
   const activeByUser = new Map<string, string>();
+  // Members the owner removed, by household. They cannot rejoin with the link.
+  const removedFrom = new Map<string, Set<string>>();
   const invites = new Map<string, InviteCode>();
   const categoryMaps = new Map<string, CategoryMap>();
   const groceries = new Map<string, Map<string, GroceryItem>>();
@@ -90,9 +92,31 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
     },
 
     async createInvite(householdId, createdBy, invite) {
-      if (!households.get(householdId)?.members.has(createdBy)) throw new HouseholdError('not-a-member');
+      const member = households.get(householdId)?.members.get(createdBy);
+      if (!member) throw new HouseholdError('not-a-member');
+      if (member.role !== 'owner') throw new HouseholdError('not-owner');
       invites.set(invite.code, invite);
       return invite;
+    },
+
+    async previewInvite(code, at) {
+      const invite = invites.get(code);
+      if (!invite) throw new HouseholdError('invalid-invite');
+      if (invite.expiresAt.getTime() <= at.getTime()) throw new HouseholdError('expired-invite');
+      return { code, inviterName: invite.inviterName };
+    },
+
+    async removeMember(householdId, actorUid, targetUid) {
+      const record = households.get(householdId);
+      if (!record || record.members.get(actorUid)?.role !== 'owner') throw new HouseholdError('not-owner');
+      const target = record.members.get(targetUid);
+      if (!target) throw new HouseholdError('not-a-member');
+      if (target.role === 'owner') throw new HouseholdError('cannot-remove');
+      record.members.delete(targetUid);
+      removedFrom.set(householdId, new Set([...(removedFrom.get(householdId) ?? []), targetUid]));
+      // The removed person gets a household of their own the next time they load the app.
+      if (activeByUser.get(targetUid) === householdId) activeByUser.delete(targetUid);
+      notifyAll();
     },
 
     async joinWithCode(uid, code, at, displayName, photoUrl) {
@@ -102,6 +126,7 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
 
       const record = households.get(invite.householdId);
       if (!record) throw new HouseholdError('invalid-invite');
+      if (removedFrom.get(invite.householdId)?.has(uid)) throw new HouseholdError('removed');
       if (record.members.has(uid)) throw new HouseholdError('already-member');
 
       record.members.set(uid, { uid, role: 'member', joinedAt: at, displayName, ...(photoUrl ? { photoUrl } : {}) });

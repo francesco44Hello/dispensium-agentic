@@ -28,9 +28,8 @@ try {
 }
 
 const notes = JSON.parse(readFileSync(notesPath, 'utf8'));
-// Diff from the fork point, so commits on this branch plus uncommitted edits show up,
-// even when the base branch was rebased or squashed and shares no direct ancestry.
-const forkPoint = git('merge-base', base, 'HEAD');
+// The PR diff is the working tree against the base branch. Commits that are already in the base
+// (for example squash merges) are not part of the change, so the merge-base is not used for files.
 
 // Critical paths: a match here makes the file part of the T2 review scope.
 const PATH_RULES = [
@@ -65,20 +64,30 @@ function countLines(path) {
 
 const STATUS_WORDS = { A: 'added', M: 'modified', D: 'deleted' };
 const statusByPath = new Map(
-  lines(git('diff', '--name-status', '--no-renames', forkPoint)).map((line) => {
+  lines(git('diff', '--name-status', '--no-renames', base)).map((line) => {
     const [code, path] = line.split('\t');
     return [path, code];
   }),
 );
 const numstatByPath = new Map(
-  lines(git('diff', '--numstat', '--no-renames', forkPoint)).map((line) => {
+  lines(git('diff', '--numstat', '--no-renames', base)).map((line) => {
     const [added, deleted, path] = line.split('\t');
     return [path, { added: Number(added) || 0, deleted: Number(deleted) || 0 }];
   }),
 );
 const untracked = lines(git('ls-files', '--others', '--exclude-standard'));
 
-const files = [...new Set([...statusByPath.keys(), ...untracked])].map((path) => {
+const excluded = notes.exclude ?? [];
+const isExcluded = (path) => excluded.some((prefix) => (prefix.endsWith('/') ? path.startsWith(prefix) : path === prefix));
+
+// A folder key ending in "/" describes every file under it. An exact path wins over a folder.
+const reasonFor = (path) => {
+  if (notes.files?.[path]) return notes.files[path];
+  const folder = Object.keys(notes.files ?? {}).find((key) => key.endsWith('/') && path.startsWith(key));
+  return folder ? notes.files[folder] : '';
+};
+
+const files = [...new Set([...statusByPath.keys(), ...untracked])].filter((path) => !isExcluded(path)).map((path) => {
   const code = untracked.includes(path) ? 'A' : statusByPath.get(path);
   const counts = numstatByPath.get(path) ?? { added: countLines(path), deleted: 0 };
   return {
@@ -87,7 +96,7 @@ const files = [...new Set([...statusByPath.keys(), ...untracked])].map((path) =>
     added: counts.added,
     deleted: counts.deleted,
     reasons: criticalReasons(path),
-    why: notes.files?.[path] ?? '',
+    why: reasonFor(path),
   };
 });
 files.sort((a, b) => b.added + b.deleted - (a.added + a.deleted));
@@ -99,7 +108,7 @@ const suggestedTier = files.some((file) => file.reasons.length > 0)
     : 'T0';
 const tier = notes.tier ?? suggestedTier;
 const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
-const commits = lines(git('log', '--oneline', `${forkPoint}..HEAD`));
+const commits = lines(git('log', '--oneline', `${base}..HEAD`));
 const totals = files.reduce(
   (sum, file) => ({ added: sum.added + file.added, deleted: sum.deleted + file.deleted }),
   { added: 0, deleted: 0 },
@@ -243,7 +252,7 @@ li { margin: 6px 0; }
     <div class="tile"><b class="plus">+${totals.added}</b><span class="muted">lines added</span></div>
     <div class="tile"><b class="minus">-${totals.deleted}</b><span class="muted">lines deleted</span></div>
     <div class="tile"><b>${critical.length}</b><span class="muted">critical files</span></div>
-    <div class="tile"><b>${commits.length}</b><span class="muted">commits</span></div>
+    <div class="tile"><b>${commits.length}</b><span class="muted">commits not in main by hash</span></div>
   </div>
 </header>
 
@@ -284,8 +293,49 @@ li { margin: 6px 0; }
 </html>
 `;
 
+// The PR description: the same facts as the HTML report, in markdown for `gh pr create --body-file`.
+const cell = (value) => String(value ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const prBody = [
+  `## Change report (${tier})`,
+  '',
+  notes.summary ?? '',
+  '',
+  `**Tier:** ${tier} (files suggest ${suggestedTier}) · **Files:** ${files.length} · **Lines:** +${totals.added} / -${totals.deleted}`,
+  '',
+  ...warnings.map((warning) => `> ⚠️ ${warning}`),
+  ...(warnings.length ? [''] : []),
+  '### Why',
+  '',
+  notes.why ?? 'No reasoning recorded.',
+  '',
+  ...(notes.decisions?.length ? ['### Decisions', '', ...notes.decisions.map((item) => `- ${item}`), ''] : []),
+  '### Critical files',
+  '',
+  ...(critical.length
+    ? critical.map((file) => `- \`${file.path}\` (${file.reasons.join(', ')}): ${file.why || 'no reason recorded'}`)
+    : ['None.']),
+  '',
+  '### Verification',
+  '',
+  '| Check | Result | Detail |',
+  '| --- | --- | --- |',
+  ...(notes.verification ?? []).map((check) => `| ${cell(check.name)} | ${cell(check.result)} | ${cell(check.detail)} |`),
+  '',
+  '### Reviews',
+  '',
+  ...(reviews.length ? reviews.map((review) => `- ${review.agent}: ${review.verdict}`) : ['None recorded.']),
+  '',
+  '### Not verified',
+  '',
+  ...(notes.gaps?.length ? notes.gaps.map((gap) => `- ${gap}`) : ['None recorded.']),
+  '',
+].join('\n');
+
 const outDir = join(root, 'e2e-artifacts', 'change-report');
 mkdirSync(outDir, { recursive: true });
 const outFile = join(outDir, 'index.html');
+const prBodyFile = join(outDir, 'pr-body.md');
 writeFileSync(outFile, html);
+writeFileSync(prBodyFile, prBody);
 console.log(outFile);
+console.log(prBodyFile);

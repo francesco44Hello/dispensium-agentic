@@ -44,13 +44,16 @@ From the repo root, run:
 node .claude/skills/change-report/scripts/build-report.mjs <scratchpad>/change-notes.json --base origin/main
 ```
 
-The script prints the absolute path of the generated file. It reads git itself (files, line counts, commits, critical paths) and flags critical files, the suggested tier, and warnings such as a missing required review.
+The script prints the absolute paths of two files. It reads git itself (files, line counts, commits, critical paths) and flags critical files, the suggested tier, and warnings such as a missing required review.
+- `index.html`: the visual report, for reading locally.
+- `pr-body.md`: the same facts in markdown. This is the PR description for every T1 and T2 PR.
 
 ## 3. Check it
 - Read the warnings banner. A suggested tier above the tier you wrote, or a missing required review, must be fixed before handoff.
-- Open the file in the browser to confirm it renders. Do not paste the HTML into chat.
+- Open the HTML in the browser to confirm it renders. Do not paste the HTML into chat.
+- Read `pr-body.md` once. It must match the notes: no check marked `pass` that was not run.
 
 ## 4. Handoff
-Give the user the absolute path of the report in one line, plus the tier, and any warnings still showing. Do not repeat the report contents in chat.
+Give the user the absolute path of the HTML report in one line, plus the tier, and any warnings still showing. Do not repeat the report contents in chat. The PR is opened with `pr-body.md` as its body (see the `ship` skill, step 8), after the user approves opening it.
 
-Notes: the report reflects the working tree against the base, so run it after the last edit. Rerun it after any later change, since it is a snapshot. The script handles git only; it does not run tests or reviewers, so the notes must come from the real results.
+Notes: the report reflects the working tree against the base, so run it after the last edit. Rerun it after any later change, since it is a snapshot. The script handles git only; it does not run tests or reviewers, so the notes must come from the real results. Run it after the reviews are green, so the reviewer verdicts in the notes are final.

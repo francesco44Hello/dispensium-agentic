@@ -8,7 +8,11 @@ import { AuthError, type AuthErrorCode } from '../../services/authService';
 import { useLocale } from '../i18n/LocaleProvider';
 import { LanguageSelect } from '../i18n/LanguageSelect';
 import type { MessageKey } from '../../i18n/messages';
+import { afterSignInPath } from '../../utils/inviteLink';
 import styles from './AuthForm.module.css';
+
+// Someone who opened an invite link lands back on the join card once signed in.
+const destination = () => afterSignInPath(window.location.search);
 
 type AuthFormProps = {
   mode: 'login' | 'signup';
@@ -39,7 +43,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const isSignup = mode === 'signup';
 
   useEffect(() => {
-    if (status === 'authenticated') router.replace('/');
+    if (status === 'authenticated') router.replace(destination());
   }, [status, router]);
 
   async function handleGoogleSignIn() {
@@ -47,7 +51,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setSubmitting(true);
     try {
       await service.signInWithGoogle();
-      router.replace('/');
+      router.replace(destination());
     } catch (err) {
       const code = err instanceof AuthError ? err.code : 'unknown';
       // Closing the Google popup is a deliberate choice, so no error is shown.
@@ -73,7 +77,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       } else {
         await service.signIn(email, password);
       }
-      router.replace('/');
+      router.replace(destination());
     } catch (err) {
       const code = err instanceof AuthError ? err.code : 'unknown';
       setError(ERROR_KEYS[code]);

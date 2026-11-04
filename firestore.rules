@@ -10,6 +10,10 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid));
     }
 
+    function isOwner(hid) {
+      return get(/databases/$(database)/documents/households/$(hid)/members/$(request.auth.uid)).data.role == 'owner';
+    }
+
     function validText(value) {
       return value is string && value.size() > 0 && value.size() <= 100 && !value.matches('(?s).*[<>{}"].*');
     }
@@ -32,29 +36,35 @@ service cloud.firestore {
     }
 
     // Codes are document ids, so a joiner can only read a code they already know. Listing is denied.
-    // Any signed-in user may get a code they know: joining needs the invite document (its householdId and expiry)
-    // before the user is a member. Signed-out reads are refused. Codes are random and short-lived, so this is accepted.
+    // The shared invite link carries the code, so any signed-in user who has the link can read the invite
+    // (its householdId, the inviter's name and expiry) before joining. Signed-out reads are refused.
+    // Codes are random and short-lived, and the owner chooses to share the link, so this is accepted.
     // createdAt is the server time of the write, and an invite lives at most 7 days plus a 5 minute clock skew allowance
     // (a device clock slightly ahead must not make the client's 7-day expiry fail).
     // The code id is 8 characters from the client's alphabet (no I, O, 0 or 1), the same format as utils/inviteCode.ts.
-    // Only the four fields the client writes are allowed, so an invite cannot carry extra data.
+    // Only the five fields the client writes are allowed, so an invite cannot carry extra data.
+    // Only the owner creates invites. inviterName is the name shown on the join card.
     match /inviteCodes/{code} {
-      allow get: if signedIn();
+      // Expired invites are not readable, so an old link reveals nothing.
+      allow get: if signedIn() && request.time < resource.data.expiresAt;
       allow create: if signedIn()
         && code.matches('^[A-HJ-NP-Z2-9]{8}$')
-        && request.resource.data.keys().hasOnly(['householdId', 'createdBy', 'createdAt', 'expiresAt'])
+        && request.resource.data.keys().hasOnly(['householdId', 'createdBy', 'inviterName', 'createdAt', 'expiresAt'])
         && request.resource.data.createdBy == request.auth.uid
-        && isMember(request.resource.data.householdId)
+        && validName(request.resource.data.inviterName)
+        && isOwner(request.resource.data.householdId)
         && request.resource.data.createdAt == request.time
         && request.resource.data.expiresAt > request.time
         && request.resource.data.expiresAt <= request.time + duration.value(7, 'd') + duration.value(5, 'm');
-      allow delete: if signedIn() && isMember(resource.data.householdId);
+      allow delete: if signedIn() && isOwner(resource.data.householdId);
     }
 
     match /households/{hid} {
       allow get: if signedIn() && isMember(hid);
       allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'ownerUid', 'createdAt'])
         && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.createdAt is timestamp
         && validText(request.resource.data.name);
       allow update, delete: if false;
 
@@ -63,8 +73,12 @@ service cloud.firestore {
         allow read: if signedIn() && (request.auth.uid == uid || isMember(hid));
         // Owner bootstrap: the household does not exist yet, so the owner doc is created in the same batch.
         // Joiners: must present an unexpired invite for this household.
+        // A removed member cannot come back with the link: the owner's removal record blocks it.
         allow create: if signedIn()
           && request.auth.uid == uid
+          && !exists(/databases/$(database)/documents/households/$(hid)/removed/$(uid))
+          && request.resource.data.keys().hasOnly(['role', 'joinedAt', 'displayName', 'photoUrl', 'inviteCode'])
+          && request.resource.data.joinedAt is timestamp
           && (
             (request.resource.data.role == 'owner' && !exists(/databases/$(database)/documents/households/$(hid)))
             || (
@@ -81,7 +95,24 @@ service cloud.firestore {
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoUrl'])
           && validName(request.resource.data.get('displayName', ''))
           && validPhoto(request.resource.data.get('photoUrl', ''));
-        allow delete: if false;
+        // The owner can remove a member, never themselves or another owner. Members cannot remove anyone.
+        allow delete: if signedIn()
+          && isOwner(hid)
+          && request.auth.uid != uid
+          && resource.data.role == 'member';
+      }
+
+      // Written by the owner when they remove a member. The removed person can read their own record.
+      // It blocks joining with the link, and it is never deleted by the app.
+      match /removed/{uid} {
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow create: if signedIn()
+          && isOwner(hid)
+          && uid != request.auth.uid
+          && get(/databases/$(database)/documents/households/$(hid)/members/$(uid)).data.role == 'member'
+          && request.resource.data.keys().hasOnly(['removedAt'])
+          && request.resource.data.removedAt is timestamp;
+        allow update, delete: if false;
       }
 
       // Items: the client sends only these keys. Items are created by their owner, so createdBy is checked on create.
@@ -90,7 +121,8 @@ service cloud.firestore {
           return request.resource.data.keys().hasOnly(['name', 'category', 'completed', 'createdBy', 'createdAt'])
             && validText(request.resource.data.name)
             && validText(request.resource.data.category)
-            && request.resource.data.completed is bool;
+            && request.resource.data.completed is bool
+            && request.resource.data.createdAt is timestamp;
         }
 
         allow read, delete: if signedIn() && isMember(hid);
@@ -98,9 +130,11 @@ service cloud.firestore {
           && isMember(hid)
           && request.resource.data.createdBy == request.auth.uid
           && validItem();
+        // The author and the creation time cannot change after an item is added.
         allow update: if signedIn()
           && isMember(hid)
           && request.resource.data.createdBy == resource.data.createdBy
+          && request.resource.data.createdAt == resource.data.createdAt
           && validItem();
       }
 
