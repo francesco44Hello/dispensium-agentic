@@ -12,6 +12,8 @@ export function createHouseholdStub(members: HouseholdMember[] = []) {
       throw new Error('not used in these tests');
     },
     removeMember: async () => undefined,
+    readmitMember: async () => undefined,
+    subscribeToRemovedMembers: () => () => undefined,
     createInvite: async () => {
       throw new Error('not used in these tests');
     },

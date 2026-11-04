@@ -102,17 +102,19 @@ service cloud.firestore {
           && resource.data.role == 'member';
       }
 
-      // Written by the owner when they remove a member. The removed person can read their own record.
-      // It blocks joining with the link, and it is never deleted by the app.
+      // Written by the owner when they remove a member. It blocks joining with the link until the owner clears it,
+      // which is how a removed member is added back. The owner sees the list; the removed person sees their own record.
       match /removed/{uid} {
-        allow read: if signedIn() && request.auth.uid == uid;
+        allow read: if signedIn() && (request.auth.uid == uid || isOwner(hid));
         allow create: if signedIn()
           && isOwner(hid)
           && uid != request.auth.uid
           && get(/databases/$(database)/documents/households/$(hid)/members/$(uid)).data.role == 'member'
-          && request.resource.data.keys().hasOnly(['removedAt'])
-          && request.resource.data.removedAt is timestamp;
-        allow update, delete: if false;
+          && request.resource.data.keys().hasOnly(['removedAt', 'displayName'])
+          && request.resource.data.removedAt is timestamp
+          && (!('displayName' in request.resource.data) || validName(request.resource.data.displayName));
+        allow update: if false;
+        allow delete: if signedIn() && isOwner(hid);
       }
 
       // Items: the client sends only these keys. Items are created by their owner, so createdBy is checked on create.

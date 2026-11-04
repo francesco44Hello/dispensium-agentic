@@ -240,3 +240,34 @@ describe('removal in the in-memory backend', () => {
     expect(await service.ensureDefaultHousehold('bob')).not.toBe(hid);
   });
 });
+
+describe('adding a removed member back', () => {
+  const withBob = async () => {
+    const { service, backend } = setup({ generateCode: () => 'ABCD2345' });
+    const hid = await service.ensureDefaultHousehold('alice', 'Alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345', 'Bob');
+    await service.removeMember(hid, 'alice', 'bob');
+    return { service, backend, hid };
+  };
+
+  it('lists the removed members with their names, for the owner', async () => {
+    const { backend, hid } = await withBob();
+    const removed = current<{ uid: string; displayName: string }[]>((l) => backend.subscribeToRemovedMembers(hid, l));
+    expect(removed).toEqual([{ uid: 'bob', displayName: 'Bob' }]);
+  });
+
+  it('lets the owner add a removed member back, so they can join again with the link', async () => {
+    const { service, hid } = await withBob();
+    await expect(service.joinWithCode('bob', 'ABCD2345')).rejects.toMatchObject({ code: 'removed' });
+
+    await service.readmitMember(hid, 'alice', 'bob');
+
+    await expect(service.joinWithCode('bob', 'ABCD2345', 'Bob')).resolves.toBe(hid);
+  });
+
+  it('does not let a member add someone back', async () => {
+    const { service, hid } = await withBob();
+    await expect(service.readmitMember(hid, 'carol', 'bob')).rejects.toMatchObject({ code: 'not-owner' });
+  });
+});

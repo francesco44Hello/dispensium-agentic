@@ -30,7 +30,8 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
   const households = new Map<string, HouseholdRecord>();
   const activeByUser = new Map<string, string>();
   // Members the owner removed, by household. They cannot rejoin with the link.
-  const removedFrom = new Map<string, Set<string>>();
+  // Maps each household to the members it removed, with their names. Cleared when the owner adds someone back.
+  const removedFrom = new Map<string, Map<string, string>>();
   const invites = new Map<string, InviteCode>();
   const categoryMaps = new Map<string, CategoryMap>();
   const groceries = new Map<string, Map<string, GroceryItem>>();
@@ -113,10 +114,26 @@ export function createMemoryDataBackend(options: { now?: () => Date } = {}): Dat
       if (!target) throw new HouseholdError('not-a-member');
       if (target.role === 'owner') throw new HouseholdError('cannot-remove');
       record.members.delete(targetUid);
-      removedFrom.set(householdId, new Set([...(removedFrom.get(householdId) ?? []), targetUid]));
+      const removed = removedFrom.get(householdId) ?? new Map<string, string>();
+      removed.set(targetUid, target.displayName ?? '');
+      removedFrom.set(householdId, removed);
       // The removed person gets a household of their own the next time they load the app.
       if (activeByUser.get(targetUid) === householdId) activeByUser.delete(targetUid);
       notifyAll();
+    },
+
+    async readmitMember(householdId, actorUid, targetUid) {
+      const record = households.get(householdId);
+      if (!record || record.members.get(actorUid)?.role !== 'owner') throw new HouseholdError('not-owner');
+      removedFrom.get(householdId)?.delete(targetUid);
+      notifyAll();
+    },
+
+    subscribeToRemovedMembers(householdId, listener) {
+      return subscribe(
+        () => [...(removedFrom.get(householdId) ?? [])].map(([uid, displayName]) => ({ uid, displayName })),
+        listener,
+      );
     },
 
     async joinWithCode(uid, code, at, displayName, photoUrl) {

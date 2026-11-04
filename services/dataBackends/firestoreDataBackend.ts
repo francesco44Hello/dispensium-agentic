@@ -1,4 +1,5 @@
 import { cleanPhotoUrl } from '../../utils/photoUrl';
+import { sanitizeInput } from '../../utils/sanitizeInput';
 import {
   addDoc,
   collection,
@@ -161,8 +162,35 @@ export function createFirestoreDataBackend(): DataBackend {
       // One batch: the member goes and the removal record is written, so the person cannot rejoin with the link.
       const batch = writeBatch(db());
       batch.delete(doc(db(), 'households', householdId, 'members', targetUid));
-      batch.set(doc(db(), 'households', householdId, 'removed', targetUid), { removedAt: serverTimestamp() });
+      const name: unknown = targetSnap.data()?.displayName;
+      batch.set(doc(db(), 'households', householdId, 'removed', targetUid), {
+        removedAt: serverTimestamp(),
+        displayName: typeof name === 'string' ? sanitizeInput(name) : '',
+      });
       await batch.commit();
+    },
+
+    async readmitMember(householdId, actorUid, targetUid) {
+      const actorSnap = await getDoc(doc(db(), 'households', householdId, 'members', actorUid));
+      if (actorSnap.data()?.role !== 'owner') throw new HouseholdError('not-owner');
+      // Clearing the record lets the person join with the link again.
+      await deleteDoc(doc(db(), 'households', householdId, 'removed', targetUid));
+    },
+
+    subscribeToRemovedMembers(householdId, listener): Unsubscribe {
+      return onSnapshot(
+        collection(db(), 'households', householdId, 'removed'),
+        (snap) => {
+          listener(
+            snap.docs.map((d) => {
+              const name: unknown = d.data().displayName;
+              return { uid: d.id, displayName: typeof name === 'string' ? name : '' };
+            }),
+          );
+        },
+        // Not allowed to read the list (not the owner, or the rules refused it): show no removed members.
+        () => listener([]),
+      );
     },
 
     async joinWithCode(uid, code, at, displayName, photoUrl) {

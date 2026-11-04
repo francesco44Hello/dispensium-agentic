@@ -176,11 +176,11 @@ describe('shared invite link (Firestore)', () => {
     fx.writeBatch.mockReturnValue(batch);
     // The owner (alice) is checked first, then the member being removed (bob).
     fx.getDoc.mockImplementation(async (ref: { path: string }) =>
-      ref.path === 'households/hh-1/members/alice' ? snapWith({ role: 'owner' }) : snapWith({ role: 'member' }),
+      ref.path === 'households/hh-1/members/alice' ? snapWith({ role: 'owner' }) : snapWith({ role: 'member', displayName: 'Bob' }),
     );
     await createFirestoreDataBackend().households.removeMember('hh-1', 'alice', 'bob');
     expect(batch.delete).toHaveBeenCalledWith({ path: 'households/hh-1/members/bob' });
-    expect(batch.set).toHaveBeenCalledWith({ path: 'households/hh-1/removed/bob' }, { removedAt: fx.serverTimestamp });
+    expect(batch.set).toHaveBeenCalledWith({ path: 'households/hh-1/removed/bob' }, { removedAt: fx.serverTimestamp, displayName: 'Bob' });
     expect(batch.commit).toHaveBeenCalled();
   });
 
@@ -255,5 +255,36 @@ describe('joinWithCode refused read (Firestore)', () => {
     await expect(
       createFirestoreDataBackend().households.joinWithCode('bob', 'ABCD2345', new Date('2026-10-22T10:00:00Z'), '', ''),
     ).rejects.toMatchObject({ code: 'invalid-invite' });
+  });
+});
+
+describe('adding a removed member back (Firestore)', () => {
+  it('clears the removal record when the caller is the owner', async () => {
+    fx.getDoc.mockResolvedValue(snapWith({ role: 'owner' }));
+    await createFirestoreDataBackend().households.readmitMember('hh-1', 'alice', 'bob');
+    expect(fx.deleteDoc).toHaveBeenCalledWith({ path: 'households/hh-1/removed/bob' });
+  });
+
+  it('refuses when the caller is not the owner, and clears nothing', async () => {
+    fx.getDoc.mockResolvedValue(snapWith({ role: 'member' }));
+    await expect(createFirestoreDataBackend().households.readmitMember('hh-1', 'carol', 'bob')).rejects.toMatchObject({
+      code: 'not-owner',
+    });
+    expect(fx.deleteDoc).not.toHaveBeenCalled();
+  });
+});
+
+describe('subscribeToRemovedMembers (Firestore)', () => {
+  it('reports an empty list when the owner cannot read the removal records', async () => {
+    const { onSnapshot } = await import('firebase/firestore');
+    vi.mocked(onSnapshot).mockImplementationOnce(((_ref: unknown, _next: unknown, error: (err: unknown) => void) => {
+      error(new Error('permission-denied'));
+      return () => undefined;
+    }) as never);
+    const listener = vi.fn();
+
+    createFirestoreDataBackend().households.subscribeToRemovedMembers('hh-1', listener);
+
+    expect(listener).toHaveBeenCalledWith([]);
   });
 });

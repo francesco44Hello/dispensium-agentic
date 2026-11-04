@@ -761,3 +761,47 @@ describe('review follow-ups: invite delete, removal target, join time', () => {
     );
   });
 });
+
+describe('re-adding a removed member', () => {
+  beforeEach(addMembers);
+
+  const removeCarol = async () => {
+    const owner = as('alice');
+    const batch = writeBatch(owner);
+    batch.delete(doc(owner, 'households', HID, 'members', 'carol'));
+    batch.set(doc(owner, 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: 'Carol' });
+    await assertSucceeds(batch.commit());
+  };
+
+  it('lets the owner see the removal record, the removed person see their own, and no one else', async () => {
+    await removeCarol();
+    await assertSucceeds(getDoc(doc(as('alice'), 'households', HID, 'removed', 'carol')));
+    await assertSucceeds(getDoc(doc(as('carol'), 'households', HID, 'removed', 'carol')));
+    await assertFails(getDoc(doc(as('bob'), 'households', HID, 'removed', 'carol')));
+  });
+
+  it('lets only the owner clear a removal, after which the person can join with the link again', async () => {
+    await removeCarol();
+    const rejoin = () =>
+      setDoc(doc(as('carol'), 'households', HID, 'members', 'carol'), {
+        role: 'member',
+        joinedAt: new Date(),
+        inviteCode: 'VALID234',
+      });
+    await assertFails(rejoin());
+
+    await assertFails(deleteDoc(doc(as('bob'), 'households', HID, 'removed', 'carol')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'households', HID, 'removed', 'carol')));
+
+    await assertSucceeds(rejoin());
+  });
+
+  it('accepts a display name on the removal record, and refuses markup in it', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: '<b>Carol</b>' }),
+    );
+    await assertSucceeds(
+      setDoc(doc(as('alice'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: 'Carol' }),
+    );
+  });
+});

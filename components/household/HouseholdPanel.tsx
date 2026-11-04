@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMembers } from '../../hooks/useMembers';
 import { householdService as defaultService } from '../../services/dataClient';
 import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
 import { HOUSEHOLD_ERROR_KEYS } from './householdErrors';
-import type { HouseholdMember, HouseholdService, InviteCode } from '../../types/household';
+import type { HouseholdMember, HouseholdService, InviteCode, RemovedMember } from '../../types/household';
 import { buildInviteLink } from '../../utils/inviteLink';
 import { useLocale } from '../i18n/LocaleProvider';
 import styles from './HouseholdPanel.module.css';
@@ -22,10 +22,17 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
   const [invite, setInvite] = useState<InviteCode | null>(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<HouseholdErrorCode | null>(null);
+  const [removed, setRemoved] = useState<RemovedMember[]>([]);
 
   const self = members?.find((member) => member.uid === uid);
   const isOwner = self?.role === 'owner';
   const inviteLink = invite ? buildInviteLink(window.location.origin, invite.code) : '';
+
+  // Only the owner may read the removed list, so members never subscribe to it.
+  useEffect(() => {
+    if (!isOwner) return;
+    return service.subscribeToRemovedMembers(householdId, setRemoved);
+  }, [isOwner, householdId, service]);
 
   async function handleCreateInvite() {
     setError(null);
@@ -55,6 +62,16 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
     setError(null);
     try {
       await service.removeMember(householdId, uid, member.uid);
+    } catch (err) {
+      setError(err instanceof HouseholdError ? err.code : 'unknown');
+    }
+  }
+
+  async function handleReadmit(member: RemovedMember) {
+    if (!window.confirm(t('household.readmitConfirm', { name: member.displayName || t('household.housemate') }))) return;
+    setError(null);
+    try {
+      await service.readmitMember(householdId, uid, member.uid);
     } catch (err) {
       setError(err instanceof HouseholdError ? err.code : 'unknown');
     }
@@ -123,6 +140,30 @@ export function HouseholdPanel({ householdId, uid, service = defaultService }: H
               {t(HOUSEHOLD_ERROR_KEYS[error])}
             </p>
           )}
+        </section>
+      )}
+
+      {isOwner && removed.length > 0 && (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>{t('household.removedTitle')}</h2>
+          <ul className={styles.members}>
+            {removed.map((member) => {
+              const name = member.displayName || t('household.housemate');
+              return (
+                <li key={member.uid} className={styles.member}>
+                  <span className={styles.name}>{name}</span>
+                  <button
+                    type="button"
+                    className={styles.copyButton}
+                    aria-label={t('household.readmitMember', { name })}
+                    onClick={() => handleReadmit(member)}
+                  >
+                    {t('household.readmit')}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       )}
 

@@ -47,7 +47,10 @@ describe('HouseholdPanel shared invite link', () => {
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Remove Bob' }));
 
-    await waitFor(() => expect(screen.queryByText('Bob')).toBeNull());
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Remove Bob' })).toBeNull());
+    expect(await screen.findByRole('button', { name: 'Add back Bob' })).toBeTruthy();
+    // Bob's name appears once, in the Removed section, so he is not in the members list any more.
+    expect(screen.getAllByText('Bob')).toHaveLength(1);
   });
 
   it('keeps the member when the owner cancels the removal', async () => {
@@ -77,5 +80,30 @@ describe('HouseholdPanel shared invite link', () => {
 
     await screen.findByRole('button', { name: 'Remove Bob' });
     expect(screen.queryByRole('button', { name: 'Remove Alice' })).toBeNull();
+  });
+});
+
+describe('HouseholdPanel removed members', () => {
+  it('lists removed members for the owner, and adds one back after confirming', async () => {
+    const { service, hid } = await householdWithBob();
+    await service.removeMember(hid, 'alice', 'bob');
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Add back Bob' }));
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'Add back Bob' })).toBeNull());
+    await expect(service.joinWithCode('bob', 'ABCD2345', 'Bob')).resolves.toBe(hid);
+  });
+
+  it('does not show the removed list to a member', async () => {
+    const { service, hid } = await householdWithBob();
+    await service.joinWithCode('carol', 'ABCD2345', 'Carol');
+    await service.removeMember(hid, 'alice', 'bob');
+
+    render(<HouseholdPanel householdId={hid} uid="carol" service={service} />);
+
+    expect(await screen.findByText('Alice')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /add back/i })).toBeNull();
   });
 });

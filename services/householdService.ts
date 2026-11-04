@@ -1,6 +1,6 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
 import { generateInviteCode, isValidInviteCode, normalizeInviteCode } from '../utils/inviteCode';
-import type { HouseholdMember, HouseholdService, InviteCode, InvitePreview } from '../types/household';
+import type { HouseholdMember, HouseholdService, InviteCode, InvitePreview, RemovedMember } from '../types/household';
 import type { Unsubscribe } from '../types/subscription';
 import { cleanDisplayName } from '../utils/displayName';
 import { cleanPhotoUrl } from '../utils/photoUrl';
@@ -31,6 +31,8 @@ export interface HouseholdBackend {
   previewInvite(code: string, now: Date): Promise<InvitePreview>;
   joinWithCode(uid: string, code: string, now: Date, displayName: string, photoUrl: string): Promise<string>;
   removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  readmitMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  subscribeToRemovedMembers(householdId: string, listener: (removed: RemovedMember[]) => void): Unsubscribe;
   saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
   saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;
@@ -83,6 +85,14 @@ export function createHouseholdService(backend: HouseholdBackend, options: House
     async removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void> {
       if (actorUid === targetUid) throw new HouseholdError('cannot-remove');
       return backend.removeMember(householdId, actorUid, targetUid);
+    },
+
+    readmitMember(householdId: string, actorUid: string, targetUid: string): Promise<void> {
+      return backend.readmitMember(householdId, actorUid, targetUid);
+    },
+
+    subscribeToRemovedMembers(householdId: string, listener: (removed: RemovedMember[]) => void): Unsubscribe {
+      return backend.subscribeToRemovedMembers(householdId, listener);
     },
 
     saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void> {

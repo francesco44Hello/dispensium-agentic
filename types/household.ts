@@ -29,6 +29,12 @@ export interface InviteCode {
   expiresAt: Date;
 }
 
+// A member the owner removed. Shown to the owner, who can add them back.
+export interface RemovedMember {
+  uid: string;
+  displayName: string;
+}
+
 // The signed-in person who accepts an invite. Taken from the auth user.
 export interface InviteUser {
   uid: string;
@@ -49,6 +55,8 @@ export interface HouseholdService {
   previewInvite(rawCode: string): Promise<InvitePreview>;
   joinWithCode(uid: string, rawCode: string, displayName?: string, photoUrl?: string): Promise<string>;
   removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  readmitMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  subscribeToRemovedMembers(householdId: string, listener: (removed: RemovedMember[]) => void): Unsubscribe;
   saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
   saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;
