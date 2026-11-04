@@ -10,6 +10,7 @@ Household grocery app. Next.js (App Router, `cacheComponents`), React (`'use cli
 - Tokens: `--primary-color #2D3C59`, `--secondary-color #FDB7EA`, `--muted #B7B1F2`, `--primary-button #A3DC9A`. Background `linear-gradient(to bottom, #B7B1F2, #FDB7EA)`, `background-attachment: fixed !important; min-height: 100vh`. Font: Balsamiq Sans.
 - Font weights: Balsamiq Sans is only available at 400 and 700 (600 does not exist). Page titles use `var(--font-weight-title)` (400). The header app name uses `var(--font-weight-brand)` (700). Never write a literal weight for titles; add a token in `app/globals.css` if a new one is needed.
 - `screenshots/` holds the approved visual references and they win over the token list (e.g. the add button is blue `#6B7FE0`, not `--primary-button`). Compare against them for any UI change.
+- Mockups and design decisions live in `design/`. Before making a mockup, read `design/README.md` and start from `design/system/base.html` (it loads the real tokens and component styles). Build tickets implement from `design/features/<feature>/`.
 
 ## Engineering rules (non-negotiable)
 1. Strict TypeScript: no `any`. Shared types live in `types/`.
