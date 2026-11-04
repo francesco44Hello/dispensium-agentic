@@ -3,18 +3,10 @@
 import { useState, type FormEvent } from 'react';
 import { householdService as defaultService } from '../../services/dataClient';
 import { HouseholdError, type HouseholdErrorCode } from '../../services/householdService';
+import { HOUSEHOLD_ERROR_KEYS } from './householdErrors';
 import type { HouseholdService } from '../../types/household';
 import { useLocale } from '../i18n/LocaleProvider';
-import type { MessageKey } from '../../i18n/messages';
 import styles from './JoinHouseholdForm.module.css';
-
-const ERROR_KEYS: Record<HouseholdErrorCode, MessageKey> = {
-  'invalid-invite': 'household.error.invalidInvite',
-  'expired-invite': 'household.error.expiredInvite',
-  'already-member': 'household.error.alreadyMember',
-  'not-a-member': 'household.error.notMember',
-  unknown: 'error.unknown',
-};
 
 type JoinHouseholdFormProps = {
   uid: string;
@@ -59,7 +51,7 @@ export function JoinHouseholdForm({ uid, displayName, photoUrl, service = defaul
       </label>
       {error && (
         <p role="alert" className={styles.error}>
-          {t(ERROR_KEYS[error])}
+          {t(HOUSEHOLD_ERROR_KEYS[error])}
         </p>
       )}
       {status === 'joined' && <p role="status">{t('household.joined')}</p>}

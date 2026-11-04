@@ -22,7 +22,7 @@ describe('HouseholdPanel', () => {
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
     await service.ensureDefaultHousehold('bob');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await service.joinWithCode('bob', 'ABCD2345');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
@@ -33,14 +33,14 @@ describe('HouseholdPanel', () => {
     expect(screen.getByText('member')).toBeTruthy();
   });
 
-  it('creates an invite code and displays it', async () => {
+  it('creates an invite link and displays it', async () => {
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
-    fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create invite link/i }));
 
-    expect(await screen.findByText('ABCD2345')).toBeTruthy();
+    expect(await screen.findByText(/\/join\/ABCD2345$/)).toBeTruthy();
   });
 });
 
@@ -55,29 +55,29 @@ describe('HouseholdPanel layout', () => {
     expect(owner.parentElement?.textContent).toContain('You');
   });
 
-  it('copies the invite code to the clipboard from its own button', async () => {
+  it('copies the invite link to the clipboard from its own button', async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal('navigator', { clipboard: { writeText } });
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
-    fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
-    fireEvent.click(await screen.findByRole('button', { name: /^copy$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create invite link/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /copy link/i }));
 
-    expect(writeText).toHaveBeenCalledWith('ABCD2345');
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/join/ABCD2345`);
   });
 
-  it('keeps the invite code on screen when the clipboard refuses', async () => {
+  it('keeps the invite link on screen when the clipboard refuses', async () => {
     vi.stubGlobal('navigator', { clipboard: { writeText: vi.fn().mockRejectedValue(new Error('denied')) } });
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
-    fireEvent.click(screen.getByRole('button', { name: /create invite code/i }));
-    fireEvent.click(await screen.findByRole('button', { name: /^copy$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create invite link/i }));
+    fireEvent.click(await screen.findByRole('button', { name: /copy link/i }));
 
-    expect(await screen.findByText('ABCD2345')).toBeTruthy();
+    expect(await screen.findByText(/\/join\/ABCD2345$/)).toBeTruthy();
   });
 });
 
@@ -97,7 +97,7 @@ describe('JoinHouseholdForm', () => {
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
     await service.ensureDefaultHousehold('bob');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
 
     render(<JoinHouseholdForm uid="bob" service={service} />);
     fireEvent.change(screen.getByLabelText(/invite code/i), { target: { value: 'abcd-2345' } });
@@ -109,7 +109,7 @@ describe('JoinHouseholdForm', () => {
   it('explains when the user is already in the household', async () => {
     const { service } = setup(() => 'ABCD2345');
     const hid = await service.ensureDefaultHousehold('alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
 
     render(<JoinHouseholdForm uid="alice" service={service} />);
     fireEvent.change(screen.getByLabelText(/invite code/i), { target: { value: 'ABCD2345' } });

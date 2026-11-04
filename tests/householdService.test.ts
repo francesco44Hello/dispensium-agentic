@@ -67,7 +67,7 @@ describe('createInvite', () => {
   it('returns a valid code that expires after seven days', async () => {
     const { service } = setup();
     const hid = await service.ensureDefaultHousehold('alice');
-    const invite = await service.createInvite(hid, 'alice');
+    const invite = await service.createInvite(hid, 'alice', 'alice');
     expect(isValidInviteCode(invite.code)).toBe(true);
     expect(invite.householdId).toBe(hid);
     expect(invite.expiresAt.getTime() - invite.createdAt.getTime()).toBe(7 * DAY_MS);
@@ -76,14 +76,14 @@ describe('createInvite', () => {
   it('uses the injected code generator', async () => {
     const { service } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
-    const invite = await service.createInvite(hid, 'alice');
+    const invite = await service.createInvite(hid, 'alice', 'alice');
     expect(invite.code).toBe('ABCD2345');
   });
 
   it('rejects an invite from a user who is not a member', async () => {
     const { service } = setup();
     const hid = await service.ensureDefaultHousehold('alice');
-    await expect(service.createInvite(hid, 'mallory')).rejects.toMatchObject({ code: 'not-a-member' });
+    await expect(service.createInvite(hid, 'mallory', 'mallory')).rejects.toMatchObject({ code: 'not-a-member' });
   });
 });
 
@@ -92,7 +92,7 @@ describe('joinWithCode', () => {
     const { service, backend } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
     await service.ensureDefaultHousehold('bob');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
 
     const joined = await service.joinWithCode('bob', 'ABCD2345');
 
@@ -109,7 +109,7 @@ describe('joinWithCode', () => {
     const { service, backend } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
     await service.ensureDefaultHousehold('bob');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
 
     let seen: HouseholdMember[] = [];
     const off = backend.subscribeToMembers(hid, (m) => {
@@ -124,7 +124,7 @@ describe('joinWithCode', () => {
   it('accepts a code with spaces, dashes and lowercase letters', async () => {
     const { service } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await expect(service.joinWithCode('bob', ' abcd-2345 ')).resolves.toBe(hid);
   });
 
@@ -142,7 +142,7 @@ describe('joinWithCode', () => {
   it('rejects an expired code with expired-invite', async () => {
     const { service, advanceDays } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     advanceDays(8);
     await expect(service.joinWithCode('bob', 'ABCD2345')).rejects.toMatchObject({ code: 'expired-invite' });
   });
@@ -150,12 +150,124 @@ describe('joinWithCode', () => {
   it('rejects joining a household the user already belongs to', async () => {
     const { service } = setup({ generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await expect(service.joinWithCode('alice', 'ABCD2345')).rejects.toMatchObject({ code: 'already-member' });
   });
 
   it('throws HouseholdError instances', async () => {
     const { service } = setup();
     await expect(service.joinWithCode('bob', 'ABC')).rejects.toBeInstanceOf(HouseholdError);
+  });
+});
+
+describe('shared invite link', () => {
+  const withCode = (code: string) => setup({ generateCode: () => code });
+
+  it('stores the inviter name on the invite, without blocked characters', async () => {
+    const { service } = setup();
+    const hid = await service.ensureDefaultHousehold('alice');
+    const invite = await service.createInvite(hid, 'alice', 'Alice <b>');
+    expect(invite.inviterName).toContain('Alice');
+    expect(invite.inviterName).not.toMatch(/[<>]/);
+  });
+
+  it('lets only the owner create an invite', async () => {
+    const { service } = withCode('ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345');
+    await expect(service.createInvite(hid, 'bob', 'Bob')).rejects.toMatchObject({ code: 'not-owner' });
+  });
+
+  it('previews a valid invite with the inviter name', async () => {
+    const { service } = withCode('ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    expect(await service.previewInvite('abcd 2345')).toEqual({ code: 'ABCD2345', inviterName: 'Alice' });
+  });
+
+  it('refuses to preview an unknown or expired invite', async () => {
+    const { service, advanceDays } = withCode('ABCD2345');
+    await expect(service.previewInvite('ABCD2345')).rejects.toMatchObject({ code: 'invalid-invite' });
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    advanceDays(8);
+    await expect(service.previewInvite('ABCD2345')).rejects.toMatchObject({ code: 'expired-invite' });
+  });
+
+  it('lets the owner remove a member, who then leaves the member list', async () => {
+    const { service, backend } = withCode('ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345');
+    await service.removeMember(hid, 'alice', 'bob');
+    const members = current<HouseholdMember[]>((l) => backend.subscribeToMembers(hid, l));
+    expect(members.map((m) => m.uid)).toEqual(['alice']);
+  });
+
+  it('does not let a member remove someone', async () => {
+    const { service } = withCode('ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345');
+    await service.joinWithCode('carol', 'ABCD2345');
+    await expect(service.removeMember(hid, 'bob', 'carol')).rejects.toMatchObject({ code: 'not-owner' });
+  });
+
+  it('does not let the owner remove themselves', async () => {
+    const { service } = withCode('ABCD2345');
+    const hid = await service.ensureDefaultHousehold('alice');
+    await expect(service.removeMember(hid, 'alice', 'alice')).rejects.toMatchObject({ code: 'cannot-remove' });
+  });
+});
+
+describe('removal in the in-memory backend', () => {
+  it('keeps a removed member out, even with the link', async () => {
+    const { service } = setup({ generateCode: () => 'ABCD2345' });
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345');
+    await service.removeMember(hid, 'alice', 'bob');
+    await expect(service.joinWithCode('bob', 'ABCD2345')).rejects.toMatchObject({ code: 'removed' });
+  });
+
+  it('gives a removed member a household of their own on their next load', async () => {
+    const { service } = setup({ generateCode: () => 'ABCD2345' });
+    const hid = await service.ensureDefaultHousehold('alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345');
+    await service.removeMember(hid, 'alice', 'bob');
+    expect(await service.ensureDefaultHousehold('bob')).not.toBe(hid);
+  });
+});
+
+describe('adding a removed member back', () => {
+  const withBob = async () => {
+    const { service, backend } = setup({ generateCode: () => 'ABCD2345' });
+    const hid = await service.ensureDefaultHousehold('alice', 'Alice');
+    await service.createInvite(hid, 'alice', 'Alice');
+    await service.joinWithCode('bob', 'ABCD2345', 'Bob');
+    await service.removeMember(hid, 'alice', 'bob');
+    return { service, backend, hid };
+  };
+
+  it('lists the removed members with their names, for the owner', async () => {
+    const { backend, hid } = await withBob();
+    const removed = current<{ uid: string; displayName: string }[]>((l) => backend.subscribeToRemovedMembers(hid, l));
+    expect(removed).toEqual([{ uid: 'bob', displayName: 'Bob' }]);
+  });
+
+  it('lets the owner add a removed member back, so they can join again with the link', async () => {
+    const { service, hid } = await withBob();
+    await expect(service.joinWithCode('bob', 'ABCD2345')).rejects.toMatchObject({ code: 'removed' });
+
+    await service.readmitMember(hid, 'alice', 'bob');
+
+    await expect(service.joinWithCode('bob', 'ABCD2345', 'Bob')).resolves.toBe(hid);
+  });
+
+  it('does not let a member add someone back', async () => {
+    const { service, hid } = await withBob();
+    await expect(service.readmitMember(hid, 'carol', 'bob')).rejects.toMatchObject({ code: 'not-owner' });
   });
 });
