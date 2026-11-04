@@ -32,7 +32,11 @@ function fakeService() {
     saveMemberName,
     saveMemberPhoto,
     createInvite: vi.fn(),
+    previewInvite: vi.fn(),
     joinWithCode: vi.fn(),
+    removeMember: vi.fn(),
+    readmitMember: vi.fn(),
+    subscribeToRemovedMembers: () => () => {},
     subscribeToActiveHousehold: (_uid: string, listener: (id: string | null) => void) => {
       listener('hh-1');
       return () => {};

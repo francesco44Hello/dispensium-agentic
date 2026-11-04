@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dispensium mockup: base</title>
+
+  <!-- Next.js loads Balsamiq Sans through next/font and exposes it as --font-balsamiq; a static page loads it here instead. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans:wght@400;700&display=swap">
+
+  <!-- The app's global tokens and background. Linked, never copied. -->
+  <link rel="stylesheet" href="/app/globals.css">
+
+  <!-- The app's real component styles, scoped as Prefix__class (see mockup.js). Add the modules your screen uses. -->
+  <script src="/design/system/mockup.js" data-modules="
+    /components/AppShell.module.css
+    /components/layout/AppHeader.module.css
+    /components/layout/BottomNav.module.css
+    /components/profile/ProfileAvatar.module.css
+    /components/groceries/GroceryList.module.css
+    /components/groceries/GroceryInput.module.css
+    /components/groceries/CategoryGroup.module.css
+    /components/groceries/GroceryItemRow.module.css
+  "></script>
+
+  <style>
+    :root { --font-balsamiq: "Balsamiq Sans"; }
+    /* Icons follow the text colour, as AppIcon and react-icons do in the app. */
+    .ui-icon { width: 1em; height: 1em; fill: currentColor; }
+
+    /* Mockup-only styles for components that do not exist yet go below this line.
+       Use the tokens from app/globals.css (var(--primary-color) etc.), never literal colours. */
+  </style>
+</head>
+<body>
+  <!-- AppShell: header, main content, floating bottom nav. Keep this frame; replace only what is inside <main>. -->
+  <div class="AppShell__shell">
+    <header class="AppHeader__header">
+      <button type="button" class="AppHeader__icon" aria-label="Open menu">
+        <svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-menu"/></svg>
+      </button>
+      <div class="AppHeader__titleGroup">
+        <div class="AppHeader__brandRow">
+          <h1 class="AppHeader__title">Dispensium</h1>
+        </div>
+      </div>
+      <a href="#" class="AppHeader__profile" aria-label="Profile">
+        <img class="ProfileAvatar__small" src="/public/avatars/peep-01.svg" alt="">
+      </a>
+    </header>
+
+    <main class="AppShell__content">
+      <!-- ▼ Screen content. This example is the grocery list as it ships today. -->
+      <section class="GroceryList__list">
+        <h2 class="GroceryList__title">What's missing?</h2>
+
+        <form class="GroceryInput__form" onsubmit="return false">
+          <input type="text" class="GroceryInput__input" placeholder="Add a grocery item (e.g., apple)...">
+          <button type="submit" class="GroceryInput__submit" aria-label="Add">
+            <svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-add-circle-outline"/></svg>
+          </button>
+        </form>
+
+        <div class="GroceryList__groups">
+          <section class="CategoryGroup__group">
+            <h2 class="CategoryGroup__heading">
+              <svg class="CategoryGroup__icon" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><use href="/public/icons/sprite.svg#cat-pantry-shelf"/></svg>
+              Pantry
+            </h2>
+            <ul class="CategoryGroup__items">
+              <li class="GroceryItemRow__row"><label class="GroceryItemRow__label"><input type="checkbox"><span>Olio</span></label></li>
+              <li class="GroceryItemRow__row"><label class="GroceryItemRow__label"><input type="checkbox" checked><span class="GroceryItemRow__done">Sale grosso</span></label></li>
+            </ul>
+          </section>
+
+          <section class="CategoryGroup__group">
+            <h2 class="CategoryGroup__heading">
+              <svg class="CategoryGroup__icon" width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true"><use href="/public/icons/sprite.svg#cat-dairy"/></svg>
+              Dairy
+            </h2>
+            <ul class="CategoryGroup__items">
+              <li class="GroceryItemRow__row"><label class="GroceryItemRow__label"><input type="checkbox"><span>Latte</span></label></li>
+              <li class="GroceryItemRow__row"><label class="GroceryItemRow__label"><input type="checkbox"><span>Parmigiano</span></label></li>
+            </ul>
+          </section>
+        </div>
+
+        <div class="GroceryList__footer">
+          <button type="button" class="GroceryList__complete">Grocery completed</button>
+        </div>
+      </section>
+      <!-- ▲ End of screen content. -->
+    </main>
+
+    <nav class="BottomNav__nav" aria-label="Main">
+      <a href="#" class="BottomNav__tab" aria-current="page">
+        <span class="BottomNav__iconWrap BottomNav__active"><svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-checklist"/></svg></span>
+        <span class="BottomNav__label">Shopping</span>
+      </a>
+      <a href="#" class="BottomNav__tab">
+        <span class="BottomNav__iconWrap"><svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-restaurant"/></svg></span>
+        <span class="BottomNav__label">Recipes</span>
+      </a>
+      <a href="#" class="BottomNav__tab">
+        <span class="BottomNav__iconWrap"><svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-calendar-month"/></svg></span>
+        <span class="BottomNav__label">Menu</span>
+      </a>
+      <a href="#" class="BottomNav__tab">
+        <span class="BottomNav__iconWrap"><svg class="ui-icon" aria-hidden="true"><use href="/design/system/ui-icons.svg#md-groups"/></svg></span>
+        <span class="BottomNav__label">Household</span>
+      </a>
+    </nav>
+  </div>
+</body>
+</html>

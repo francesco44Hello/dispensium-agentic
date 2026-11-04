@@ -67,12 +67,14 @@ async function seed() {
     await setDoc(doc(db, 'inviteCodes', 'VALID234'), {
       householdId: HID,
       createdBy: 'alice',
+      inviterName: 'Alice',
       createdAt: now,
       expiresAt: new Date(now.getTime() + DAY_MS),
     });
     await setDoc(doc(db, 'inviteCodes', 'EXPIRED2'), {
       householdId: HID,
       createdBy: 'alice',
+      inviterName: 'Alice',
       createdAt: new Date(now.getTime() - 2 * DAY_MS),
       expiresAt: new Date(now.getTime() - DAY_MS),
     });
@@ -88,6 +90,7 @@ async function seed() {
     await setDoc(doc(db, 'inviteCodes', 'OTHER222'), {
       householdId: OTHER_HID,
       createdBy: 'dave',
+      inviterName: 'Dave',
       createdAt: now,
       expiresAt: new Date(now.getTime() + DAY_MS),
     });
@@ -258,6 +261,7 @@ describe('invite codes and joining', () => {
     const invite = (householdId: string) => ({
       householdId,
       createdBy: 'alice',
+      inviterName: 'Alice',
       createdAt: serverTimestamp(),
       expiresAt: new Date(Date.now() + DAY_MS),
     });
@@ -271,6 +275,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'EXTRA234'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + DAY_MS),
         note: 'smuggled',
@@ -282,6 +287,7 @@ describe('invite codes and joining', () => {
     const invite = () => ({
       householdId: HID,
       createdBy: 'alice',
+      inviterName: 'Alice',
       createdAt: serverTimestamp(),
       expiresAt: new Date(Date.now() + DAY_MS),
     });
@@ -296,6 +302,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'WEEK2345'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 7 * DAY_MS),
       }),
@@ -307,6 +314,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'LONG2345'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 30 * DAY_MS),
       }),
@@ -322,6 +330,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'EXACT234'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 7 * DAY_MS),
       }),
@@ -333,6 +342,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'SKEW2345'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 7 * DAY_MS + 2 * MIN_MS),
       }),
@@ -344,6 +354,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'HOUR2345'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: serverTimestamp(),
         expiresAt: new Date(Date.now() + 7 * DAY_MS + 60 * MIN_MS),
       }),
@@ -355,6 +366,7 @@ describe('invite codes and joining', () => {
       setDoc(doc(as('alice'), 'inviteCodes', 'BACK2345'), {
         householdId: HID,
         createdBy: 'alice',
+        inviterName: 'Alice',
         createdAt: new Date(Date.now() - 2 * DAY_MS),
         expiresAt: new Date(Date.now() + DAY_MS),
       }),
@@ -603,5 +615,193 @@ describe('weekly menu', () => {
   it('does not allow a day to be deleted', async () => {
     await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'menu', DAY), { lunch: entry() }, { merge: true }));
     await assertFails(deleteDoc(doc(as('alice'), 'households', HID, 'menu', DAY)));
+  });
+});
+
+// A household with alice as owner, bob and carol as members, and eve outside it.
+const addMembers = () =>
+  env.withSecurityRulesDisabled(async (ctx) => {
+    const db = ctx.firestore();
+    await setDoc(doc(db, 'households', HID, 'members', 'bob'), { role: 'member', joinedAt: new Date(), inviteCode: 'VALID234' });
+    await setDoc(doc(db, 'households', HID, 'members', 'carol'), { role: 'member', joinedAt: new Date(), inviteCode: 'VALID234' });
+  });
+
+describe('shared invite link', () => {
+  const invite = () => ({
+    householdId: HID,
+    createdBy: 'alice',
+    inviterName: 'Alice',
+    createdAt: serverTimestamp(),
+    expiresAt: new Date(Date.now() + DAY_MS),
+  });
+
+  it('requires the inviter name, as a string without blocked characters', async () => {
+    const withoutName: Record<string, unknown> = { ...invite() };
+    delete withoutName.inviterName;
+    await assertFails(setDoc(doc(as('alice'), 'inviteCodes', 'NNMEX234'), withoutName));
+    await assertFails(setDoc(doc(as('alice'), 'inviteCodes', 'MARKUP23'), { ...invite(), inviterName: '<b>Alice</b>' }));
+    await assertFails(setDoc(doc(as('alice'), 'inviteCodes', 'NUMBER23'), { ...invite(), inviterName: 42 }));
+    await assertSucceeds(setDoc(doc(as('alice'), 'inviteCodes', 'NAMED234'), invite()));
+  });
+
+  it('lets only the owner create invites, not another member', async () => {
+    await addMembers();
+    await assertSucceeds(setDoc(doc(as('alice'), 'inviteCodes', 'WNER2345'), invite()));
+    await assertFails(setDoc(doc(as('bob'), 'inviteCodes', 'BBNVX234'), { ...invite(), createdBy: 'bob' }));
+  });
+});
+
+describe('member removal', () => {
+  beforeEach(addMembers);
+
+  it('lets the owner remove a member', async () => {
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'households', HID, 'members', 'bob')));
+  });
+
+  it('does not let a member remove another member', async () => {
+    await assertFails(deleteDoc(doc(as('bob'), 'households', HID, 'members', 'carol')));
+  });
+
+  it('does not let the owner remove themselves', async () => {
+    await assertFails(deleteDoc(doc(as('alice'), 'households', HID, 'members', 'alice')));
+  });
+
+  it('does not let a non-member, or the owner of another household, remove anyone here', async () => {
+    await assertFails(deleteDoc(doc(as('eve'), 'households', HID, 'members', 'bob')));
+    await assertFails(deleteDoc(doc(as('dave'), 'households', HID, 'members', 'bob')));
+  });
+
+  it('cuts off a removed member from the household data', async () => {
+    await assertSucceeds(getDocs(collection(as('bob'), 'households', HID, 'groceries')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'households', HID, 'members', 'bob')));
+    await assertFails(getDocs(collection(as('bob'), 'households', HID, 'groceries')));
+    await assertFails(setDoc(doc(as('bob'), 'households', HID, 'groceries', 'g9'), { ...newGrocery('Eggs'), createdBy: 'bob' }));
+  });
+});
+
+describe('strict keys and types (audit fixes)', () => {
+  it('refuses extra fields on a new household', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'households', 'hh-new'), { name: 'Home', ownerUid: 'alice', createdAt: new Date(), plan: 'pro' }),
+    );
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', 'hh-new'), { name: 'Home', ownerUid: 'alice', createdAt: new Date() }));
+  });
+
+  it('refuses extra fields on a member document', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'households', 'hh-new2', 'members', 'alice'), {
+        role: 'owner',
+        joinedAt: new Date(),
+        displayName: '',
+        isAdmin: true,
+      }),
+    );
+  });
+
+  it('requires a timestamp createdAt on a new grocery item', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'groceries', 'g7'), { ...newGrocery('Eggs'), createdAt: 'yesterday' }));
+  });
+
+  it('does not let the createdAt of an item change', async () => {
+    await assertFails(updateDoc(doc(as('alice'), 'households', HID, 'groceries', 'g1'), { createdAt: new Date(0) }));
+  });
+});
+
+describe('expired invites and removed members', () => {
+  beforeEach(addMembers);
+
+  it('does not let a signed-in user read an expired invite', async () => {
+    await assertFails(getDoc(doc(as('bob'), 'inviteCodes', 'EXPIRED2')));
+    await assertSucceeds(getDoc(doc(as('bob'), 'inviteCodes', 'VALID234')));
+  });
+
+  it('keeps a removed member out, even with a valid link', async () => {
+    const owner = as('alice');
+    const batch = writeBatch(owner);
+    batch.delete(doc(owner, 'households', HID, 'members', 'bob'));
+    batch.set(doc(owner, 'households', HID, 'removed', 'bob'), { removedAt: serverTimestamp() });
+    await assertSucceeds(batch.commit());
+
+    await assertFails(
+      setDoc(doc(as('bob'), 'households', HID, 'members', 'bob'), {
+        role: 'member',
+        joinedAt: new Date(),
+        inviteCode: 'VALID234',
+      }),
+    );
+    await assertSucceeds(getDoc(doc(as('bob'), 'households', HID, 'removed', 'bob')));
+  });
+
+  it('lets only the owner record a removal, and never for themselves', async () => {
+    await assertFails(setDoc(doc(as('bob'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp() }));
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'removed', 'alice'), { removedAt: serverTimestamp() }));
+    await assertSucceeds(setDoc(doc(as('alice'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp() }));
+  });
+});
+
+describe('review follow-ups: invite delete, removal target, join time', () => {
+  beforeEach(addMembers);
+
+  it('lets only the owner delete an invite', async () => {
+    await assertFails(deleteDoc(doc(as('bob'), 'inviteCodes', 'VALID234')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'inviteCodes', 'VALID234')));
+  });
+
+  it('records a removal only for a current member', async () => {
+    await assertFails(setDoc(doc(as('alice'), 'households', HID, 'removed', 'dave'), { removedAt: serverTimestamp() }));
+  });
+
+  it('refuses a join without a timestamp joinedAt', async () => {
+    await assertFails(
+      setDoc(doc(as('eve'), 'households', HID, 'members', 'eve'), {
+        role: 'member',
+        joinedAt: 'soon',
+        inviteCode: 'VALID234',
+      }),
+    );
+  });
+});
+
+describe('re-adding a removed member', () => {
+  beforeEach(addMembers);
+
+  const removeCarol = async () => {
+    const owner = as('alice');
+    const batch = writeBatch(owner);
+    batch.delete(doc(owner, 'households', HID, 'members', 'carol'));
+    batch.set(doc(owner, 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: 'Carol' });
+    await assertSucceeds(batch.commit());
+  };
+
+  it('lets the owner see the removal record, the removed person see their own, and no one else', async () => {
+    await removeCarol();
+    await assertSucceeds(getDoc(doc(as('alice'), 'households', HID, 'removed', 'carol')));
+    await assertSucceeds(getDoc(doc(as('carol'), 'households', HID, 'removed', 'carol')));
+    await assertFails(getDoc(doc(as('bob'), 'households', HID, 'removed', 'carol')));
+  });
+
+  it('lets only the owner clear a removal, after which the person can join with the link again', async () => {
+    await removeCarol();
+    const rejoin = () =>
+      setDoc(doc(as('carol'), 'households', HID, 'members', 'carol'), {
+        role: 'member',
+        joinedAt: new Date(),
+        inviteCode: 'VALID234',
+      });
+    await assertFails(rejoin());
+
+    await assertFails(deleteDoc(doc(as('bob'), 'households', HID, 'removed', 'carol')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'households', HID, 'removed', 'carol')));
+
+    await assertSucceeds(rejoin());
+  });
+
+  it('accepts a display name on the removal record, and refuses markup in it', async () => {
+    await assertFails(
+      setDoc(doc(as('alice'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: '<b>Carol</b>' }),
+    );
+    await assertSucceeds(
+      setDoc(doc(as('alice'), 'households', HID, 'removed', 'carol'), { removedAt: serverTimestamp(), displayName: 'Carol' }),
+    );
   });
 });

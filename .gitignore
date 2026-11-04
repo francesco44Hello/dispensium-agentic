@@ -45,7 +45,9 @@ next-env.d.ts
 /test-results/
 /e2e-artifacts/
 /.vercel
-/.claude/
+# Claude Code: share agents, skills, hooks and settings; keep local state private
+/.claude/.verify-stamp
+/.claude/settings.local.json
 *-firebase-adminsdk-*.json
 firebase-debug.log
 firestore-debug.log

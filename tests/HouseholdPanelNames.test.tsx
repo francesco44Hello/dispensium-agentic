@@ -13,7 +13,7 @@ describe('HouseholdPanel member names', () => {
   it('shows a housemate by their saved name instead of the generic label', async () => {
     const service = createHouseholdService(createMemoryDataBackend().households, { generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice', 'Alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await service.joinWithCode('bob', 'ABCD2345', 'Bob Jones');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);
@@ -25,7 +25,7 @@ describe('HouseholdPanel member names', () => {
   it('falls back to the generic label when a member has no saved name', async () => {
     const service = createHouseholdService(createMemoryDataBackend().households, { generateCode: () => 'ABCD2345' });
     const hid = await service.ensureDefaultHousehold('alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await service.joinWithCode('bob', 'ABCD2345');
 
     render(<HouseholdPanel householdId={hid} uid="alice" service={service} />);

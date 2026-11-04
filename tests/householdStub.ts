@@ -8,6 +8,12 @@ export function createHouseholdStub(members: HouseholdMember[] = []) {
   const saveMemberPhoto = vi.fn<(householdId: string, uid: string, photoUrl: string) => Promise<void>>(async () => undefined);
   const service = createHouseholdService({
     ensureDefaultHousehold: async () => 'hh-1',
+    previewInvite: async () => {
+      throw new Error('not used in these tests');
+    },
+    removeMember: async () => undefined,
+    readmitMember: async () => undefined,
+    subscribeToRemovedMembers: () => () => undefined,
     createInvite: async () => {
       throw new Error('not used in these tests');
     },

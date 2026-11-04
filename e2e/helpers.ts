@@ -9,14 +9,14 @@ export const visibleForm = (page: Page) => page.locator('form:visible');
 
 // Mock auth state lives in the page, so tests that need several users must navigate
 // client-side (links, router) and never reload the page between users.
-export async function fillSignUp(page: Page, email: string, password = PASSWORD) {
+export async function fillSignUp(page: Page, email: string, password = PASSWORD, { landOnHome = true } = {}) {
   const form = visibleForm(page);
   await form.getByLabel('Name', { exact: true }).fill('Test User');
   await form.getByLabel('Email').fill(email);
   await form.getByLabel('Password', { exact: true }).fill(password);
   await form.getByLabel('Confirm password').fill(password);
   await form.getByRole('button', { name: 'Sign up' }).click();
-  await expect(page.getByRole('heading', { name: 'Dispensium' })).toBeVisible();
+  if (landOnHome) await expect(page.getByRole('heading', { name: 'Dispensium' })).toBeVisible();
 }
 
 export async function signUp(page: Page, email = `user-${Date.now()}@example.com`) {

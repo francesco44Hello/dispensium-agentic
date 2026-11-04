@@ -15,6 +15,6 @@ test('capture list, household and login pages', async ({ page }) => {
   await page.screenshot({ path: 'e2e-artifacts/visual/list.png' });
 
   await page.getByRole('link', { name: 'Household', exact: true }).click();
-  await page.getByRole('button', { name: 'Create invite code' }).click();
+  await page.getByRole('button', { name: 'Create invite link' }).click();
   await page.screenshot({ path: 'e2e-artifacts/visual/household.png' });
 });

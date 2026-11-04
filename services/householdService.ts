@@ -1,6 +1,6 @@
 import { sanitizeInput } from '../utils/sanitizeInput';
 import { generateInviteCode, isValidInviteCode, normalizeInviteCode } from '../utils/inviteCode';
-import type { HouseholdMember, HouseholdService, InviteCode } from '../types/household';
+import type { HouseholdMember, HouseholdService, InviteCode, InvitePreview, RemovedMember } from '../types/household';
 import type { Unsubscribe } from '../types/subscription';
 import { cleanDisplayName } from '../utils/displayName';
 import { cleanPhotoUrl } from '../utils/photoUrl';
@@ -10,6 +10,9 @@ export type HouseholdErrorCode =
   | 'expired-invite'
   | 'already-member'
   | 'not-a-member'
+  | 'not-owner'
+  | 'cannot-remove'
+  | 'removed'
   | 'unknown';
 
 export class HouseholdError extends Error {
@@ -25,7 +28,11 @@ export class HouseholdError extends Error {
 export interface HouseholdBackend {
   ensureDefaultHousehold(uid: string, displayName: string, photoUrl: string): Promise<string>;
   createInvite(householdId: string, createdBy: string, invite: InviteCode): Promise<InviteCode>;
+  previewInvite(code: string, now: Date): Promise<InvitePreview>;
   joinWithCode(uid: string, code: string, now: Date, displayName: string, photoUrl: string): Promise<string>;
+  removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  readmitMember(householdId: string, actorUid: string, targetUid: string): Promise<void>;
+  subscribeToRemovedMembers(householdId: string, listener: (removed: RemovedMember[]) => void): Unsubscribe;
   saveMemberName(householdId: string, uid: string, displayName: string): Promise<void>;
   saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void>;
   subscribeToActiveHousehold(uid: string, listener: (householdId: string | null) => void): Unsubscribe;
@@ -50,22 +57,42 @@ export function createHouseholdService(backend: HouseholdBackend, options: House
       return backend.ensureDefaultHousehold(uid, cleanDisplayName(displayName), cleanPhotoUrl(photoUrl));
     },
 
-    async createInvite(householdId: string, uid: string): Promise<InviteCode> {
+    async createInvite(householdId: string, uid: string, inviterName: string): Promise<InviteCode> {
       const createdAt = now();
       const invite: InviteCode = {
         code: generateCode(),
         householdId,
         createdBy: uid,
+        inviterName: cleanDisplayName(inviterName),
         createdAt,
         expiresAt: new Date(createdAt.getTime() + inviteTtlMs),
       };
       return backend.createInvite(householdId, uid, invite);
     },
 
+    async previewInvite(rawCode: string): Promise<InvitePreview> {
+      const code = normalizeInviteCode(sanitizeInput(rawCode));
+      if (!isValidInviteCode(code)) throw new HouseholdError('invalid-invite');
+      return backend.previewInvite(code, now());
+    },
+
     async joinWithCode(uid: string, rawCode: string, displayName = '', photoUrl = ''): Promise<string> {
       const code = normalizeInviteCode(sanitizeInput(rawCode));
       if (!isValidInviteCode(code)) throw new HouseholdError('invalid-invite');
       return backend.joinWithCode(uid, code, now(), cleanDisplayName(displayName), cleanPhotoUrl(photoUrl));
+    },
+
+    async removeMember(householdId: string, actorUid: string, targetUid: string): Promise<void> {
+      if (actorUid === targetUid) throw new HouseholdError('cannot-remove');
+      return backend.removeMember(householdId, actorUid, targetUid);
+    },
+
+    readmitMember(householdId: string, actorUid: string, targetUid: string): Promise<void> {
+      return backend.readmitMember(householdId, actorUid, targetUid);
+    },
+
+    subscribeToRemovedMembers(householdId: string, listener: (removed: RemovedMember[]) => void): Unsubscribe {
+      return backend.subscribeToRemovedMembers(householdId, listener);
     },
 
     saveMemberPhoto(householdId: string, uid: string, photoUrl: string): Promise<void> {

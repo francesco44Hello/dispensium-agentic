@@ -1,4 +1,5 @@
 import { cleanPhotoUrl } from '../../utils/photoUrl';
+import { sanitizeInput } from '../../utils/sanitizeInput';
 import {
   addDoc,
   collection,
@@ -42,6 +43,12 @@ import type { DataBackend } from './dataBackend';
 // Lazily resolved so importing this module on the server is safe.
 const db = (): Firestore => getFirestore(getFirebaseApp());
 const BATCH_LIMIT = 500;
+
+// Firestore refuses to read an expired invite, so a refused read means the link is no longer valid.
+function refusedAsInvalid(err: unknown): never {
+  if (hasCode(err) && err.code === 'permission-denied') throw new HouseholdError('invalid-invite');
+  throw err;
+}
 
 function toDate(value: unknown): Date {
   return typeof value === 'object' && value !== null && 'toDate' in value && typeof value.toDate === 'function'
@@ -101,7 +108,11 @@ export function createFirestoreDataBackend(): DataBackend {
       return runTransaction(db(), async (tx) => {
         const userSnap = await tx.get(userRef);
         const existing = userSnap.data()?.activeHouseholdId;
-        if (typeof existing === 'string') return existing;
+        if (typeof existing === 'string') {
+          // The owner may have removed this person from that household. Only a current member keeps it.
+          const membership = await tx.get(doc(db(), 'households', existing, 'members', uid));
+          if (membership.exists()) return existing;
+        }
 
         const householdRef = doc(collection(db(), 'households'));
         const createdAt = new Date();
@@ -121,19 +132,70 @@ export function createFirestoreDataBackend(): DataBackend {
     async createInvite(householdId, createdBy, invite: InviteCode) {
       const memberSnap = await getDoc(doc(db(), 'households', householdId, 'members', createdBy));
       if (!memberSnap.exists()) throw new HouseholdError('not-a-member');
+      if (memberSnap.data()?.role !== 'owner') throw new HouseholdError('not-owner');
       // createdAt is the server's clock: the rules accept an invite only when createdAt equals request.time.
       await setDoc(doc(db(), 'inviteCodes', invite.code), {
         householdId,
         createdBy,
+        inviterName: invite.inviterName,
         createdAt: serverTimestamp(),
         expiresAt: invite.expiresAt,
       });
       return invite;
     },
 
+    async previewInvite(code, at) {
+      const inviteSnap = await getDoc(doc(db(), 'inviteCodes', code)).catch(refusedAsInvalid);
+      if (!inviteSnap.exists()) throw new HouseholdError('invalid-invite');
+      const data: DocumentData = inviteSnap.data() ?? {};
+      if (typeof data.householdId !== 'string' || data.householdId === '') throw new HouseholdError('invalid-invite');
+      if (toDate(data.expiresAt).getTime() <= at.getTime()) throw new HouseholdError('expired-invite');
+      return { code, inviterName: typeof data.inviterName === 'string' ? data.inviterName : '' };
+    },
+
+    async removeMember(householdId, actorUid, targetUid) {
+      const actorSnap = await getDoc(doc(db(), 'households', householdId, 'members', actorUid));
+      if (actorSnap.data()?.role !== 'owner') throw new HouseholdError('not-owner');
+      const targetSnap = await getDoc(doc(db(), 'households', householdId, 'members', targetUid));
+      if (!targetSnap.exists()) throw new HouseholdError('not-a-member');
+      if (targetSnap.data()?.role === 'owner') throw new HouseholdError('cannot-remove');
+      // One batch: the member goes and the removal record is written, so the person cannot rejoin with the link.
+      const batch = writeBatch(db());
+      batch.delete(doc(db(), 'households', householdId, 'members', targetUid));
+      const name: unknown = targetSnap.data()?.displayName;
+      batch.set(doc(db(), 'households', householdId, 'removed', targetUid), {
+        removedAt: serverTimestamp(),
+        displayName: typeof name === 'string' ? sanitizeInput(name) : '',
+      });
+      await batch.commit();
+    },
+
+    async readmitMember(householdId, actorUid, targetUid) {
+      const actorSnap = await getDoc(doc(db(), 'households', householdId, 'members', actorUid));
+      if (actorSnap.data()?.role !== 'owner') throw new HouseholdError('not-owner');
+      // Clearing the record lets the person join with the link again.
+      await deleteDoc(doc(db(), 'households', householdId, 'removed', targetUid));
+    },
+
+    subscribeToRemovedMembers(householdId, listener): Unsubscribe {
+      return onSnapshot(
+        collection(db(), 'households', householdId, 'removed'),
+        (snap) => {
+          listener(
+            snap.docs.map((d) => {
+              const name: unknown = d.data().displayName;
+              return { uid: d.id, displayName: typeof name === 'string' ? name : '' };
+            }),
+          );
+        },
+        // Not allowed to read the list (not the owner, or the rules refused it): show no removed members.
+        () => listener([]),
+      );
+    },
+
     async joinWithCode(uid, code, at, displayName, photoUrl) {
       return runTransaction(db(), async (tx) => {
-        const inviteSnap = await tx.get(doc(db(), 'inviteCodes', code));
+        const inviteSnap = await tx.get(doc(db(), 'inviteCodes', code)).catch(refusedAsInvalid);
         if (!inviteSnap.exists()) throw new HouseholdError('invalid-invite');
 
         // A malformed invite must not become a membership path such as households/undefined/members/{uid}.
@@ -142,6 +204,9 @@ export function createFirestoreDataBackend(): DataBackend {
         if (toDate(inviteSnap.data().expiresAt).getTime() <= at.getTime()) {
           throw new HouseholdError('expired-invite');
         }
+
+        const removedSnap = await tx.get(doc(db(), 'households', householdId, 'removed', uid));
+        if (removedSnap.exists()) throw new HouseholdError('removed');
 
         const memberRef = doc(db(), 'households', householdId, 'members', uid);
         if ((await tx.get(memberRef)).exists()) throw new HouseholdError('already-member');

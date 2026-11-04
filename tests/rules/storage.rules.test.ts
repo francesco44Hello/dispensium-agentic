@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 import { assertFails, assertSucceeds, initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { deleteObject, getBytes, ref, uploadBytes, updateMetadata } from 'firebase/storage';
+import { deleteObject, getBytes, listAll, ref, uploadBytes, updateMetadata, type StorageReference } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 
 // Runs against the Firestore and Storage emulators: `npm run test:rules` (needs Java).
@@ -24,8 +24,20 @@ afterAll(async () => {
   await env.cleanup();
 });
 
+// clearStorage() only removes files at the bucket root, so walk the household folders too.
+// Otherwise a photo from one test is still there for the next test.
+async function clearPhotos() {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    const walk = async (folder: StorageReference): Promise<void> => {
+      const { items, prefixes } = await listAll(folder);
+      await Promise.all([...items.map((item) => deleteObject(item)), ...prefixes.map(walk)]);
+    };
+    await walk(ref(ctx.storage(), 'households'));
+  });
+}
+
 beforeEach(async () => {
-  await env.clearStorage();
+  await clearPhotos();
   await env.clearFirestore();
   // alice is a member of hh-1; bob is not a member of anything.
   await env.withSecurityRulesDisabled(async (ctx) => {
@@ -83,5 +95,12 @@ describe('recipe photos', () => {
   it('does not allow a photo metadata to be changed', async () => {
     await upload(as('alice'), PATH);
     await assertFails(updateMetadata(ref(as('alice'), PATH), { contentType: 'image/png' }));
+  });
+});
+
+describe('recipe photo overwrites', () => {
+  it('blocks overwriting an existing recipe photo', async () => {
+    await assertSucceeds(upload(as('alice'), PATH));
+    await assertFails(upload(as('alice'), PATH));
   });
 });
