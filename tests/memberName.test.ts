@@ -50,7 +50,7 @@ describe('household member names', () => {
   it('stores the joiner name when they join with a code', async () => {
     const { service } = setup();
     const hid = await service.ensureDefaultHousehold('alice', 'Alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await service.joinWithCode('bob', 'ABCD2345', 'Bob');
 
     expect(membersOf(service, hid).find((m) => m.uid === 'bob')).toMatchObject({ displayName: 'Bob' });

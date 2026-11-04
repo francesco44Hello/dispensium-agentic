@@ -57,7 +57,7 @@ You (the main session) turn the user's requests into tasks. Subagents cannot spa
 - Staging and production are separate Firebase projects. Production is touched only through `/release` after approval.
 
 ## Definition of done
-`npm run verify` green, new behavior covered by unit tests (Red then Green shown), every review the tier requires green (`security-reviewer` PASS for T2, `code-reviewer` APPROVE for T1 and T2), e2e green for changed flows, visual QA done for UI changes, PR with passing CI, preview URL (when available). Report what was NOT verified (for example "rules tests not run: no Java") instead of implying it passed.
+`npm run verify` green, new behavior covered by unit tests (Red then Green shown), every review the tier requires green (`security-reviewer` PASS for T2, `code-reviewer` APPROVE for T1 and T2), e2e green for changed flows, visual QA done for UI changes, PR with passing CI, preview URL (when available). Every T1 and T2 PR has its change report (`change-report` skill) as the PR body, built after the reviews, not at release time. Report what was NOT verified (for example "rules tests not run: no Java") instead of implying it passed.
 
 ## Hooks you will meet (`.claude/settings.json`)
 - Edits to `.env*` and service-account files are blocked.

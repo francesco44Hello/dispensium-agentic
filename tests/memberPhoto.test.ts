@@ -29,7 +29,7 @@ describe('member photos', () => {
   it('stores the picture of a joiner who joins with a code', async () => {
     const { service } = setup();
     const hid = await service.ensureDefaultHousehold('alice', 'Alice');
-    await service.createInvite(hid, 'alice');
+    await service.createInvite(hid, 'alice', 'alice');
     await service.joinWithCode('bob', 'ABCD2345', 'Bob', PHOTO);
 
     expect(membersOf(service, hid).find((m) => m.uid === 'bob')?.photoUrl).toBe(PHOTO);
